@@ -1,10 +1,15 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
+const db = require('../js/dbAdapter.js')
 const pug = require('pug')
 
+const homepage = pug.compileFile('./views/home.pug')
 
 router.get('/', (req, res) => {
-    res.send(pug.renderFile('./views/home.pug', {'cache': true}))
+    db.find('arm')
+        .then((recipes) => {
+            res.send(homepage({'recipes': recipes}))
+        })
 })
 
 module.exports = router

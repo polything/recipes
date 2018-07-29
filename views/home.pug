@@ -1,4 +1,13 @@
-head
-body
-    h1 Home
-    p Welcome!
+html
+    head
+        title Recipes
+        style
+            include style.css
+    body
+        h1 Home
+        p Welcome!
+        table
+            tbody
+                each recipe in recipes
+                    tr
+                        td #{recipe.title}
