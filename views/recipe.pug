@@ -1,0 +1,16 @@
+html
+    head
+        if recipe
+            title #{recipe.title}
+    body
+        if recipe
+            h1 #{recipe.title}
+            ul
+                each ingredient in recipe.ingredients
+                    - let prep = (ingredient.prep !== null ? ', '+ingredient.prep : '')
+                    - let note = (ingredient.note !== null ? ' ('+ingredient.note+')' : '')
+                    li #{ingredient.amount} #{ingredient.unit} #{ingredient.name}#{prep}#{note}
+            each direction in recipe.directions
+                p #{direction}
+        else
+            h1 ERROR
