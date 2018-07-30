@@ -21,8 +21,7 @@ exports.find = (string, options) => new Promise((resolve, reject) => {
                 && recipe.title.indexOf(string) !== -1) {
             results.push(recipe)
         }
-
-        if (options === undefined || options.ingredients === true) {
+        else if (options === undefined || options.ingredients === true) {
             recipe.ingredients.forEach((ingredient) => {
                 if (ingredient.name.indexOf(string) !== -1) {
                     results.push(recipe)

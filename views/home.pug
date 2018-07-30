@@ -5,12 +5,14 @@ html
             include style.css
         script
             include ../js/search.js
+            include ../js/client.js
     body
         h1 Home
         p Welcome!
-        input(type='text', onkeyup='search(event, this, (val) => console.log("Hello" + val))')
+        - var searchResultsTableBodyID = 'searchResults'
+        input(
+            type='text'
+            onkeyup='search(event, this, (val) => updateRecipeTable("'+searchResultsTableBodyID+'",val))'
+        )
         table
-            tbody
-                each recipe in recipes
-                    tr
-                        td #{recipe.title}
+            tbody(id=searchResultsTableBodyID)
