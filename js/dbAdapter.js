@@ -22,11 +22,12 @@ exports.find = (string, options) => new Promise((resolve, reject) => {
             results.push(recipe)
         }
         else if (options === undefined || options.ingredients === true) {
-            recipe.ingredients.forEach((ingredient) => {
+            for (let ingredient of recipe.ingredients) {
                 if (ingredient.name.indexOf(string) !== -1) {
                     results.push(recipe)
+                    break
                 }
-            })
+            }
         }
     })
     resolve(results)

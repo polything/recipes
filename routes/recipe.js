@@ -10,7 +10,6 @@ router.get('/', (req, res) => {
 router.get('/:recipeTitle', (req, res) => {
     var options = {ingredients:false, title: true}
     var term = req.params.recipeTitle
-    console.log(term)
     db.find(term, options)
         .then((results) => {
             var recipe = (results.length > 0 ? results[0] : null)
