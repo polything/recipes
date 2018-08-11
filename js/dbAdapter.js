@@ -1,5 +1,5 @@
-var Promise = require('promise')
-var fs = require('fs')
+const Promise = require('promise')
+const fs = require('fs')
 var data = null
 var loaded = false
 
