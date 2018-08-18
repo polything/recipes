@@ -33,5 +33,5 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
         }
 
         const PORT = process.env.PORT || config.options.port || 3000
-        app.listen(PORT, () => { console.log('Listening on port ' + PORT) })
+        app.listen(PORT, () => console.log('Listening on port ' + PORT))
     })
