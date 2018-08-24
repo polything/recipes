@@ -1,26 +1,29 @@
-const util = require('util')
+const util = require('./util')
 
 const DEFAULT_NUM_SLAVES = 5
 
-exports.slaves = new Set()
+exports.slaves = new Set([])
 
 exports.createKey = (ip, port) => ip + ':' + port
 
 exports.find = (string, options) => new Promise((resolve, _) => {
     let results = []
+    let slaves = Array.from(exports.slaves)
     let slaveIdxs = new Set()
     const DESIRED_NUM_SLAVES = options.numSlaves || DEFAULT_NUM_SLAVES
-    const NUM_SLAVES = DESIRED_NUM_SLAVES > exports.slaves.length ?
-        exports.slaves.length : DESIRED_NUM_SLAVES
+    const NUM_SLAVES = (DESIRED_NUM_SLAVES > slaves.length) ?
+        slaves.length : DESIRED_NUM_SLAVES
 
     // Pick random slaves to query
-    while (slaveIdxs.length < NUM_SLAVES) {
-        slaveIdxs.add(Math.floor(Math.random() * exports.slaves.length))
+    while (slaveIdxs.size < NUM_SLAVES) {
+        slaveIdxs.add(Math.floor(Math.random() * slaves.length))
     }
 
     slaveIdxs.forEach((idx) => {
         // Request slave search
-        util.asyncPost(exports.slaves[idx], {options: options, term: string})
+        let url = slaves[idx] + '/data'
+        let body = JSON.stringify({options: options, term: string})
+        util.asyncPost(url, body)
             .then((slaveResults) => {
                 slaveResults.forEach((slaveResult) => {
                     let exists = (recipe) => recipe.title == slaveResult.title
@@ -31,21 +34,5 @@ exports.find = (string, options) => new Promise((resolve, _) => {
                 })
                 resolve(results)
             })
-
-        /*
-        // TODO Add timeout for requests
-        if ((options === undefined || options.title === true)
-                && recipe.title.indexOf(string) !== -1) {
-            results.push(recipe)
-        }
-        else if (options === undefined || options.ingredients === true) {
-            for (let ingredient of recipe.ingredients) {
-                if (ingredient.name.indexOf(string) !== -1) {
-                    results.push(recipe)
-                    break
-                }
-            }
-        }
-        */
     })
 })

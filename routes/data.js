@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const config = require('../js/config')
-const localDB = require('../js/dbAdapter')
+const localDB = require('../js/localDB')
 const slaveDB = require('../js/slaveDB')
 
 const REQUEST_TIMEOUT_MS = 500
@@ -11,12 +11,12 @@ var searchDB = (enabled, term, searchOptions, results, findFunc) =>
     new Promise((resolve, _) => {
         if (enabled) {
             findFunc(term, searchOptions)
-                .then((localResults) => {
-                    for (let localResult of localResults) {
-                        let stored = (recipe) => recipe.title == localResult.title
+                .then((dbResults) => {
+                    for (let dbResult of dbResults) {
+                        let stored = (recipe) => recipe.title == dbResult.title
                         // Don't add to results if it's already there
                         if (!results.some(stored)) {
-                            results.push(localResult)
+                            results.push(dbResult)
                         }
                     }
 
