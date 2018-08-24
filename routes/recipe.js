@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const db = require('../js/dbAdapter.js')
+const db = require('../js/localDB.js')
 const pug = require('pug')
 
 router.get('/', (req, res) => {

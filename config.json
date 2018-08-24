@@ -1,0 +1,14 @@
+{
+    "port": 3000,
+    "master": {
+        "enable": true,
+        "search": "local"
+    },
+    "slave": {
+        "enable": true,
+        "masters": []
+    },
+    "db": {
+        "method": "file"
+    }
+}
