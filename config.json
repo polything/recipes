@@ -8,7 +8,10 @@
         "enable": true,
         "masters": []
     },
-    "db": {
-        "method": "file"
+    "dbAdapter": {
+        "type": "file",
+        "options": {
+            "filePath": "recipes.json"
+        }
     }
 }
