@@ -1,34 +1,15 @@
-const Promise = require('promise')
 const fs = require('fs')
-var data = null
-var loaded = false
+const config = require('./config')
 
-// Async load data
-fs.readFile(__dirname + '/../recipes.json', 'utf8', (err, contents) => {
-    if (err) throw err
-    data = JSON.parse(contents)
-    loaded = true
-})
-
-exports.find = (string, options) => new Promise((resolve, reject) => {
-    if (!loaded) {
-        reject(new Error('Database not yet loaded'), {})
+const dbFile = __dirname + '/../dbAdapters/' + config.options.localDB.type + '.js'
+// Import the db adapter based on config file
+var db = null
+fs.stat(dbFile, (err, _) => {
+    if (err === null) {
+        db = require(dbFile)
+    } else {
+        throw new Error(err)
     }
-
-    var results = []
-    data.recipes.forEach((recipe) => {
-        if ((options === undefined || options.title === true)
-                && recipe.title.indexOf(string) !== -1) {
-            results.push(recipe)
-        }
-        else if (options === undefined || options.ingredients === true) {
-            for (let ingredient of recipe.ingredients) {
-                if (ingredient.name.indexOf(string) !== -1) {
-                    results.push(recipe)
-                    break
-                }
-            }
-        }
-    })
-    resolve(results)
 })
+
+exports.find = (string, searchOptions) => db.find(string, searchOptions)

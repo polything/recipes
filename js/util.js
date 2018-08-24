@@ -37,3 +37,23 @@ exports.recipesEqual = (r1, r2) => {
     // TODO Check ingredients
     //else if (r1.ingredients != r2.ingredients) return false
 }
+
+exports.SearchOptions = function() {
+    this.searchDirections = true
+    this.searchIngredients = true
+    this.searchTitle = true
+}
+
+exports.Recipe = function(title, ingredients, directions) {
+    this.title = title
+    this.ingredients = ingredients
+    this.directions = directions
+}
+
+exports.Ingredient = function(name, amount, unit, preparation='', note='') {
+    this.name = name
+    this.amount = amount
+    this.unit = unit
+    this.preparation = preparation
+    this.note = note
+}
