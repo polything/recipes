@@ -11,6 +11,7 @@ Set the configuration file to use by setting `RECIPE_CONFIG` to the path of the 
 * `slave` Slave node configuration options
     * `enable {boolean}` `true` if the instance should run as a slave node.
     * `masters {Array}` Array of master node URIs to ping to notify of availability.
+    * `heartbeatPeriod {integer}` Number of milliseconds between pings.
 * `localDB` Local database configuration options.
     * `type {string}` The name of the file (without the `.js` extension). For example, if the adapter is `mongodb.js`, the value would be `mongodb`.
     * `options {Object}` Options for this particular database adapter.

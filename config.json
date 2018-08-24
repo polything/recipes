@@ -6,7 +6,8 @@
     },
     "slave": {
         "enable": true,
-        "masters": []
+        "masters": [],
+        "heartbeatPeriod": 5000
     },
     "localDB": {
         "type": "file",
