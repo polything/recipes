@@ -23,8 +23,20 @@ exports.asyncPost = (url, body) => new Promise((resolve, _) => {
         path: path,
         port: port
     }, (res) => {
+        let buffer = Buffer.from([])
+        res.on('data', (chunk) => {
+            buffer = Buffer.concat([buffer, chunk])
+        })
         res.on('end', () => {
-            resolve(res)
+            let results = []
+            try {
+                results = JSON.parse(buffer.toString())
+            } catch (e) {
+                if (e instanceof SyntaxError) {
+                    // Ignore syntax errors
+                }
+            }
+            resolve(results)
         })
     })
 

@@ -27,9 +27,8 @@ exports.find = (string, options) => new Promise((resolve, _) => {
             .then((slaveResults) => {
                 slaveResults.forEach((slaveResult) => {
                     let exists = (recipe) => recipe.title == slaveResult.title
-
                     if (!results.some(exists)) {
-                        results.append(slaveResult)
+                        results.push(slaveResult)
                     }
                 })
                 resolve(results)
