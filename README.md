@@ -7,7 +7,9 @@ Set the configuration file to use by setting `RECIPE_CONFIG` to the path of the 
 * `port {integer}` Port to serve requests on.
 * `master` Master node configuration options
     * `enable {boolean}` `true` if the instance should run as a master node.
-    * `search {boolean}` Type of search to perform. `local-only` to search only the locl database, `slaves-only` to search only slaves, `both` to search both.
+    * `search` Type of search to perform.
+        * `local {boolean}` `true` to search the local database.
+        * `slaves {boolean}` `true` to search slaves.
 * `slave` Slave node configuration options
     * `enable {boolean}` `true` if the instance should run as a slave node.
     * `masters {Array}` Array of master node URIs to ping to notify of availability.

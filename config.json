@@ -2,7 +2,10 @@
     "port": 3000,
     "master": {
         "enable": true,
-        "search": "local"
+        "search": {
+            "local": true,
+            "slaves": false
+        }
     },
     "slave": {
         "enable": true,

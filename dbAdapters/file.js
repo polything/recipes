@@ -1,10 +1,11 @@
 const Promise = require('promise')
 const fs = require('fs')
+const config = require('../js/config')
 var data = null
 var loaded = false
 
 // Async load data
-fs.readFile(__dirname + '/../recipes.json', 'utf8', (err, contents) => {
+fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => {
     if (err) throw err
     data = JSON.parse(contents)
     loaded = true
