@@ -1,11 +1,13 @@
-# Protocol
+# HTTP Interface
+Interface for the application.
 
 ## Request recipes
 Send the following to a server or client to get recipes.
 
-IP: xxx.xxx.xxx.xxx/data
-Request type: JSON
-HTTP Method: `POST`
+|Target|Request type|HTTP Method|
+|==|============|===========|
+|xxx.xxx.xxx.xxx/data|JSON|`POST`|
+
 * `options {Object}` Options for the search.
     * `ingredients {boolean}` `true` to search in ingredients.
     * `title {boolean}` `true` to search in title.
