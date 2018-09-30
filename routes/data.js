@@ -28,6 +28,7 @@ var searchDB = (enabled, term, searchOptions, results, findFunc) =>
         }
     })
 
+// Receive data request
 router.post('/', (req, res) => {
     if (req.body === undefined || req.body === null) {
         // Ignore these requests
