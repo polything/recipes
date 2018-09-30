@@ -3,6 +3,7 @@ const router = express.Router()
 
 const slaveDB = require('../js/slaveDB.js')
 
+// Client heartbeat received
 router.post('/', (req, res) => {
     if (req.body === undefined || req.body === null) {
         // Ignore these requests
