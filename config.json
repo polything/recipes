@@ -8,14 +8,14 @@
         }
     },
     "slave": {
-        "enable": true,
+        "enable": false,
         "masters": [],
         "heartbeatPeriod": 5000
     },
     "localDB": {
         "type": "file",
         "options": {
-            "filePath": "recipes.json"
+            "filePath": "dbAdapters/recipes.json"
         }
     }
 }
