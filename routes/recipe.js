@@ -1,10 +1,11 @@
-const express = require('express')
-const router = express.Router()
+const config = require('../js/config.js')
 const db = require('../js/localDB.js')
+const express = require('express')
 const pug = require('pug')
+const router = express.Router()
 
 router.get('/', (req, res) => {
-    res.redirect('/')
+    res.redirect(config.options.rootURL)
 })
 
 router.get('/:recipeTitle', (req, res) => {
