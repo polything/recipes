@@ -20,7 +20,7 @@ const queryDB = (term) => new Promise((resolve, reject) => {
         'options': {'ingredients': true, 'title': true},
         'term': term
     }
-    asyncPost('/data', JSON.stringify(body), (resText) => {
+    asyncPost(DATA_URL, JSON.stringify(body), (resText) => {
         resolve(JSON.parse(resText))
     })
 })
@@ -33,7 +33,7 @@ const updateRecipeTable = (id, term) => {
             tableBody.innerHTML = '' // Clear contents
             results.forEach((recipe) => {
                 let link = document.createElement('a')
-                link.setAttribute('href', '/recipe/'+recipe.title)
+                link.setAttribute('href', RECIPE_URL + '/' + recipe.title)
                 link.innerHTML = recipe.title
 
                 let title = document.createElement('td')
