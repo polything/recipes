@@ -2,15 +2,14 @@
   "name": "recipes",
   "version": "0.0.1",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node app.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "command-line-args": "^4.0.7",
-    "express": "^4.16.3",
+    "express": "^4.16.4",
     "jsonfile": "^4.0.0",
-    "nodemon": "^1.18.3",
     "pug": "^2.0.3"
   },
   "main": "app.js",
