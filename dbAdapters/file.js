@@ -6,14 +6,18 @@ var loaded = false
 
 // Async load data
 fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => {
-    if (err) throw err
+    if (err) {
+        console.log('ERROR: File DB failed.' + err)
+        return
+    }
     data = JSON.parse(contents)
     loaded = true
 })
 
-exports.find = (string, options) => new Promise((resolve, reject) => {
+exports.find = (string, options) => new Promise((resolve, _) => {
     if (!loaded) {
-        reject(new Error('Database not yet loaded'), {})
+        console.log('File DB not loaded')
+        resolve([])
     }
 
     var results = []

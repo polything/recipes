@@ -1,4 +1,5 @@
 const config = require('./config')
+const path = require('path')
 const util = require('./util')
 
 exports.masters = []
@@ -7,8 +8,10 @@ exports.masters = []
 
 function sendPings() {
     for (let master of config.options.slave.masters) {
-        console.log('pinging ' + master)
-        util.asyncPost(master, JSON.stringify({'me': config.options.port}))
+        let dataURL =
+            path.join(config.options.port + config.options.rootURL, 'data')
+
+        util.asyncPost(master, JSON.stringify({'me': dataURL}))
             .then((results) => {
                 if (('status' in results) && results.status === 'OK')
                 {
