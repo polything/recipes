@@ -6,7 +6,9 @@
         "search": {
             "local": true,
             "slaves": false
-        }
+        },
+        "slaveTimeout": 300000,
+        "slaveCullInterval": 600000
     },
     "slave": {
         "enable": false,

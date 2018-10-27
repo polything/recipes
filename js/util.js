@@ -6,13 +6,17 @@ const http = require('http')
 const urlRegex = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})((?::\d+)?)(.*)/
 
 // Send a POST and return a Promise resolving the response
-exports.asyncPost = (url, body) => new Promise((resolve, _) => {
-    // TODO Send secure requests
+exports.asyncPost = (url, body) => new Promise((resolve, reject) => {
     let matches = url.match(urlRegex)
+    if (matches === null) {
+        reject()
+    }
+
     let host = matches[1]
     let port = matches[2]
     port = port.length > 1 ? port.substr(1) : '443'
     let path = matches[3]
+
     let req = http.request({
         agent: false,
         headers: {
