@@ -32,7 +32,7 @@ exports.asyncPost = (url, body) => new Promise((resolve, reject) => {
             buffer = Buffer.concat([buffer, chunk])
         })
         res.on('end', () => {
-            let results = []
+            let results = {}
             try {
                 results = JSON.parse(buffer.toString())
             } catch (e) {
@@ -42,6 +42,10 @@ exports.asyncPost = (url, body) => new Promise((resolve, reject) => {
             }
             resolve(results)
         })
+    })
+
+    req.on('error', (e) => {
+        reject(e)
     })
 
     req.write(body)
