@@ -25,7 +25,7 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
         if (configData.master.enable) {
             console.log('Running as a master instance')
             const master = require('./routes/master')
-            app.use('/master', master)
+            app.use(path.join(rootURL, 'master'), master)
         }
 
         if (configData.slave.enable) {

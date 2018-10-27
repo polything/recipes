@@ -2,8 +2,7 @@ const util = require('./util')
 
 const DEFAULT_NUM_SLAVES = 5
 
-exports.slaves = new Set([])
-
+exports.slaves = new Map()
 exports.createKey = (ip, port) => ip + ':' + port
 
 exports.find = (string, options) => new Promise((resolve, _) => {
