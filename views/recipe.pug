@@ -7,8 +7,8 @@ html
             h1 #{recipe.title}
             ul
                 each ingredient in recipe.ingredients
-                    - let prep = (ingredient.prep !== null ? ', '+ingredient.prep : '')
-                    - let note = (ingredient.note !== null ? ' ('+ingredient.note+')' : '')
+                    - let prep = (ingredient.prep !== undefined ? ', '+ingredient.prep : '')
+                    - let note = (ingredient.note !== undefined ? ' ('+ingredient.note+')' : '')
                     li #{ingredient.amount} #{ingredient.unit} #{ingredient.name}#{prep}#{note}
             each direction in recipe.directions
                 p #{direction}
