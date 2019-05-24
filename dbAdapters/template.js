@@ -11,11 +11,11 @@ const mydb = require('mydb')
 //                                     to find the search term in.
 // @return A Promise that resolves to an Array of util.Recipes or an error.
 exports.find = (string, options) => new Promise((resolve, reject) => {
-    try {
-        var results = mydb.search(string, options)
+	try {
+		var results = mydb.search(string, options)
 
-        resolve(results)
-    } catch (err) {
-        reject(err)
-    }
+		resolve(results)
+	} catch (err) {
+		reject(err)
+	}
 })

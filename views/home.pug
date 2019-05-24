@@ -1,22 +1,19 @@
 html
-    head
-        title Recipes
-        style
-            include style.css
-
-        script.
-            const DATA_URL = '#{dataURL}'
-            const RECIPE_URL = '#{recipeURL}'
-        script
-            include ../js/search.js
-            include ../js/client.js
-    body
-        h1 Home
-        p Welcome!
-        - var searchResultsTableBodyID = 'searchResults'
-        input(
-            type='text'
-            onkeyup='search(event, this, (val) => updateRecipeTable("'+searchResultsTableBodyID+'",val))'
-        )
-        table
-            tbody(id=searchResultsTableBodyID)
+	head
+		title Recipes
+		link(href=cssURL + '/style.css' rel='stylesheet')
+		script(src=jsURL + '/client.js')
+		script(src=jsURL + '/search.js')
+		script.
+			const DATA_URL = '#{dataURL}'
+			const RECIPE_URL = '#{recipeURL}'
+	body
+		h1 Home
+		p Welcome!
+		- var searchResultsTableBodyID = 'searchResults'
+		input(
+			type='text'
+			onkeyup='search(event, this, (val) => updateRecipeTable("'+searchResultsTableBodyID+'",val))'
+		)
+		table
+			tbody(id=searchResultsTableBodyID)
