@@ -1,0 +1,26 @@
+html
+	head
+		title Add recipe
+		link(href=cssURL + '/style.css' rel='stylesheet')
+		script(src='https://code.jquery.com/jquery-3.4.1.min.js' type='text/javascript')
+		script.
+			const DATA_URL = '#{dataURL}'
+		script(src=jsURL + '/util.js' type='text/javascript')
+		script(src=jsURL + '/add.js' type='text/javascript')
+	body
+		h1 Add
+		p
+			a(href='/') Home
+		div
+			label(for='title') Title
+				input(type='text' name='title' id='title' required)
+		div
+			p Ingredients
+			ul(id='ingredients')
+			button(onclick='addIngredientInput()') + Ingredient
+		div
+			p Directions
+			textarea(id='directions' style='width:100%')
+
+		button(onclick='submitRecipe()') Submit
+			
