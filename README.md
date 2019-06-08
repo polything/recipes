@@ -1,9 +1,12 @@
-# Configuration
+# Recipe
+A Raspberry Pi recipe server.
 
-## Config path
+## Configuration
+
+### Config path
 Set the configuration file to use by setting `RECIPE_CONFIG` to the path of the configuration file to use. If `RECIPE_CONFIG` is not specified, `config.json` in the repo is used.
 
-## Configuration file
+### Configuration file
 * `port {integer}` Port to serve requests on.
 * `rootURL {string}` URL of the application's root.
 * `localDB` Local database configuration options.

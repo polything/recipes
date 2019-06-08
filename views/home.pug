@@ -2,6 +2,7 @@ html
 	head
 		title Recipes
 		link(href=cssURL + '/style.css' rel='stylesheet')
+		script(src=jsURL + '/util.js')
 		script(src=jsURL + '/client.js')
 		script(src=jsURL + '/search.js')
 		script.
@@ -9,11 +10,15 @@ html
 			const RECIPE_URL = '#{recipeURL}'
 	body
 		h1 Home
-		p Welcome!
-		- var searchResultsTableBodyID = 'searchResults'
-		input(
-			type='text'
-			onkeyup='search(event, this, (val) => updateRecipeTable("'+searchResultsTableBodyID+'",val))'
-		)
-		table
-			tbody(id=searchResultsTableBodyID)
+		div
+			a(href='/add') Add recipe
+
+		div
+			p Search
+				- var searchResultsTableBodyID = 'searchResults'
+				input(
+					type='text'
+					onkeyup='search(event, this, (val) => updateRecipeTable("'+searchResultsTableBodyID+'",val))'
+				)
+			table
+				tbody(id=searchResultsTableBodyID)

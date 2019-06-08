@@ -77,3 +77,53 @@ exports.Ingredient = function(name, amount, unit, preparation='', note='') {
 	this.preparation = preparation
 	this.note = note
 }
+
+exports.validUnits = ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz',
+	'pint', 'quart', 'tbsp', 'tsp']
+
+exports.isString = (thing) => {
+	return typeof(thing) === 'string'
+}
+
+exports.hasOwnProps = (obj, props) => {
+	return props.every(field => obj.hasOwnProperty(field))
+}
+
+exports.isValidTitle = (recipe) => {
+	return recipe.hasOwnProperty('title') && exports.isString(recipe.title)
+		&& recipe.title.length > 2
+}
+
+exports.isValidIngredient = (ingredient) => {
+	return typeof(ingredient) === 'object'
+		&& exports.hasOwnProps(ingredient, ['name', 'amount', 'unit'])
+		// name
+		&& exports.isString(ingredient.name) && ingredient.name.length > 1
+		// amount
+		&& typeof(ingredient.amount) === 'number' && ingredient.amount > 0
+		// unit
+		&& exports.isString(ingredient.unit) && ingredient.unit in exports.validUnits
+}
+
+exports.isValidIngredients = (recipe) => {
+	return recipe.ingredients.length > 0
+		&& recipe.ingredients.every(exports.isValidIngredient)
+}
+
+exports.isValidDirection = (direction) => {
+	return exports.isString(direction) && direction.length > 0
+}
+
+exports.isValidDirections = (recipe) => {
+	return recipe.directions.length > 0
+		&& recipe.directions.every(exports.isValidDirection)
+}
+
+exports.isValidRecipe = (recipe) => {
+	let fields = ['ingredients', 'directions']
+	return !(typeof(recipe) === 'object' && exports.isValidTitle(recipe)
+		&& fields.every(field => recipe.hasOwnProperty(field))
+		&& fields.every(field => Array.isArray(recipe[field]))
+		&& exports.isValidIngredients(recipe)
+		&& exports.isValidDirections(recipe))
+}

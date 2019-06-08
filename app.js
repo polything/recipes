@@ -13,6 +13,7 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		app.use(express.urlencoded())
 
 		// Routes
+		const add = require('./routes/add')
 		const home = require('./routes/home')
 		const data = require('./routes/data')
 		const recipe = require('./routes/recipe')
@@ -20,6 +21,7 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		const rootURL = config.options.rootURL
 		app.use(express.static('public'))
 		app.use(rootURL, home)
+		app.use(path.join(rootURL, 'add'), add)
 		app.use(path.join(rootURL, 'data'), data)
 		app.use(path.join(rootURL, 'recipe'), recipe)
 
