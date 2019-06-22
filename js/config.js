@@ -27,8 +27,17 @@ function addUnspecifiedSettings(config, defaultValues) {
 exports.options = {}
 
 exports.load = (configPath) => new Promise((resolve, reject) => {
+	if (!fs.existsSync(configPath)) {
+		console.log(configPath + ' does not exist. Exiting')
+		process.exit(1)
+	}
+
 	fs.readFile(configPath, 'utf8', (err, contents) => {
-		if (err) reject(err)
+		if (err) {
+			reject(err)
+			return
+		}
+
 		exports.options = addUnspecifiedSettings(JSON.parse(contents), defaults)
 		resolve(exports.options)
 	})
