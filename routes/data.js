@@ -7,6 +7,10 @@ const util = require('../js/util')
 
 const REQUEST_TIMEOUT_MS = 500
 
+var validRequest = (req) => {
+	return req.body !== undefined || req.body !== null
+}
+
 var searchDB = (term, searchOptions, results, findFunc) =>
 	new Promise((resolve, _) => {
 		findFunc(term, searchOptions)
@@ -25,12 +29,19 @@ var searchDB = (term, searchOptions, results, findFunc) =>
 	})
 
 
+// Receive delete request
+router.delete('/', (req, res) => {
+	if (req.query.title && localDB.delete(req.query.title)) {
+		res.status(200)
+	} else {
+		res.status(404)
+	}
+})
+
+
 // Receive add request
 router.post('/add', (req, res) => {
-	if (req.body === undefined || req.body === null) {
-		// Ignore these requests
-		return
-	}
+	if (!validRequest(req)) return
 
 	if (!(req.body.hasOwnProperty('recipes')
 			&& Array.isArray(req.body.recipes)
@@ -52,10 +63,7 @@ router.post('/add', (req, res) => {
 
 // Receive search request
 router.post('/', (req, res) => {
-	if (req.body === undefined || req.body === null) {
-		// Ignore these requests
-		return
-	}
+	if (!validRequest(req)) return
 
 	var term = req.body.term
 	var searchOptions = req.body.options
