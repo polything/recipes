@@ -15,3 +15,5 @@ fs.stat(dbFile, (err, _) => {
 exports.find = (string, searchOptions) => db.find(string, searchOptions)
 
 exports.add = (recipes) => db.add(recipes)
+
+exports.delete = title => db.delete(title)

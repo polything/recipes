@@ -15,7 +15,7 @@ HTTP Method: `POST`
     * `title {boolean}` `true` to search in title.
 * `term {string}` The string to search for.
 
-## Respond with recipes
+### Response
 * `recipes {Array}` Array of recipes.
     * `title {string}` Title of the recipe.
     * `ingredients {Object}` Ingredients for the recipe.
@@ -25,3 +25,19 @@ HTTP Method: `POST`
         * `prep {string}` Preparation method.
         * `note {string}` Ingredient note.
     * `directions {Array}` Array of direction strings.
+
+
+## Delete recipes
+
+URL: `/data?title=X`
+
+Format: JSON
+
+HTTP Method: `DELETE`
+
+### Response
+
+| Code | Data |
+| :---: | --- |
+| 200 | None |
+| 404 | None |

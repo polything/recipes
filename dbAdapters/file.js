@@ -54,3 +54,19 @@ exports.add = (recipes) => new Promise((resolve, reject) => {
 
 	resolve()
 })
+
+exports.delete = (title) => new Promise((resolve, reject) => {
+	if (!loaded) {
+		return reject('FileDB not loaded')
+	}
+
+	let deleteIdx = data.recipes.findIndex(recipe => recipe.title === title)
+
+	if (deleteIdx !== -1) {
+		data.recipes.splice(deleteIdx, 1)
+		fs.writeFileSync(config.options.localDB.options.filePath,
+			JSON.stringify(data))
+	}
+
+	resolve()
+})

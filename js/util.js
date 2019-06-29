@@ -89,6 +89,10 @@ exports.hasOwnProps = (obj, props) => {
 	return props.every(field => obj.hasOwnProperty(field))
 }
 
+exports.hasOwnProp = (obj, prop) => {
+	return obj.hasOwnProperty(prop)
+}
+
 exports.isValidTitle = (recipe) => {
 	return recipe.hasOwnProperty('title') && exports.isString(recipe.title)
 		&& recipe.title.length > 2
