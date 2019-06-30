@@ -16,4 +16,6 @@ exports.find = (string, searchOptions) => db.find(string, searchOptions)
 
 exports.add = (recipes) => db.add(recipes)
 
+exports.addIngredient = ingredient => db.addIngredient(ingredient)
+
 exports.delete = title => db.delete(title)

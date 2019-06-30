@@ -19,4 +19,12 @@ router.get('/', (req, res) => {
 	}))
 })
 
+router.get('/ingredient', (req, res) => {
+	res.send(pug.renderFile('./views/addIngredient.pug', {
+		'cssURL': cssURL,
+		'dataURL': dataURL,
+		'jsURL': jsURL,
+	}))
+})
+
 module.exports = router

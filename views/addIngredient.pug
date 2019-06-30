@@ -1,0 +1,35 @@
+html
+	head
+		name Recipes
+		link(href=cssURL + '/style.css' rel='stylesheet')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js' type='text/javascript')
+		script(src=jsURL + '/util.js' type='text/javascript')
+		script(src=jsURL + '/client.js' type='text/javascript')
+		script(src=jsURL + '/addIngredient.js' type='text/javascript')
+		script.
+			const DATA_URL = '#{dataURL}'
+			const RECIPE_URL = '#{recipeURL}'
+	body
+		h1 Add ingredient
+		p
+			a(href='/') Home
+		div
+			label(for='name') Name
+				input(type='text' name='name' id='name' required)
+
+		div
+			label(for='amount') Amount
+				input(type='number' name='amount' id='amount' required)
+
+		div
+			label(for='unit') Unit
+				select(name='unit' id='unit')
+
+					-
+						const units = ['cup', 'floz', 'g', 'gal', 'kg', 'lb',
+							'liter', 'oz', 'pint', 'quart', 'tbsp', 'tsp']
+
+					each unit in units
+						option(value=unit) #{unit}
+
+		button(onclick='submitIngredient()') Submit

@@ -12,6 +12,14 @@ fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => 
 	}
 
 	data = JSON.parse(contents)
+
+	if (!data.hasOwnProperty('recipes')) {
+		data.recipes = []
+	}
+
+	if (!data.hasOwnProperty('pantry')) {
+		data.pantry = {}
+	}
 	loaded = true
 })
 
@@ -51,6 +59,20 @@ exports.add = (recipes) => new Promise((resolve, reject) => {
 
 	fs.writeFileSync(config.options.localDB.options.filePath,
 		JSON.stringify(data))
+
+	resolve()
+})
+
+exports.addIngredient = ingredient => new Promise((resolve, reject) => {
+	if (!loaded) {
+		return reject('FileDB not loaded')
+	}
+
+	if (!data.pantry.hasOwnProperty(ingredient.name)) {
+		data.pantry[ingredient.name] = ingredient
+		fs.writeFileSync(config.options.localDB.options.filePath,
+			JSON.stringify(data))
+	}
 
 	resolve()
 })
