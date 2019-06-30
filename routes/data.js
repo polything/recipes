@@ -4,6 +4,7 @@ const router = express.Router()
 const config = require('../js/config')
 const localDB = require('../js/localDB')
 const util = require('../js/util')
+const ingredient = require('../js/ingredient')
 
 const REQUEST_TIMEOUT_MS = 500
 
@@ -36,6 +37,25 @@ router.delete('/', (req, res) => {
 	} else {
 		res.status(404)
 	}
+})
+
+
+// Add pantry item
+router.post('/add/ingredient', (req, res) => {
+	const _ingredient = ingredient.create(req.query)
+
+	if ( _ingredient) {
+		localDB.addIngredient(_ingredient)
+			.then(() => {
+				res.status(200)
+			})
+			.catch(msg => {
+				console.log('Tried adding ' + _ingredient.name + ' with error '
+					+ msg)
+				res.status(404)
+			})
+	}
+	res.status(400)
 })
 
 

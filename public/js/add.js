@@ -30,6 +30,25 @@ function submitRecipe() {
 	})
 }
 
+function submitIngredient() {
+	const ingredient = {}
+	ingredient.name = $('#name').val()
+	ingredient.amount = $('#amount').val()
+	ingredient.unit = $('#unit').val()
+
+	const url = DATA_URL + '/add/ingredient?name=' + ingredient.name
+		+ '&amount=' + ingredient.amount
+		+ '&unit=' + ingredient.unit
+
+	console.log(ingredient)
+	console.log(url)
+
+	$.ajax({
+		url: url,
+		method: 'POST'
+	})
+}
+
 function getID() {
 	return ('' + Math.random()).slice(2)
 }

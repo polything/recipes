@@ -2,10 +2,10 @@ html
 	head
 		title Recipes
 		link(href=cssURL + '/style.css' rel='stylesheet')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js')
-		script(src=jsURL + '/util.js')
-		script(src=jsURL + '/client.js')
-		script(src=jsURL + '/search.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js' type='text/javascript')
+		script(src=jsURL + '/util.js' type='text/javascript')
+		script(src=jsURL + '/client.js' type='text/javascript')
+		script(src=jsURL + '/search.js' type='text/javascript')
 		script.
 			const DATA_URL = '#{dataURL}'
 			const RECIPE_URL = '#{recipeURL}'
@@ -13,6 +13,7 @@ html
 		h1 Home
 		div
 			a(href='/add') Add recipe
+			a(href='/add/ingredient') Add ingredient
 
 		div
 			p Search
