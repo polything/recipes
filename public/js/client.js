@@ -25,37 +25,38 @@ const deleteFunc = (event) => {
 
 // eslint-disable-next-line no-unused-vars
 const updateRecipeTable = (id, term) => {
+	$('#' + id).html('') // Clear contents
+
 	if (term === '') {
-		var tableBody = document.getElementById(id)
-		tableBody.innerHTML = '' // Clear contents
 		return
 	}
 
 	queryDB(term)
-		.then((results) => {
-			var tableBody = document.getElementById(id)
-			tableBody.innerHTML = '' // Clear contents
+		.then(results => {
 			results.forEach((recipe) => {
-				let link = document.createElement('a')
-				link.setAttribute('href', RECIPE_URL + '/' + recipe.title)
-				link.innerHTML = recipe.title
+				// Recipe title
+				const $link = $('<a></a>')
+				$link.attr('href', RECIPE_URL + '/' + recipe.title)
+				$link.html(recipe.title)
 
-				let title = document.createElement('td')
-				title.appendChild(link)
+				const $titleCol = $('<div></div>')
+				$titleCol.addClass('col-auto')
+				$titleCol.append($link)
 
-				let deleteButton = document.createElement('button')
-				deleteButton.innerHTML = 'X'
-				let data = '/data?title=' + recipe.title
-				$(deleteButton).click(data, deleteFunc)
+				// Delete button
+				const $butt = $('<button>X</button>')
+				$butt.click('/data?title=' + recipe.title, deleteFunc)
 
-				let remove = document.createElement('td')
-				remove.appendChild(deleteButton)
+				const $deleteCol = $('<div></div>')
+				$deleteCol.addClass('col-1')
+				$deleteCol.append($butt)
 
-				let row = document.createElement('tr')
-				row.appendChild(title)
-				row.appendChild(remove)
-				tableBody.appendChild(row)
+				const $row = $('<div></div>')
+				$row.addClass('row justify-content-between')
+				$row.append($titleCol)
+				$row.append($deleteCol)
+
+				$('#' + id).append($row)
 			})
 		})
-		.catch(err => console.log(err))
 }

@@ -1,25 +1,31 @@
+doctype html
 html
 	head
 		title Add recipe
+		include ./parts/commonheader
 		link(href=cssURL + '/style.css' rel='stylesheet')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js' type='text/javascript')
 		script.
 			const DATA_URL = '#{dataURL}'
 		script(src=jsURL + '/util.js' type='text/javascript')
 		script(src=jsURL + '/add.js' type='text/javascript')
-	body
+	body(class='bg-dark text-white')
 		h1 Add recipe
-		p
-			a(href='/') Home
-		div
-			label(for='title') Title
-				input(type='text' name='title' id='title' required)
-		div
-			p Ingredients
-			ul(id='ingredients')
-			button(onclick='addIngredientInput()') + Ingredient
-		div
-			p Directions
-			textarea(id='directions' style='width:100%')
 
-		button(onclick='submitRecipe()') Submit
+		div(class='container')
+			- var recipeActive = 'active'
+			include ./parts/navbar
+
+			div(class='row')
+				div(class='col')
+					div
+						label(for='title') Title
+							input(type='text' name='title' id='title' required)
+					div
+						p Ingredients
+						ul(id='ingredients')
+						button(onclick='addIngredientInput()') + Ingredient
+					div
+						p Directions
+						textarea(id='directions' style='width:100%')
+
+					button(onclick='submitRecipe()') Submit
