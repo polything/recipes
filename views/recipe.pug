@@ -1,16 +1,21 @@
+doctype html
 html
-    head
-        if recipe
-            title #{recipe.title}
-    body
-        if recipe
-            h1 #{recipe.title}
-            ul
-                each ingredient in recipe.ingredients
-                    - let prep = (ingredient.prep !== undefined ? ', '+ingredient.prep : '')
-                    - let note = (ingredient.note !== undefined ? ' ('+ingredient.note+')' : '')
-                    li #{ingredient.amount} #{ingredient.unit} #{ingredient.name}#{prep}#{note}
-            each direction in recipe.directions
-                p #{direction}
-        else
-            h1 ERROR
+	head
+		if recipe
+			title #{recipe.title}
+		include ./parts/commonheader
+
+	body(class='bg-dark text-white')
+		if recipe
+			div(class='container')
+				div(class='row')
+					h1 #{recipe.title}
+					ul
+						each ingredient in recipe.ingredients
+							- let prep = (ingredient.prep !== null ? ', '+ingredient.prep : '')
+							- let note = (ingredient.note !== null ? ' ('+ingredient.note+')' : '')
+							li #{ingredient.amount} #{ingredient.unit} #{ingredient.name}#{prep}#{note}
+					each direction in recipe.directions
+						p #{direction}
+		else
+			h1 ERROR

@@ -15,7 +15,8 @@ router.get('/', (req, res) => {
 		'cssURL': cssURL,
 		'dataURL': dataURL,
 		'jsURL': jsURL,
-		'recipeURL': recipeURL
+		'recipeURL': recipeURL,
+		'homeActive': 'active',
 	}))
 })
 
