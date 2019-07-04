@@ -40,6 +40,16 @@ router.delete('/', (req, res) => {
 })
 
 
+// Get pantry
+router.get('/pantry', (req, res) => {
+	localDB.getPantry()
+		.then(data => {
+			res.status(200).json(data)
+		})
+		.catch(msg => console.log(msg))
+})
+
+
 // Add pantry item
 router.post('/add/ingredient', (req, res) => {
 	const _ingredient = ingredient.create(req.query)

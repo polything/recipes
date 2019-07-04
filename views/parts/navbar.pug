@@ -1,5 +1,6 @@
 -
 	homeActive = homeActive === undefined ? '' : homeActive
+	pantryActive = pantryActive === undefined ? '' : pantryActive
 	recipeActive = recipeActive === undefined ? '' : recipeActive
 	ingredientActive = ingredientActive === undefined ? '' : ingredientActive
 
@@ -7,5 +8,6 @@ div(class='row mb-3')
 	div(class='col')
 		nav(class='nav nav-pills')
 			a(id='home' class='nav-link ' + homeActive href='/') Home
+			a(id='pantry' class='nav-link ' + pantryActive href='/pantry') Pantry
 			a(id='add-recipe' class='nav-link ' + recipeActive href='/add') + Recipe
 			a(id='add-ingredient' class='nav-link ' + ingredientActive href='/add/ingredient') + Ingredient
