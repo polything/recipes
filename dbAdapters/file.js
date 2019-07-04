@@ -82,7 +82,7 @@ exports.delete = (title) => new Promise((resolve, reject) => {
 		return reject('FileDB not loaded')
 	}
 
-	let deleteIdx = data.recipes.findIndex(recipe => recipe.title === title)
+	const deleteIdx = data.recipes.findIndex(recipe => recipe.title === title)
 
 	if (deleteIdx !== -1) {
 		data.recipes.splice(deleteIdx, 1)
@@ -91,4 +91,16 @@ exports.delete = (title) => new Promise((resolve, reject) => {
 	}
 
 	resolve()
+})
+
+exports.getPantry = () => new Promise((resolve, reject) => {
+	if (!loaded) {
+		return reject('FileDB not loaded')
+	}
+
+	const results = {}
+	for (let key in data.pantry) {
+		results[key] = data.pantry[key]
+	}
+	resolve(results)
 })

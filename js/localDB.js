@@ -19,3 +19,5 @@ exports.add = (recipes) => db.add(recipes)
 exports.addIngredient = ingredient => db.addIngredient(ingredient)
 
 exports.delete = title => db.delete(title)
+
+exports.getPantry = () => db.getPantry()

@@ -12,18 +12,13 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		app.use(express.json())
 		app.use(express.urlencoded())
 
-		// Routes
-		const add = require('./routes/add')
-		const home = require('./routes/home')
-		const data = require('./routes/data')
-		const recipe = require('./routes/recipe')
-
 		const rootURL = config.options.rootURL
 		app.use(express.static('public'))
-		app.use(rootURL, home)
-		app.use(path.join(rootURL, 'add'), add)
-		app.use(path.join(rootURL, 'data'), data)
-		app.use(path.join(rootURL, 'recipe'), recipe)
+		app.use(rootURL, require('./routes/home'))
+		app.use(path.join(rootURL, 'add'), require('./routes/add'))
+		app.use(path.join(rootURL, 'data'), require('./routes/data'))
+		app.use(path.join(rootURL, 'pantry'), require('./routes/pantry'))
+		app.use(path.join(rootURL, 'recipe'), require('./routes/recipe'))
 
 		const PORT = process.env.PORT || config.options.port || 3000
 		app.listen(PORT, () => console.log('Listening on port ' + PORT))
