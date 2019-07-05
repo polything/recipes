@@ -1,0 +1,19 @@
+div(id='view-search')
+	div(class='row')
+		div(class='col')
+			- var searchResultsTableBodyID = 'searchResults'
+			label(for='search') Search
+			input(
+				id='search'
+				class='form-control'
+				type='text'
+				onkeyup='search(event, this, (val) => updateRecipeTable("'+searchResultsTableBodyID+'",val))'
+			)
+
+	div(class='row mt-3')
+		div(class='col')
+			table
+				tbody(id=searchResultsTableBodyID)
+
+div(id='view-recipe' class='d-none')
+	include recipe

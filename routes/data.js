@@ -108,4 +108,21 @@ router.post('/', (req, res) => {
 		.then((results) => res.status(200).json(results))
 })
 
+router.get('/recipe/:name', (req, res) => {
+	const name = req.params.name
+	const opts = {
+		title: true,
+		exact: true,
+	}
+	localDB.find(name, opts)
+		.then(data => {
+			const ret = data.length > 0 ? data[0] : {}
+			res.status(200).json(ret)
+		})
+		.catch(msg => {
+			console.log(msg)
+			res.status(500)
+		})
+})
+
 module.exports = router

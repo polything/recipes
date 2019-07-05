@@ -1,0 +1,14 @@
+div(class='row')
+	div(class='col')
+		div
+			label(for='title') Title
+				input(type='text' name='title' id='title' required)
+		div
+			p Ingredients
+			ul(id='ingredients')
+			button(onclick='addIngredientInput()') + Ingredient
+		div
+			p Directions
+			textarea(id='directions' style='width:100%')
+
+		button(onclick='submitRecipe()') Submit
