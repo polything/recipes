@@ -11,7 +11,7 @@ const dataURL = path.join(config.options.rootURL, 'data')
 const recipeURL = path.join(config.options.rootURL, 'recipe')
 
 router.get('/', (req, res) => {
-	res.send(pug.renderFile('./views/home.pug', {
+	res.send(pug.renderFile('./views/app.pug', {
 		'cssURL': cssURL,
 		'dataURL': dataURL,
 		'jsURL': jsURL,

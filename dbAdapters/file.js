@@ -31,7 +31,10 @@ exports.find = (string, options) => new Promise((resolve, _) => {
 	const results = []
 	data.recipes.forEach((recipe) => {
 		if ((options === undefined || options.title === true)
-				&& recipe.title.indexOf(string) !== -1) {
+			&& ((options.exact === true && string === recipe.title)
+				|| (options.exact === false
+					&& recipe.title.indexOf(string) !== -1))) {
+
 			results.push(recipe)
 		}
 		else if (options === undefined || options.ingredients === true) {
