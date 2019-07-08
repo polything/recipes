@@ -125,4 +125,21 @@ router.get('/recipe/:name', (req, res) => {
 		})
 })
 
+router.post('/recipe/edit', (req, res) => {
+	if (!(req.body.hasOwnProperty('recipes')
+			&& Array.isArray(req.body.recipes)
+			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
+		res.status(304).json({})
+		return
+	}
+
+	localDB.update(req.body.recipes)
+		.then(() => res.status(200).json({}))
+		.catch(msg => {
+			console.log(msg)
+
+			res.status(304).json({})
+		})
+})
+
 module.exports = router
