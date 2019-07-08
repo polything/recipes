@@ -1,8 +1,10 @@
 const Promise = require('promise')
 const fs = require('fs')
 const config = require('../js/config')
+
 var data = null
 var loaded = false
+const NOT_LOADED_MSG = 'File DB not loaded'
 
 // Async load data
 fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => {
@@ -25,7 +27,7 @@ fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => 
 
 exports.find = (string, options) => new Promise((resolve, _) => {
 	if (!loaded) {
-		return reject('File DB not loaded')
+		return reject(NOT_LOADED_MSG)
 	}
 
 	const results = []
@@ -49,9 +51,29 @@ exports.find = (string, options) => new Promise((resolve, _) => {
 	resolve(results)
 })
 
+exports.update = (recipes) => new Promise((resolve, reject) => {
+	if (!loaded) {
+		reject(NOT_LOADED_MSG)
+	}
+
+	recipes.forEach(recipe => {
+		const idx = data.recipes.findIndex(_recipe => _recipe.title === recipe.title)
+		if (idx === -1) {
+			data.recipes.push(recipe)
+		} else {
+			data.recipes[idx] = recipe
+		}
+	})
+
+	fs.writeFileSync(config.options.localDB.options.filePath,
+		JSON.stringify(data))
+
+	resolve()
+})
+
 exports.add = (recipes) => new Promise((resolve, reject) => {
 	if (!loaded) {
-		return reject('FileDB not loaded')
+		return reject(NOT_LOADED_MSG)
 	}
 
 	recipes.forEach((recipe) => {
@@ -68,7 +90,7 @@ exports.add = (recipes) => new Promise((resolve, reject) => {
 
 exports.addIngredient = ingredient => new Promise((resolve, reject) => {
 	if (!loaded) {
-		return reject('FileDB not loaded')
+		return reject(NOT_LOADED_MSG)
 	}
 
 	if (!data.pantry.hasOwnProperty(ingredient.name)) {
@@ -82,7 +104,7 @@ exports.addIngredient = ingredient => new Promise((resolve, reject) => {
 
 exports.delete = (title) => new Promise((resolve, reject) => {
 	if (!loaded) {
-		return reject('FileDB not loaded')
+		return reject(NOT_LOADED_MSG)
 	}
 
 	const deleteIdx = data.recipes.findIndex(recipe => recipe.title === title)
@@ -98,7 +120,7 @@ exports.delete = (title) => new Promise((resolve, reject) => {
 
 exports.getPantry = () => new Promise((resolve, reject) => {
 	if (!loaded) {
-		return reject('FileDB not loaded')
+		return reject(NOT_LOADED_MSG)
 	}
 
 	const results = {}

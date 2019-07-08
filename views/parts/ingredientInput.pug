@@ -1,0 +1,28 @@
+div(id='template-ingredient-input')
+	div(class='input-group')
+		div(class='input-group-prepend')
+			span(class='input-group-text') Name
+		input(type='text' class='name form-control')
+		div(class='input-group-append')
+			button(class='btn btn-danger' type='button') Remove
+
+	div(class='input-group')
+		div(class='input-group-prepend')
+			span(class='input-group-text') Amount
+		input(type='number' min='0' step='0.01' class='amount form-control')
+		select(class='unit form-control')
+			-
+				let _units = ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz', 'pint', 'quart', 'tbsp', 'tsp']
+
+			each unit in _units
+				option(value=unit) #{unit}
+
+	div(class='input-group')
+		div(class='input-group-prepend')
+			span(class='input-group-text') Preparation
+		input(type='text' class='prep form-control')
+
+	div(class='input-group')
+		div(class='input-group-prepend')
+			span(class='input-group-text') Note
+		input(type='text' class='note form-control')

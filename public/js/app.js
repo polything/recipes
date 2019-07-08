@@ -1,4 +1,5 @@
 var pantry = {}
+var currentRecipe = {}
 
 // Send JSON with method POST and call the callback when the response arrives
 // eslint-disable-next-line no-unused-vars
@@ -61,7 +62,7 @@ const updateRecipeTable = (id, term) => {
 				// Recipe title
 				const $link = $('<a></a>')
 				$link.attr('href', '#')
-				$link.click(() => showRecipe(recipe.title))
+				$link.click(() => showRecipeView(recipe.title))
 				$link.html(recipe.title)
 
 				const $titleCol = $('<div></div>')
@@ -246,6 +247,7 @@ function filterTable(val) {
 }
 
 function parseRecipe(data, _, _) {
+	currentRecipe = data
 	formatRecipeView(data)
 }
 
@@ -254,7 +256,7 @@ function getRecipeErr(_, statusStr, errStr) {
 	console.log(errStr)
 }
 
-function showRecipe(name) {
+function showRecipeView(name) {
 	$('#view-recipe').removeClass('d-none')
 	$('#view-search').addClass('d-none')
 
@@ -266,7 +268,7 @@ function showRecipe(name) {
 	})
 }
 
-function hideRecipe() {
+function hideRecipeView() {
 	$('#view-recipe').addClass('d-none')
 	$('#view-search').removeClass('d-none')
 	formatRecipeView({
