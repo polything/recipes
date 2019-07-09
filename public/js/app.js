@@ -224,7 +224,7 @@ function filterTable(val) {
 
 	for (var key in pantry) {
 		const item = pantry[key]
-		if (val !== '' && item.name.indexOf(val) !== -1) {
+		if (val !== '' && item.name.indexOf(val) === -1) {
 			continue
 		}
 
