@@ -137,9 +137,37 @@ router.post('/recipe/edit', (req, res) => {
 		.then(() => res.status(200).json({}))
 		.catch(msg => {
 			console.log(msg)
-
 			res.status(304).json({})
 		})
+})
+
+router.post('/profile/create', (req, res, next) => {
+	let user = {
+		username: req.body.username,
+		password: req.body.password
+	}
+
+	localDB.addUser(user)
+		.then(success => {
+			if (success) {
+				req.login(user, err => {
+					if (err) return next(err)
+
+					return res.status(200).json({})
+				})
+			} else {
+				res.status(400).json({})
+			}
+		})
+		.catch(msg => {
+			console.log(msg)
+			res.status(500).json({})
+		})
+})
+
+router.get('/profile/logout', function(req, res) {
+	req.logout()
+	res.status(200).json({})
 })
 
 module.exports = router

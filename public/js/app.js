@@ -1,5 +1,6 @@
 var pantry = {}
 var currentRecipe = {}
+var profileInfo = {}
 
 // Send JSON with method POST and call the callback when the response arrives
 // eslint-disable-next-line no-unused-vars
@@ -132,9 +133,6 @@ function submitIngredient() {
 		+ '&amount=' + ingredient.amount
 		+ '&unit=' + ingredient.unit
 
-	console.log(ingredient)
-	console.log(url)
-
 	$.ajax({
 		url: url,
 		method: 'POST'
@@ -200,18 +198,91 @@ function initAddPage() {
 	addIngredientInput()
 }
 
-function parsePantry(data, _, _) {
-	pantry = data
+function switchProfilePrompt(name) {
+	$('.page-profile-prompt').addClass('d-none')
+	$('#profile-prompt-' + name).removeClass('d-none')
+	$('.profile-nav').removeClass('active')
+	$('#profile-prompt-navbar-' + name).addClass('active')
 }
 
-function getPantryErr(jqXHR, statusStr, errStr) {
+function onError(_, statusStr, errStr) {
 	console.log(statusStr)
 	console.log(errStr)
 }
 
+function updateProfile(data) {
+	profileInfo = {
+		'username': data.username ? data.username : ''
+	}
+	$('#profile-name').text(profileInfo.username)
+}
+
+function switchProfile(name) {
+	$('.page-profile').addClass('d-none')
+	$('#profile-' + name).removeClass('d-none')
+}
+
+function onLoginSuccess(data, _, _) {
+	console.log('Logged in')
+	console.log(data)
+	updateProfile(data)
+	switchProfile('view')
+}
+
+function login() {
+	$.ajax({
+		error: onError,
+		method: 'POST',
+		success: onLoginSuccess,
+		url: '/login',
+		data: {
+			'username': $('#login-form-name').val(),
+			'password': $('#login-form-pass').val()
+		}
+	})
+}
+
+function onLogoutSuccess(data, _, _) {
+	console.log('Logged out')
+	console.log(data)
+	updateProfile(data)
+	switchProfile('prompt')
+}
+
+function logout() {
+	$.ajax({
+		error: onError,
+		method: 'GET',
+		success: onLogoutSuccess,
+		url: '/data/profile/logout'
+	})
+}
+
+function onCreateAccountSuccess(data, _, _) {
+	console.log('Created account')
+	console.log(data)
+}
+
+function createAccount() {
+	$.ajax({
+		error: onError,
+		method: 'POST',
+		success: onCreateAccountSuccess,
+		url: '/data/profile/create',
+		data: {
+			'username': $('#create-form-name').val(),
+			'password': $('#create-form-pass').val()
+		}
+	})
+}
+
+function parsePantry(data, _, _) {
+	pantry = data
+}
+
 function getPantry() {
 	$.ajax({
-		error: getPantryErr,
+		error: onError,
 		method: 'GET',
 		success: parsePantry,
 		url: DATA_URL + '/pantry',
@@ -306,14 +377,14 @@ function formatRecipeView(recipe) {
 function switchPage(page) {
 	$('.page').addClass('d-none')
 	$('#page-' + page).removeClass('d-none')
-	$('.nav-link').removeClass('active')
+	$('.main-nav').removeClass('active')
 	$('#navbar-' + page).toggleClass('active')
 }
 
 $(() => {
 	initAddPage()
 	$.ajax({
-		error: getPantryErr,
+		error: onError,
 		method: 'GET',
 		success: (data, statusStr, _) => {
 			pantry = data

@@ -8,14 +8,30 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		const express = require('express')
 		const app = express()
 
+		const passport = require('passport')
+		const session = require('express-session')
+
+		require('./auth').init()
+
 		// Body-handling middleware
 		app.use(express.json())
 		app.use(express.urlencoded())
+		app.use(session({
+			secret: config.options.sessionSecret,
+			resave: false,
+			saveUninitialized: false,
+		}))
+		app.use(passport.initialize())
+		app.use(passport.session())
 
 		const rootURL = config.options.rootURL
+		const login = require('./routes/login')
+		const profile = require('./routes/profile')
+
 		app.use(express.static('public'))
 		app.use(rootURL, require('./routes/home'))
 		app.use(path.join(rootURL, 'data'), require('./routes/data'))
+		app.use(path.join(rootURL, 'login'), login)
 
 		const PORT = process.env.PORT || config.options.port || 3000
 		app.listen(PORT, () => console.log('Listening on port ' + PORT))
