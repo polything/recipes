@@ -1,6 +1,9 @@
+const bcrypt = require('bcrypt')
 const Promise = require('promise')
 const fs = require('fs')
 const config = require('../js/config')
+
+const saltRounds = 10
 
 var data = null
 var loaded = false
@@ -128,4 +131,35 @@ exports.getPantry = () => new Promise((resolve, reject) => {
 		results[key] = data.pantry[key]
 	}
 	resolve(results)
+})
+
+exports.findUser = username => new Promise((resolve, reject) => {
+	if (!loaded) {
+		return reject(NOT_LOADED_MSG)
+	}
+
+	resolve(data.users[username])
+})
+
+exports.addUser = userData => new Promise((resolve, reject) => {
+	if (!loaded) {
+		return reject(NOT_LOADED_MSG)
+	}
+
+	if (data.users[userData.username] === undefined) {
+		bcrypt.hash(userData.password, saltRounds, (err, hash) => {
+			let user = {
+				username: userData.username,
+				password: hash
+			}
+			data.users[user.username] = user
+
+			fs.writeFileSync(config.options.localDB.options.filePath,
+				JSON.stringify(data))
+
+			resolve(true)
+		})
+	} else {
+		resolve(false)
+	}
 })

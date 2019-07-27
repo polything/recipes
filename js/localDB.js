@@ -23,3 +23,7 @@ exports.delete = title => db.delete(title)
 exports.getPantry = () => db.getPantry()
 
 exports.update = recipes => db.update(recipes)
+
+exports.findUser = username => db.findUser(username)
+
+exports.addUser = data => db.addUser(data)

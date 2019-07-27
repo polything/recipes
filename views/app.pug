@@ -10,7 +10,6 @@ html(lang='en')
 		include appScripts
 		script.
 			const DATA_URL = '#{dataURL}'
-			const RECIPE_URL = '#{recipeURL}'
 
 	body(class='bg-dark text-white')
 		div(class='container')
@@ -30,6 +29,9 @@ html(lang='en')
 
 			div(id='page-edit-recipe' class='page d-none')
 				include ./editRecipe
+
+			div(id='page-profile' class='page d-none')
+				include ./profile
 
 		div(id='templates' class='d-none')
 			include ./parts/ingredientInput

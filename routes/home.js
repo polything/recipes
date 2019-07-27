@@ -9,6 +9,7 @@ const cssURL = path.join(config.options.rootURL, 'css')
 const jsURL = path.join(config.options.rootURL, 'js')
 const dataURL = path.join(config.options.rootURL, 'data')
 const recipeURL = path.join(config.options.rootURL, 'recipe')
+const loginURL = path.join(config.options.rootURL, 'login')
 
 router.get('/', (req, res) => {
 	res.send(pug.renderFile('./views/app.pug', {

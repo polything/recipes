@@ -1,0 +1,15 @@
+div(class='row')
+	div(class='col input-group')
+		div(class='input-group-prepend')
+			span(class='input-group-text') Username
+		input(id='login-form-name' type='text' class='form-control' required)
+
+div(class='row')
+	div(class='col input-group')
+		div(class='input-group-prepend')
+			span(class='input-group-text') Password
+		input(id='login-form-pass' type='password' class='form-control' required)
+
+div(class='row')
+	div(class='col')
+		a(href='#' class='btn btn-success' onclick='login()') Log in
