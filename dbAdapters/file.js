@@ -34,7 +34,8 @@ exports.find = (string, options) => new Promise((resolve, _) => {
 	}
 
 	const results = []
-	data.recipes.forEach((recipe) => {
+	for (const key in data.recipes) {
+		const recipe = data.recipes[key]
 		if ((options === undefined || options.title === true)
 			&& ((options.exact === true && string === recipe.title)
 				|| (options.exact === false
@@ -50,7 +51,7 @@ exports.find = (string, options) => new Promise((resolve, _) => {
 				}
 			}
 		}
-	})
+	}
 	resolve(results)
 })
 
@@ -60,12 +61,7 @@ exports.update = (recipes) => new Promise((resolve, reject) => {
 	}
 
 	recipes.forEach(recipe => {
-		const idx = data.recipes.findIndex(_recipe => _recipe.title === recipe.title)
-		if (idx === -1) {
-			data.recipes.push(recipe)
-		} else {
-			data.recipes[idx] = recipe
-		}
+		data.recipes[recipe.title] = recipe
 	})
 
 	fs.writeFileSync(config.options.localDB.options.filePath,
@@ -80,8 +76,8 @@ exports.add = (recipes) => new Promise((resolve, reject) => {
 	}
 
 	recipes.forEach((recipe) => {
-		if (data.recipes.every(_recipe => recipe.title !== _recipe.title)) {
-			data.recipes.push(recipe)
+		if (!(recipe.title in data.recipes)) {
+			data.recipes[recipe.title] = recipe
 		}
 	})
 
@@ -110,10 +106,8 @@ exports.delete = (title) => new Promise((resolve, reject) => {
 		return reject(NOT_LOADED_MSG)
 	}
 
-	const deleteIdx = data.recipes.findIndex(recipe => recipe.title === title)
-
-	if (deleteIdx !== -1) {
-		data.recipes.splice(deleteIdx, 1)
+	if (title in data.recipes) {
+		delete data.recipes[title]
 		fs.writeFileSync(config.options.localDB.options.filePath,
 			JSON.stringify(data))
 	}
