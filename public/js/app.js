@@ -381,8 +381,7 @@ function switchPage(page) {
 	$('#navbar-' + page).toggleClass('active')
 }
 
-$(() => {
-	initAddPage()
+function initPantry() {
 	$.ajax({
 		error: onError,
 		method: 'GET',
@@ -392,4 +391,26 @@ $(() => {
 		},
 		url: DATA_URL + '/pantry'
 	})
+}
+
+function initProfile() {
+	$.ajax({
+		error: onError,
+		method: 'GET',
+		success: (data, statusStr, _) => {
+			if (!data.allowed) {
+				$('#profile-prompt-navbar-create').addClass('d-none')
+				const $login = $('#profile-prompt-navbar-login')
+				$login.removeClass('active nav-link')
+				$login.removeAttr('onclick href')
+			}
+		},
+		url: DATA_URL + '/profile/createAllowed'
+	})
+}
+
+$(() => {
+	initAddPage()
+	initPantry()
+	initProfile()
 })
