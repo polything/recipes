@@ -1,10 +1,12 @@
 {
-    "port": 3000,
-    "rootURL": "/",
-    "localDB": {
-        "type": "file",
-        "options": {
-            "filePath": "dbAdapters/recipes.json"
-        }
-    }
+	"port": 3000,
+	"rootURL": "/",
+	"sessionSecret": "CHANGE ME!!!",
+	"allowAccountCreation": false,
+	"localDB": {
+		"type": "file",
+		"options": {
+			"filePath": "dbAdapters/recipes.json"
+		}
+	}
 }

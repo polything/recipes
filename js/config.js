@@ -1,12 +1,13 @@
 const fs = require('fs')
 
 defaults = {
-	"port": 3000,
-	"rootURL": "/",
-	"localDB": {
-		"type": "file",
-		"options": {
-			"filePath": "dbAdapters/recipes.json"
+	'port': 3000,
+	'rootURL': '/',
+	'allowAccountCreation': false,
+	'localDB': {
+		'type': 'file',
+		'options': {
+			'filePath': 'dbAdapters/recipes.json'
 		}
 	}
 }
@@ -17,7 +18,7 @@ function addUnspecifiedSettings(config, defaultValues) {
 	for (key in defaultValues) {
 		if (!(key in config)) {
 			config[key] = defaultValues[key]
-		} else if (getTypeString(config[key]) == "Object") {
+		} else if (getTypeString(config[key]) == 'Object') {
 			addUnspecifiedSettings(config[key], defaultValues[key])
 		}
 	}

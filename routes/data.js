@@ -141,7 +141,17 @@ router.post('/recipe/edit', (req, res) => {
 		})
 })
 
+router.get('/profile/createAllowed', (req, res) => {
+	res.status(200).json({
+		'allowed': config.options.allowAccountCreation
+	})
+})
+
 router.post('/profile/create', (req, res, next) => {
+	if (!config.options.allowAccountCreation) {
+		return res.status(405).json({})
+	}
+
 	let user = {
 		username: req.body.username,
 		password: req.body.password
@@ -156,12 +166,12 @@ router.post('/profile/create', (req, res, next) => {
 					return res.status(200).json({})
 				})
 			} else {
-				res.status(400).json({})
+				return res.status(400).json({})
 			}
 		})
 		.catch(msg => {
 			console.log(msg)
-			res.status(500).json({})
+			return res.status(500).json({})
 		})
 })
 
