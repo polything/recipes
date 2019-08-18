@@ -3,8 +3,6 @@ const Promise = require('promise')
 const fs = require('fs')
 const config = require('../js/config')
 
-const saltRounds = 10
-
 var data = null
 var loaded = false
 const NOT_LOADED_MSG = 'File DB not loaded'
@@ -24,6 +22,10 @@ fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => 
 
 	if (!data.hasOwnProperty('pantry')) {
 		data.pantry = {}
+	}
+
+	if (!data.hasOwnProperty('users')) {
+		data.users = {}
 	}
 	loaded = true
 })
@@ -141,7 +143,7 @@ exports.addUser = userData => new Promise((resolve, reject) => {
 	}
 
 	if (data.users[userData.username] === undefined) {
-		bcrypt.hash(userData.password, saltRounds, (err, hash) => {
+		bcrypt.hash(userData.password, config.options.security.saltRounds, (err, hash) => {
 			let user = {
 				username: userData.username,
 				password: hash
