@@ -9,6 +9,9 @@ defaults = {
 		'options': {
 			'filePath': 'dbAdapters/recipes.json'
 		}
+	},
+	'security': {
+		'saltRounds': 10
 	}
 }
 
