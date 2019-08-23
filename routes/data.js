@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const config = require('../js/config')
+const crypto = require('../js/crypto')
 const localDB = require('../js/localDB')
 const util = require('../js/util')
 const ingredient = require('../js/ingredient')
@@ -151,22 +152,29 @@ router.post('/profile/create', (req, res, next) => {
 		return res.status(405).json({})
 	}
 
-	let user = {
-		username: req.body.username,
-		password: req.body.password
-	}
-
-	localDB.addUser(user)
-		.then(success => {
-			if (success) {
-				req.login(user, err => {
-					if (err) return next(err)
-
-					return res.status(200).json({})
-				})
-			} else {
-				return res.status(400).json({})
+	crypto.hash(req.body.password)
+		.then(hash => {
+			let user = {
+				username: req.body.username,
+				password: hash
 			}
+
+			localDB.addUser(user)
+				.then((success) => {
+					if (success) {
+						req.login(user, (err) => {
+							if (err) return next(err)
+
+							res.status(200).json({})
+						})
+					} else {
+						res.status(400).json({})
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+					res.status(500).json({})
+				})
 		})
 		.catch(msg => {
 			console.log(msg)
