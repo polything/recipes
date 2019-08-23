@@ -299,7 +299,7 @@ function createAccount() {
 		error: onError,
 		method: 'POST',
 		success: onCreateAccountSuccess,
-		url: '/data/profile/create',
+		url: DATA_URL + '/profile/create',
 		data: {
 			'username': $('#create-form-name').val(),
 			'password': $('#create-form-pass').val()
