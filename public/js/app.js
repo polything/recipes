@@ -1,4 +1,5 @@
 var pantry = {}
+var defaultRecipes = []
 var currentRecipe = {}
 var profileInfo = {}
 
@@ -26,6 +27,52 @@ const hasOwnProps = (obj, props) => {
 	return props.every(field => obj.hasOwnProperty(field))
 }
 
+const sendRecipeRequest = (term, opts) => {
+	const body = JSON.stringify({
+		'options': opts,
+		'term': term,
+	})
+
+	return $.ajax({
+		method: 'POST',
+		contentType: 'application/json',
+		processData: false,
+		dataType: 'json',
+		url: DATA_URL,
+		data: body,
+	})
+}
+
+const updateRecipeList = (recipes) => {
+	$('#searchResults').html('') // Clear contents
+	recipes.forEach((recipe) => {
+		// Recipe title
+		const $link = $('<a></a>')
+		$link.attr('href', '#')
+		$link.click(() => showRecipeView(recipe.title))
+		$link.html(recipe.title)
+
+		const $titleCol = $('<div></div>')
+		$titleCol.addClass('col-auto')
+		$titleCol.append($link)
+
+		// Delete button
+		const $butt = $('<button>X</button>')
+		$butt.click('/data?title=' + recipe.title, deleteFunc)
+
+		const $deleteCol = $('<div></div>')
+		$deleteCol.addClass('col-1')
+		$deleteCol.append($butt)
+
+		const $row = $('<div></div>')
+		$row.addClass('row justify-content-between')
+		$row.append($titleCol)
+		$row.append($deleteCol)
+
+		$('#searchResults').append($row)
+	})
+}
+
 // eslint-disable-next-line no-unused-vars
 const queryDB = (term) => new Promise((resolve, reject) => {
 	var body = {
@@ -49,43 +96,27 @@ const deleteFunc = (event) => {
 	})
 }
 
-// eslint-disable-next-line no-unused-vars
-const updateRecipeTable = (id, term) => {
-	$('#' + id).html('') // Clear contents
-
-	if (term === '') {
-		return
-	}
-
-	queryDB(term)
-		.then(results => {
-			results.forEach((recipe) => {
-				// Recipe title
-				const $link = $('<a></a>')
-				$link.attr('href', '#')
-				$link.click(() => showRecipeView(recipe.title))
-				$link.html(recipe.title)
-
-				const $titleCol = $('<div></div>')
-				$titleCol.addClass('col-auto')
-				$titleCol.append($link)
-
-				// Delete button
-				const $butt = $('<button>X</button>')
-				$butt.click('/data?title=' + recipe.title, deleteFunc)
-
-				const $deleteCol = $('<div></div>')
-				$deleteCol.addClass('col-1')
-				$deleteCol.append($butt)
-
-				const $row = $('<div></div>')
-				$row.addClass('row justify-content-between')
-				$row.append($titleCol)
-				$row.append($deleteCol)
-
-				$('#' + id).append($row)
-			})
+const searchForRecipes = (term, opts) => {
+	sendRecipeRequest(term, opts)
+		.done((recipes, _, _2) => {
+			if (defaultRecipes.length < 1) {
+				defaultRecipes = recipes
+			}
+			updateRecipeList(recipes)
 		})
+		.fail((_, _2, err) => {
+			console.log(err)
+		})
+}
+
+// eslint-disable-next-line no-unused-vars
+const onRecipeSearch = (term) => {
+	if (term === '') {
+		updateRecipeList(defaultRecipes)
+	} else {
+		const opts = {'ingredients': true, 'title': true}
+		searchForRecipes(term, opts)
+	}
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -409,8 +440,15 @@ function initProfile() {
 	})
 }
 
+function initRecipes() {
+	const term = 'a'
+	const opts = {'ingredients': true, 'title': true}
+	searchForRecipes(term, opts)
+}
+
 $(() => {
 	initAddPage()
+	initRecipes()
 	initPantry()
 	initProfile()
 })

@@ -9,7 +9,7 @@ const ingredient = require('../js/ingredient')
 const REQUEST_TIMEOUT_MS = 500
 
 var validRequest = (req) => {
-	return req.body !== undefined || req.body !== null
+	return req.body !== undefined && req.body !== null
 }
 
 var searchDB = (term, searchOptions, results, findFunc) =>
@@ -93,18 +93,17 @@ router.post('/add', (req, res) => {
 
 // Receive search request
 router.post('/', (req, res) => {
-	if (!validRequest(req)) return
+	if (!validRequest(req)) {
+		res.status(400).json({})
+		return
+	}
 
 	var term = req.body.term
 	var searchOptions = req.body.options
 
 	Promise.resolve([])
 		// Search local
-		.then((results) =>
-			searchDB(
-				term, searchOptions, results, localDB.find
-			)
-		)
+		.then((results) => searchDB(term, searchOptions, results, localDB.find))
 		.then((results) => res.status(200).json(results))
 })
 
