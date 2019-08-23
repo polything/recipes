@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt')
 const Promise = require('promise')
 const fs = require('fs')
 const config = require('../js/config')
@@ -143,18 +142,12 @@ exports.addUser = userData => new Promise((resolve, reject) => {
 	}
 
 	if (data.users[userData.username] === undefined) {
-		bcrypt.hash(userData.password, config.options.security.saltRounds, (err, hash) => {
-			let user = {
-				username: userData.username,
-				password: hash
-			}
-			data.users[user.username] = user
+		data.users[userData.username] = userData
 
-			fs.writeFileSync(config.options.localDB.options.filePath,
-				JSON.stringify(data))
+		fs.writeFileSync(config.options.localDB.options.filePath,
+			JSON.stringify(data))
 
-			resolve(true)
-		})
+		resolve(true)
 	} else {
 		resolve(false)
 	}

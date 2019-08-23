@@ -3,7 +3,7 @@ const Promise = require('promise')
 
 const config = require('../js/config')
 
-function hashPass(pass) {
+function hash(pass) {
 	return new Promise((resolve, reject) => {
 		bcrypt.hash(pass, config.options.security.saltRounds, (err, hash) => {
 			if (err) { reject(err) }
@@ -14,5 +14,5 @@ function hashPass(pass) {
 }
 
 module.exports = {
-	'hashPass': hashPass
+	'hash': hash
 }
