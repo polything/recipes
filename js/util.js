@@ -131,3 +131,20 @@ exports.isValidRecipe = (recipe) => {
 		&& exports.isValidIngredients(recipe)
 		&& exports.isValidDirections(recipe))
 }
+
+getTypeString = (obj) => Object.prototype.toString.call(obj).slice(8, -1)
+
+exports.fillMissingOpts = (opts, defaults) => {
+	if (opts === undefined || opts === null || getTypeString(opts) != 'Object') {
+		return defaults
+	}
+
+	for (key in defaults) {
+		if (!(key in opts)) {
+			opts[key] = defaults[key]
+		} else if (getTypeString(opts[key]) == 'Object') {
+			exports.fillMissingOpts(opts[key], defaults[key])
+		}
+	}
+	return opts
+}
