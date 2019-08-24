@@ -1,5 +1,7 @@
 const fs = require('fs')
 
+const util = require('./util')
+
 defaults = {
 	'port': 3000,
 	'rootURL': '/',
@@ -13,19 +15,6 @@ defaults = {
 	'security': {
 		'saltRounds': 10
 	}
-}
-
-getTypeString = (obj) => Object.prototype.toString.call(obj).slice(8, -1)
-
-function addUnspecifiedSettings(config, defaultValues) {
-	for (key in defaultValues) {
-		if (!(key in config)) {
-			config[key] = defaultValues[key]
-		} else if (getTypeString(config[key]) == 'Object') {
-			addUnspecifiedSettings(config[key], defaultValues[key])
-		}
-	}
-	return config
 }
 
 exports.options = {}
@@ -42,7 +31,7 @@ exports.load = (configPath) => new Promise((resolve, reject) => {
 			return
 		}
 
-		exports.options = addUnspecifiedSettings(JSON.parse(contents), defaults)
+		exports.options = util.fillMissingOpts(JSON.parse(contents), defaults)
 		resolve(exports.options)
 	})
 })

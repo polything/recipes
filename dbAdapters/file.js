@@ -1,6 +1,14 @@
 const Promise = require('promise')
 const fs = require('fs')
+
 const config = require('../js/config')
+const util = require('../js/util')
+
+const defaultSearchOpts = {
+	title: false,
+	ingredients: false,
+	exact: false,
+}
 
 var data = null
 var loaded = false
@@ -34,18 +42,19 @@ exports.find = (string, options) => new Promise((resolve, _) => {
 		return reject(NOT_LOADED_MSG)
 	}
 
+	options = util.fillMissingOpts(options, defaultSearchOpts)
 	const results = []
 	for (const key in data.recipes) {
 		const recipe = data.recipes[key]
-		if ((options === undefined || options.title === true)
+		if (options.title === true
 			&& ((options.exact === true && string === recipe.title)
 				|| (options.exact === false
 					&& recipe.title.indexOf(string) !== -1))) {
 
 			results.push(recipe)
 		}
-		else if (options === undefined || options.ingredients === true) {
-			for (let ingredient of recipe.ingredients) {
+		else if (options.ingredients === true) {
+			for (const ingredient of recipe.ingredients) {
 				if (ingredient.name.indexOf(string) !== -1) {
 					results.push(recipe)
 					break
