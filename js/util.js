@@ -7,17 +7,17 @@ const urlRegex = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})((?::\d+)?)(.*)/
 
 // Send a POST and return a Promise resolving the response
 exports.asyncPost = (url, body) => new Promise((resolve, reject) => {
-	let matches = url.match(urlRegex)
+	const matches = url.match(urlRegex)
 	if (matches === null) {
 		reject()
 	}
 
-	let host = matches[1]
+	const host = matches[1]
 	let port = matches[2]
 	port = port.length > 1 ? port.substr(1) : '443'
-	let path = matches[3]
+	const path = matches[3]
 
-	let req = http.request({
+	const req = http.request({
 		agent: false,
 		headers: {
 			'Content-Type': 'application/json'
@@ -124,7 +124,7 @@ exports.isValidDirections = (recipe) => {
 }
 
 exports.isValidRecipe = (recipe) => {
-	let fields = ['ingredients', 'directions']
+	const fields = ['ingredients', 'directions']
 	return !(typeof(recipe) === 'object' && exports.isValidTitle(recipe)
 		&& fields.every(field => recipe.hasOwnProperty(field))
 		&& fields.every(field => Array.isArray(recipe[field]))
@@ -132,14 +132,14 @@ exports.isValidRecipe = (recipe) => {
 		&& exports.isValidDirections(recipe))
 }
 
-getTypeString = (obj) => Object.prototype.toString.call(obj).slice(8, -1)
+const getTypeString = (obj) => Object.prototype.toString.call(obj).slice(8, -1)
 
 exports.fillMissingOpts = (opts, defaults) => {
 	if (opts === undefined || opts === null || getTypeString(opts) != 'Object') {
 		return defaults
 	}
 
-	for (key in defaults) {
+	for (const key in defaults) {
 		if (!(key in opts)) {
 			opts[key] = defaults[key]
 		} else if (getTypeString(opts[key]) == 'Object') {

@@ -1,7 +1,6 @@
 const readline = require('readline')
 
 const config = require('./config')
-const crypto = require('./crypto')
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -18,7 +17,10 @@ function getInfo() {
 			}
 
 			db.addUser(user)
+				// eslint-disable-next-line no-console
 				.then(success => console.log(success ? 'Added. Restart the server' : 'Failed'))
+
+				// eslint-disable-next-line no-console
 				.catch(err => console.log(err))
 
 			rl.close()
@@ -31,5 +33,6 @@ rl.question('config file path: ', (path) => {
 		.then(_ => {
 			getInfo()
 		})
+		// eslint-disable-next-line no-console
 		.catch(err => console.log(err))
 })

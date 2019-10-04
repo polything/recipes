@@ -10,13 +10,14 @@ const defaultSearchOpts = {
 	exact: false,
 }
 
-var data = null
-var loaded = false
+let data = null
+let loaded = false
 const NOT_LOADED_MSG = 'File DB not loaded'
 
 // Async load data
 fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => {
 	if (err) {
+		// eslint-disable-next-line no-console
 		console.log('ERROR: File DB failed.' + err)
 		return
 	}
@@ -37,7 +38,7 @@ fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => 
 	loaded = true
 })
 
-exports.find = (string, options) => new Promise((resolve, _) => {
+exports.find = (string, options) => new Promise((resolve, reject) => {
 	if (!loaded) {
 		return reject(NOT_LOADED_MSG)
 	}
@@ -131,7 +132,7 @@ exports.getPantry = () => new Promise((resolve, reject) => {
 	}
 
 	const results = {}
-	for (let key in data.pantry) {
+	for (const key in data.pantry) {
 		results[key] = data.pantry[key]
 	}
 	resolve(results)

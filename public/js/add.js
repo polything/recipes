@@ -1,3 +1,7 @@
+/* eslint-env browser, jquery */
+/* global asyncPost, DATA_URL */
+
+// eslint-disable-next-line no-unused-vars
 function submitRecipe() {
 	const recipe = {}
 	recipe.title = $('#title').val()
@@ -17,19 +21,23 @@ function submitRecipe() {
 	recipe.directions =
 		$('#directions').val().split('\n').filter(line => line !== '')
 
+	// eslint-disable-next-line no-console
 	console.log(recipe)
 
 	const recipes = {'recipes': [recipe]}
 
-	asyncPost('/data/add', recipes, (err, data) => {
+	asyncPost('/data/add', recipes, (err, _) => {
 		if (err) {
+			// eslint-disable-next-line no-console
 			console.log(err)
 		} else {
+			// eslint-disable-next-line no-console
 			console.log('Data added')
 		}
 	})
 }
 
+// eslint-disable-next-line no-unused-vars
 function submitIngredient() {
 	const ingredient = {}
 	ingredient.name = $('#name').val()
@@ -40,7 +48,9 @@ function submitIngredient() {
 		+ '&amount=' + ingredient.amount
 		+ '&unit=' + ingredient.unit
 
+	// eslint-disable-next-line no-console
 	console.log(ingredient)
+	// eslint-disable-next-line no-console
 	console.log(url)
 
 	$.ajax({
@@ -53,6 +63,8 @@ function getID() {
 	return ('' + Math.random()).slice(2)
 }
 
+// Function is used as onclick behavior
+// eslint-disable-next-line no-unused-vars
 function removeElement(id) {
 	$('#' + id).remove()
 }

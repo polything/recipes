@@ -15,6 +15,8 @@ function findUser(username, done) {
 			return done(null)
 		})
 		.catch(msg => {
+			// eslint-disable-next-line no-console
+			console.log(msg)
 			done(null)
 		})
 }

@@ -1,3 +1,7 @@
+/* eslint-env browser, jquery */
+/* global addFormIngredient, DATA_URL, saveRecipe, switchPage */
+
+// eslint-disable-next-line no-unused-vars
 function editRecipe(recipe) {
 	switchPage('edit-recipe')
 	$('#navbar').addClass('d-none')
@@ -21,6 +25,7 @@ function backToRecipeView() {
 	$('#navbar').removeClass('d-none')
 }
 
+// eslint-disable-next-line no-unused-vars
 function saveRecipeEdit() {
 	backToRecipeView()
 

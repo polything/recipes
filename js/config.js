@@ -2,7 +2,7 @@ const fs = require('fs')
 
 const util = require('./util')
 
-defaults = {
+const defaults = {
 	'port': 3000,
 	'rootURL': '/',
 	'allowAccountCreation': false,
@@ -21,6 +21,7 @@ exports.options = {}
 
 exports.load = (configPath) => new Promise((resolve, reject) => {
 	if (!fs.existsSync(configPath)) {
+		// eslint-disable-next-line no-console
 		console.log(configPath + ' does not exist. Exiting')
 		process.exit(1)
 	}

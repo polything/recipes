@@ -1,12 +1,18 @@
-var pantry = {}
-var defaultRecipes = []
-var currentRecipe = {}
-var profileInfo = {}
+/* eslint-env browser, jquery */
+/* global DATA_URL */
+
+let pantry = {}
+let defaultRecipes = []
+let profileInfo = {}
+
+// currentRecipe is used in parseRecipe(3)
+// eslint-disable-next-line no-unused-vars
+let currentRecipe = {}
 
 // Send JSON with method POST and call the callback when the response arrives
 // eslint-disable-next-line no-unused-vars
 const asyncPost = (url, data, callback) => {
-	var xhttp = new XMLHttpRequest()
+	const xhttp = new XMLHttpRequest()
 	xhttp.open('POST', url, true)
 	xhttp.setRequestHeader('Content-Type', 'application/json')
 	xhttp.onreadystatechange = function() {
@@ -21,10 +27,6 @@ const asyncPost = (url, data, callback) => {
 		}
 	}
 	xhttp.send(JSON.stringify(data))
-}
-
-const hasOwnProps = (obj, props) => {
-	return props.every(field => obj.hasOwnProperty(field))
 }
 
 const sendRecipeRequest = (term, opts) => {
@@ -75,7 +77,7 @@ const updateRecipeList = (recipes) => {
 
 // eslint-disable-next-line no-unused-vars
 const queryDB = (term) => new Promise((resolve, reject) => {
-	var body = {
+	const body = {
 		'options': {'ingredients': true, 'title': true},
 		'term': term
 	}
@@ -105,6 +107,7 @@ const searchForRecipes = (term, opts) => {
 			updateRecipeList(recipes)
 		})
 		.fail((_, _2, err) => {
+			// eslint-disable-next-line no-console
 			console.log(err)
 		})
 }
@@ -124,6 +127,7 @@ const search = (event, elem, callback) => {
 	callback(elem.value)
 }
 
+// eslint-disable-next-line no-unused-vars
 function submitRecipe() {
 	const recipe = {}
 	recipe.title = $('#title').val()
@@ -145,15 +149,18 @@ function submitRecipe() {
 
 	const recipes = {'recipes': [recipe]}
 
-	asyncPost('/data/add', recipes, (err, data) => {
+	asyncPost('/data/add', recipes, (err, _) => {
 		if (err) {
+			// eslint-disable-next-line no-console
 			console.log(err)
 		} else {
+			// eslint-disable-next-line no-console
 			console.log('Data added')
 		}
 	})
 }
 
+// eslint-disable-next-line no-unused-vars
 function submitIngredient() {
 	const ingredient = {}
 	ingredient.name = $('#name').val()
@@ -174,6 +181,7 @@ function getID() {
 	return ('' + Math.random()).slice(2)
 }
 
+// eslint-disable-next-line no-unused-vars
 function removeElement(id) {
 	$('#' + id).remove()
 }
@@ -229,6 +237,7 @@ function initAddPage() {
 	addIngredientInput()
 }
 
+// eslint-disable-next-line no-unused-vars
 function switchProfilePrompt(name) {
 	$('.page-profile-prompt').addClass('d-none')
 	$('#profile-prompt-' + name).removeClass('d-none')
@@ -236,8 +245,11 @@ function switchProfilePrompt(name) {
 	$('#profile-prompt-navbar-' + name).addClass('active')
 }
 
+// eslint-disable-next-line no-unused-vars
 function onError(_, statusStr, errStr) {
+	// eslint-disable-next-line no-console
 	console.log(statusStr)
+	// eslint-disable-next-line no-console
 	console.log(errStr)
 }
 
@@ -253,13 +265,16 @@ function switchProfile(name) {
 	$('#profile-' + name).removeClass('d-none')
 }
 
-function onLoginSuccess(data, _, _) {
+function onLoginSuccess(data, _, _2) {
+	// eslint-disable-next-line no-console
 	console.log('Logged in')
+	// eslint-disable-next-line no-console
 	console.log(data)
 	updateProfile(data)
 	switchProfile('view')
 }
 
+// eslint-disable-next-line no-unused-vars
 function login() {
 	$.ajax({
 		error: onError,
@@ -273,13 +288,16 @@ function login() {
 	})
 }
 
-function onLogoutSuccess(data, _, _) {
+function onLogoutSuccess(data, _, _2) {
+	// eslint-disable-next-line no-console
 	console.log('Logged out')
+	// eslint-disable-next-line no-console
 	console.log(data)
 	updateProfile(data)
 	switchProfile('prompt')
 }
 
+// eslint-disable-next-line no-unused-vars
 function logout() {
 	$.ajax({
 		error: onError,
@@ -289,11 +307,14 @@ function logout() {
 	})
 }
 
-function onCreateAccountSuccess(data, _, _) {
+function onCreateAccountSuccess(data, _, _2) {
+	// eslint-disable-next-line no-console
 	console.log('Created account')
+	// eslint-disable-next-line no-console
 	console.log(data)
 }
 
+// eslint-disable-next-line no-unused-vars
 function createAccount() {
 	$.ajax({
 		error: onError,
@@ -307,10 +328,11 @@ function createAccount() {
 	})
 }
 
-function parsePantry(data, _, _) {
+function parsePantry(data, _, _2) {
 	pantry = data
 }
 
+// eslint-disable-next-line no-unused-vars
 function getPantry() {
 	$.ajax({
 		error: onError,
@@ -324,7 +346,7 @@ function filterTable(val) {
 	const table = $('#filterTable')
 	table.html('') // Clear contents
 
-	for (var key in pantry) {
+	for (const key in pantry) {
 		const item = pantry[key]
 		if (val !== '' && item.name.indexOf(val) === -1) {
 			continue
@@ -348,13 +370,15 @@ function filterTable(val) {
 	}
 }
 
-function parseRecipe(data, _, _) {
+function parseRecipe(data, _, _2) {
 	currentRecipe = data
 	formatRecipeView(data)
 }
 
 function getRecipeErr(_, statusStr, errStr) {
+	// eslint-disable-next-line no-console
 	console.log(statusStr)
+	// eslint-disable-next-line no-console
 	console.log(errStr)
 }
 
@@ -370,6 +394,7 @@ function showRecipeView(name) {
 	})
 }
 
+// eslint-disable-next-line no-unused-vars
 function hideRecipeView() {
 	$('#view-recipe').addClass('d-none')
 	$('#view-search').removeClass('d-none')
@@ -405,6 +430,7 @@ function formatRecipeView(recipe) {
 	})
 }
 
+// eslint-disable-next-line no-unused-vars
 function switchPage(page) {
 	$('.page').addClass('d-none')
 	$('#page-' + page).removeClass('d-none')
@@ -416,7 +442,7 @@ function initPantry() {
 	$.ajax({
 		error: onError,
 		method: 'GET',
-		success: (data, statusStr, _) => {
+		success: (data, _, _2) => {
 			pantry = data
 			filterTable('')
 		},
@@ -428,7 +454,7 @@ function initProfile() {
 	$.ajax({
 		error: onError,
 		method: 'GET',
-		success: (data, statusStr, _) => {
+		success: (data, _, _2) => {
 			if (!data.allowed) {
 				$('#profile-prompt-navbar-create').addClass('d-none')
 				const $login = $('#profile-prompt-navbar-login')

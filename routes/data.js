@@ -9,16 +9,16 @@ const ingredient = require('../js/ingredient')
 
 const REQUEST_TIMEOUT_MS = 500
 
-var validRequest = (req) => {
+const validRequest = (req) => {
 	return req.body !== undefined && req.body !== null
 }
 
-var searchDB = (term, searchOptions, results, findFunc) =>
+const searchDB = (term, searchOptions, results, findFunc) =>
 	new Promise((resolve, _) => {
 		findFunc(term, searchOptions)
 			.then((dbResults) => {
-				for (let dbResult of dbResults) {
-					let stored = (recipe) => recipe.title == dbResult.title
+				for (const dbResult of dbResults) {
+					const stored = (recipe) => recipe.title == dbResult.title
 					// Don't add to results if it's already there
 					if (!results.some(stored)) {
 						results.push(dbResult)
@@ -47,6 +47,7 @@ router.get('/pantry', (req, res) => {
 		.then(data => {
 			res.status(200).json(data)
 		})
+		// eslint-disable-next-line no-console
 		.catch(msg => console.log(msg))
 })
 
@@ -61,6 +62,7 @@ router.post('/add/ingredient', (req, res) => {
 				res.status(200)
 			})
 			.catch(msg => {
+				// eslint-disable-next-line no-console
 				console.log('Tried adding ' + _ingredient.name + ' with error '
 					+ msg)
 				res.status(404)
@@ -84,6 +86,7 @@ router.post('/add', (req, res) => {
 	localDB.add(req.body.recipes)
 		.then(() => res.status(200).json({}))
 		.catch(msg => {
+			// eslint-disable-next-line no-console
 			console.log('Tried adding ' + req.body.recipes + ' with error '
 				+ msg)
 
@@ -99,8 +102,8 @@ router.post('/', (req, res) => {
 		return
 	}
 
-	var term = req.body.term
-	var searchOptions = req.body.options
+	const term = req.body.term
+	const searchOptions = req.body.options
 
 	Promise.resolve([])
 		// Search local
@@ -120,6 +123,7 @@ router.get('/recipe/:name', (req, res) => {
 			res.status(200).json(ret)
 		})
 		.catch(msg => {
+			// eslint-disable-next-line no-console
 			console.log(msg)
 			res.status(500)
 		})
@@ -136,6 +140,7 @@ router.post('/recipe/edit', (req, res) => {
 	localDB.update(req.body.recipes)
 		.then(() => res.status(200).json({}))
 		.catch(msg => {
+			// eslint-disable-next-line no-console
 			console.log(msg)
 			res.status(304).json({})
 		})
@@ -154,7 +159,7 @@ router.post('/profile/create', (req, res, next) => {
 
 	crypto.hash(req.body.password)
 		.then(hash => {
-			let user = {
+			const user = {
 				username: req.body.username,
 				password: hash
 			}
@@ -172,11 +177,13 @@ router.post('/profile/create', (req, res, next) => {
 					}
 				})
 				.catch((err) => {
+					// eslint-disable-next-line no-console
 					console.log(err)
 					res.status(500).json({})
 				})
 		})
 		.catch(msg => {
+			// eslint-disable-next-line no-console
 			console.log(msg)
 			return res.status(500).json({})
 		})
