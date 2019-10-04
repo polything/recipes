@@ -6,7 +6,7 @@ div(id='view-search')
 				id='search'
 				class='form-control'
 				type='text'
-				onkeyup='search(event, this, (val) => onRecipeSearch(val))'
+				onkeyup='app.search(event, this, (val) => app.onRecipeSearch(val))'
 			)
 
 	div(class='row mt-3')
