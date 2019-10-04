@@ -1,14 +1,20 @@
-var pantry = {}
+/* eslint-env browser, jquery */
+/* global DATA_URL */
 
-function parsePantry(data, statusStr, _) {
+let pantry = {}
+
+function parsePantry(data, _, _2) {
 	pantry = data
 }
 
 function getPantryErr(jqXHR, statusStr, errStr) {
+	// eslint-disable-next-line no-console
 	console.log(statusStr)
+	// eslint-disable-next-line no-console
 	console.log(errStr)
 }
 
+// eslint-disable-next-line no-unused-vars
 function getPantry() {
 	$.ajax({
 		error: getPantryErr,
@@ -22,7 +28,7 @@ function filterTable(val) {
 	const table = $('#filterTable')
 	table.html('') // Clear contents
 
-	for (var key in pantry) {
+	for (const key in pantry) {
 		const item = pantry[key]
 		if (val !== '' && item.name.indexOf(val) !== -1) {
 			continue
@@ -50,7 +56,7 @@ $(() => {
 	$.ajax({
 		error: getPantryErr,
 		method: 'GET',
-		success: (data, statusStr, _) => {
+		success: (data, _, _2) => {
 			pantry = data
 			filterTable('')
 		},

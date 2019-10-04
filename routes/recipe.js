@@ -9,13 +9,13 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:recipeTitle', (req, res) => {
-	var options = {ingredients:false, title: true}
-	var term = req.params.recipeTitle
+	const options = {ingredients:false, title: true}
+	const term = req.params.recipeTitle
 	db.find(term, options)
 		.then((results) => {
-			var recipe = (results.length > 0 ? results[0] : null)
+			const recipe = (results.length > 0 ? results[0] : null)
 			res.send(pug.renderFile('./views/recipe.pug', {'recipe': recipe}))
-	})
+		})
 })
 
 module.exports = router
