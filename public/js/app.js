@@ -245,6 +245,10 @@
 		})
 	}
 
+	const onAddIngredientSuccess = (_, _2, _3) => {
+		initPantry()
+	}
+
 	// eslint-disable-next-line no-unused-vars
 	const submitIngredient = () => {
 		const ingredient = {}
@@ -257,8 +261,10 @@
 			+ '&unit=' + ingredient.unit
 
 		$.ajax({
+			error: onError,
+			method: 'POST',
+			success: onAddIngredientSuccess,
 			url: url,
-			method: 'POST'
 		})
 	}
 
