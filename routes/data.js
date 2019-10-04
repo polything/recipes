@@ -56,19 +56,20 @@ router.get('/pantry', (req, res) => {
 router.post('/add/ingredient', (req, res) => {
 	const _ingredient = ingredient.create(req.query)
 
-	if ( _ingredient) {
+	if (_ingredient) {
 		localDB.addIngredient(_ingredient)
 			.then(() => {
-				res.status(200)
+				res.status(200).end()
 			})
 			.catch(msg => {
 				// eslint-disable-next-line no-console
 				console.log('Tried adding ' + _ingredient.name + ' with error '
 					+ msg)
-				res.status(404)
+				res.status(404).end()
 			})
+	} else {
+		res.status(400).end()
 	}
-	res.status(400)
 })
 
 
@@ -79,18 +80,18 @@ router.post('/add', (req, res) => {
 	if (!(req.body.hasOwnProperty('recipes')
 			&& Array.isArray(req.body.recipes)
 			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
-		res.status(304).json({})
+		res.status(304).json({}).end()
 		return
 	}
 
 	localDB.add(req.body.recipes)
-		.then(() => res.status(200).json({}))
+		.then(() => res.status(200).json({}).end())
 		.catch(msg => {
 			// eslint-disable-next-line no-console
 			console.log('Tried adding ' + req.body.recipes + ' with error '
 				+ msg)
 
-			res.status(304).json({})
+			res.status(304).json({}).end()
 		})
 })
 
@@ -98,7 +99,7 @@ router.post('/add', (req, res) => {
 // Receive search request
 router.post('/', (req, res) => {
 	if (!validRequest(req)) {
-		res.status(400).json({})
+		res.status(400).json({}).end()
 		return
 	}
 
@@ -108,7 +109,7 @@ router.post('/', (req, res) => {
 	Promise.resolve([])
 		// Search local
 		.then((results) => searchDB(term, searchOptions, results, localDB.find))
-		.then((results) => res.status(200).json(results))
+		.then((results) => res.status(200).json(results).end())
 })
 
 router.get('/recipe/:name', (req, res) => {
@@ -120,12 +121,12 @@ router.get('/recipe/:name', (req, res) => {
 	localDB.find(name, opts)
 		.then(data => {
 			const ret = data.length > 0 ? data[0] : {}
-			res.status(200).json(ret)
+			res.status(200).json(ret).end()
 		})
 		.catch(msg => {
 			// eslint-disable-next-line no-console
 			console.log(msg)
-			res.status(500)
+			res.status(500).end()
 		})
 })
 
@@ -133,28 +134,29 @@ router.post('/recipe/edit', (req, res) => {
 	if (!(req.body.hasOwnProperty('recipes')
 			&& Array.isArray(req.body.recipes)
 			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
-		res.status(304).json({})
+		res.status(304).json({}).end()
 		return
 	}
 
 	localDB.update(req.body.recipes)
-		.then(() => res.status(200).json({}))
+		.then(() => res.status(200).json({}).end())
 		.catch(msg => {
 			// eslint-disable-next-line no-console
 			console.log(msg)
-			res.status(304).json({})
+			res.status(304).json({}).end()
 		})
 })
 
 router.get('/profile/createAllowed', (req, res) => {
 	res.status(200).json({
 		'allowed': config.options.allowAccountCreation
-	})
+	}).end()
 })
 
 router.post('/profile/create', (req, res, next) => {
 	if (!config.options.allowAccountCreation) {
-		return res.status(405).json({})
+		res.status(405).json({}).end()
+		return
 	}
 
 	crypto.hash(req.body.password)
@@ -170,28 +172,28 @@ router.post('/profile/create', (req, res, next) => {
 						req.login(user, (err) => {
 							if (err) return next(err)
 
-							res.status(200).json({})
+							res.status(200).json({}).end()
 						})
 					} else {
-						res.status(400).json({})
+						res.status(400).json({}).end()
 					}
 				})
 				.catch((err) => {
 					// eslint-disable-next-line no-console
 					console.log(err)
-					res.status(500).json({})
+					res.status(500).json({}).end()
 				})
 		})
 		.catch(msg => {
 			// eslint-disable-next-line no-console
 			console.log(msg)
-			return res.status(500).json({})
+			res.status(500).json({}).end()
 		})
 })
 
 router.get('/profile/logout', function(req, res) {
 	req.logout()
-	res.status(200).json({})
+	res.status(200).json({}).end()
 })
 
 module.exports = router
