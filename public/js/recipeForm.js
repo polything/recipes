@@ -1,3 +1,15 @@
+/* eslint-env browser, jquery */
+/* global getID, removeElement */
+
+function createIngredientInput() {
+	const $ret = $('#template-ingredient-input').clone()
+	const id = getID()
+	$ret.attr('id', id)
+	$ret.find('button').click(() => removeElement(id))
+	return $ret
+}
+
+// eslint-disable-next-line no-unused-vars
 function addFormIngredient(ingredient) {
 	const $elem = createIngredientInput()
 	const id = $elem.attr('id')
@@ -13,6 +25,7 @@ function addFormIngredient(ingredient) {
 	$('#recipe-form-ingredients').append($li)
 }
 
+// eslint-disable-next-line no-unused-vars
 function saveRecipe(url) {
 	const recipe = {}
 	recipe.title = $('#recipe-form-name').val()

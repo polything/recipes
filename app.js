@@ -3,6 +3,7 @@ const path = require('path')
 
 config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 	.then((configData) => {
+		// eslint-disable-next-line no-console
 		console.log(configData)
 
 		const express = require('express')
@@ -26,7 +27,6 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 
 		const rootURL = config.options.rootURL
 		const login = require('./routes/login')
-		const profile = require('./routes/profile')
 
 		app.use(express.static('public'))
 		app.use(rootURL, require('./routes/home'))
@@ -34,9 +34,12 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		app.use(path.join(rootURL, 'login'), login)
 
 		const PORT = process.env.PORT || config.options.port || 3000
+
+		// eslint-disable-next-line no-console
 		app.listen(PORT, () => console.log('Listening on port ' + PORT))
 	})
 	.catch(err => {
+		// eslint-disable-next-line no-console
 		console.log(err)
 		process.exit(1)
 	})
