@@ -17,10 +17,14 @@ const searchDB = (term, searchOptions, results, findFunc) =>
 	new Promise((resolve, _) => {
 		findFunc(term, searchOptions)
 			.then((dbResults) => {
+				// Filter dbResults in case of concurrent searchDB() calls
 				for (const dbResult of dbResults) {
-					const stored = (recipe) => recipe.title == dbResult.title
+					const isStored = (recipe) =>
+						recipe.title.toLowerCase()
+							=== dbResult.title.toLowerCase()
+
 					// Don't add to results if it's already there
-					if (!results.some(stored)) {
+					if (!results.some(isStored)) {
 						results.push(dbResult)
 					}
 				}
