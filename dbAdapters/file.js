@@ -38,27 +38,37 @@ fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => 
 	loaded = true
 })
 
-exports.find = (string, options) => new Promise((resolve, reject) => {
+exports.find = (term, options) => new Promise((resolve, reject) => {
 	if (!loaded) {
 		return reject(NOT_LOADED_MSG)
 	}
 
+	term = term.toLowerCase()
 	options = util.fillMissingOpts(options, defaultSearchOpts)
 	const results = []
 	for (const key in data.recipes) {
 		const recipe = data.recipes[key]
-		if (options.title === true
-			&& ((options.exact === true && string === recipe.title)
-				|| (options.exact === false
-					&& recipe.title.indexOf(string) !== -1))) {
 
-			results.push(recipe)
+
+		if (options.title) {
+			const title = recipe.title.toLowerCase()
+
+			if (options.exact && title === term) {
+				results.push(recipe)
+				continue
+			} else if (!options.exact && title.indexOf(term) !== -1) {
+				results.push(recipe)
+				continue
+			}
 		}
-		else if (options.ingredients === true) {
+		
+		if (options.ingredients) {
 			for (const ingredient of recipe.ingredients) {
-				if (ingredient.name.indexOf(string) !== -1) {
+				const name = ingredient.name.toLowerCase()
+
+				if (name.indexOf(term) !== -1) {
 					results.push(recipe)
-					break
+					continue
 				}
 			}
 		}
