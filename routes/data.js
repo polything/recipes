@@ -1,9 +1,10 @@
 const express = require('express')
+const passportConfig = require('../auth/passport')
 const router = express.Router()
 
 const config = require('../js/config')
 const crypto = require('../js/crypto')
-const localDB = require('../js/localDB')
+const db = require('../js/localDB')
 const util = require('../js/util')
 const ingredient = require('../js/ingredient')
 
@@ -37,7 +38,7 @@ const searchDB = (term, searchOptions, results, findFunc) =>
 
 // Receive delete request
 router.delete('/', (req, res) => {
-	if (req.query.title && localDB.delete(req.query.title)) {
+	if (req.query.title && db.delete(req.query.title)) {
 		res.status(200)
 	} else {
 		res.status(404)
@@ -46,13 +47,14 @@ router.delete('/', (req, res) => {
 
 
 // Get pantry
-router.get('/pantry', (req, res) => {
-	localDB.getPantry()
-		.then(data => {
-			res.status(200).json(data)
-		})
-		// eslint-disable-next-line no-console
-		.catch(msg => console.log(msg))
+router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
+	if (!req.user) {
+		return res.status(400).end()
+	}
+
+	const {err, pantry} = await db.getPantry(req.user)
+	if (err) { return res.status(500).json({}).end() }
+	return res.status(200).json(pantry).end()
 })
 
 
@@ -61,7 +63,7 @@ router.post('/add/ingredient', (req, res) => {
 	const _ingredient = ingredient.create(req.query)
 
 	if (_ingredient) {
-		localDB.addIngredient(_ingredient)
+		db.addIngredient(_ingredient)
 			.then(() => {
 				res.status(200).end()
 			})
@@ -77,18 +79,18 @@ router.post('/add/ingredient', (req, res) => {
 })
 
 
-// Receive add request
+// Add recipe request
 router.post('/add', (req, res) => {
 	if (!validRequest(req)) return
 
-	if (!(req.body.hasOwnProperty('recipes')
+	if (!(req.body.recipes
 			&& Array.isArray(req.body.recipes)
 			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
 		res.status(304).json({}).end()
 		return
 	}
 
-	localDB.add(req.body.recipes)
+	db.add(req.body.recipes)
 		.then(() => res.status(200).json({}).end())
 		.catch(msg => {
 			// eslint-disable-next-line no-console
@@ -112,7 +114,7 @@ router.post('/', (req, res) => {
 
 	Promise.resolve([])
 		// Search local
-		.then((results) => searchDB(term, searchOptions, results, localDB.find))
+		.then((results) => searchDB(term, searchOptions, results, db.find))
 		.then((results) => res.status(200).json(results).end())
 })
 
@@ -122,7 +124,7 @@ router.get('/recipe/:name', (req, res) => {
 		title: true,
 		exact: true,
 	}
-	localDB.find(name, opts)
+	db.find(name, opts)
 		.then(data => {
 			const ret = data.length > 0 ? data[0] : {}
 			res.status(200).json(ret).end()
@@ -135,14 +137,14 @@ router.get('/recipe/:name', (req, res) => {
 })
 
 router.post('/recipe/edit', (req, res) => {
-	if (!(req.body.hasOwnProperty('recipes')
+	if (!(req.body.recipes
 			&& Array.isArray(req.body.recipes)
 			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
 		res.status(304).json({}).end()
 		return
 	}
 
-	localDB.update(req.body.recipes)
+	db.update(req.body.recipes)
 		.then(() => res.status(200).json({}).end())
 		.catch(msg => {
 			// eslint-disable-next-line no-console
@@ -167,10 +169,12 @@ router.post('/profile/create', (req, res, next) => {
 		.then(hash => {
 			const user = {
 				username: req.body.username,
-				password: hash
+				password: hash,
+				pantry: {},
+				recipes: [],
 			}
 
-			localDB.addUser(user)
+			db.addUser(user)
 				.then((success) => {
 					if (success) {
 						req.login(user, (err) => {

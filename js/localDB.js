@@ -21,10 +21,10 @@ exports.addIngredient = ingredient => db.addIngredient(ingredient)
 
 exports.delete = title => db.delete(title)
 
-exports.getPantry = () => db.getPantry()
+exports.getPantry = async (user) => await db.getPantry(user)
 
 exports.update = recipes => db.update(recipes)
 
-exports.findUser = username => db.findUser(username)
+exports.findUser = async (username) => await db.findUser(username)
 
 exports.addUser = data => db.addUser(data)

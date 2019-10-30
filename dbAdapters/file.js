@@ -24,17 +24,8 @@ fs.readFile(config.options.localDB.options.filePath, 'utf8', (err, contents) => 
 
 	data = JSON.parse(contents)
 
-	if (!data.hasOwnProperty('recipes')) {
-		data.recipes = []
-	}
-
-	if (!data.hasOwnProperty('pantry')) {
-		data.pantry = {}
-	}
-
-	if (!data.hasOwnProperty('users')) {
-		data.users = {}
-	}
+	data.recipes = data.recipes || []
+	data.users = data.users || {}
 	loaded = true
 })
 
@@ -48,7 +39,6 @@ exports.find = (term, options) => new Promise((resolve, reject) => {
 	const results = []
 	for (const key in data.recipes) {
 		const recipe = data.recipes[key]
-
 
 		if (options.title) {
 			const title = recipe.title.toLowerCase()
@@ -113,7 +103,7 @@ exports.addIngredient = ingredient => new Promise((resolve, reject) => {
 		return reject(NOT_LOADED_MSG)
 	}
 
-	if (!data.pantry.hasOwnProperty(ingredient.name)) {
+	if (!data.pantry[ingredient.name]) {
 		data.pantry[ingredient.name] = ingredient
 		fs.writeFileSync(config.options.localDB.options.filePath,
 			JSON.stringify(data))
@@ -136,25 +126,38 @@ exports.delete = (title) => new Promise((resolve, reject) => {
 	resolve()
 })
 
-exports.getPantry = () => new Promise((resolve, reject) => {
+exports.getPantry = async (user) => {
 	if (!loaded) {
-		return reject(NOT_LOADED_MSG)
+		return {
+			err: NOT_LOADED_MSG,
+			pantry: null,
+		}
 	}
 
 	const results = {}
-	for (const key in data.pantry) {
-		results[key] = data.pantry[key]
+	const pantry = user.pantry
+	for (const key in pantry) {
+		results[key] = pantry[key]
 	}
-	resolve(results)
-})
+	return {
+		err: null,
+		'pantry': results,
+	}
+}
 
-exports.findUser = username => new Promise((resolve, reject) => {
+exports.findUser = async (username) => {
 	if (!loaded) {
-		return reject(NOT_LOADED_MSG)
+		return {
+			err: NOT_LOADED_MSG,
+			user: null,
+		}
 	}
 
-	resolve(data.users[username])
-})
+	return {
+		err: null,
+		user: data.users[username],
+	}
+}
 
 exports.addUser = userData => new Promise((resolve, reject) => {
 	if (!loaded) {
