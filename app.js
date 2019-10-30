@@ -12,7 +12,8 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		const passport = require('passport')
 		const session = require('express-session')
 
-		require('./auth').init()
+		// Unused import but needs to configure passport prior to initializtion
+		require('./auth/passport')
 
 		// Body-handling middleware
 		app.use(express.json())
@@ -32,6 +33,8 @@ config.load(process.env.RECIPE_CONFIG || __dirname + '/config.json')
 		app.use(rootURL, require('./routes/home'))
 		app.use(path.join(rootURL, 'data'), require('./routes/data'))
 		app.use(path.join(rootURL, 'login'), login)
+
+		app.disable('x-powered-by')
 
 		const PORT = process.env.PORT || config.options.port || 3000
 

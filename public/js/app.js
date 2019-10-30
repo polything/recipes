@@ -246,7 +246,7 @@
 	}
 
 	const onAddIngredientSuccess = (_, _2, _3) => {
-		initPantry()
+		getPantry()
 	}
 
 	// eslint-disable-next-line no-unused-vars
@@ -359,10 +359,9 @@
 	const onLoginSuccess = (data, _, _2) => {
 		// eslint-disable-next-line no-console
 		console.log('Logged in')
-		// eslint-disable-next-line no-console
-		console.log(data)
 		updateProfile(data)
 		switchProfile('view')
+		getPantry()
 	}
 
 	// eslint-disable-next-line no-unused-vars
@@ -386,6 +385,7 @@
 		console.log(data)
 		updateProfile(data)
 		switchProfile('prompt')
+		filterPantryTable('')
 	}
 
 	// eslint-disable-next-line no-unused-vars
@@ -419,42 +419,49 @@
 		})
 	}
 
-	const parsePantry = (data, _, _2) => {
-		pantry = data
-	}
-
 	// eslint-disable-next-line no-unused-vars
 	const getPantry = () => {
 		$.ajax({
-			error: onError,
+			error: (_, _2, _3) => {
+				pantry = {}
+				filterPantryTable('')
+			},
 			method: 'GET',
-			success: parsePantry,
+			success: (data, _, _2) => {
+				pantry = data
+				filterPantryTable('')
+			},
 			url: DATA_URL + '/pantry',
 		})
 	}
 
-	const filterTable = (val) => {
+	// Filter the table to ingredients whose names match the term.
+	// @param term{String} The term to filter on.
+	const filterPantryTable = (term) => {
 		const table = $('#filterTable')
 		table.html('') // Clear contents
 
 		for (const key in pantry) {
-			const item = pantry[key]
-			if (val !== '' && item.name.indexOf(val) === -1) {
+			const ingredient = pantry[key]
+
+			// Filter out the ingredient if term is given and term is not a
+			// substring of ingredient name
+			if (term !== '' && ingredient.name.indexOf(term) === -1) {
 				continue
 			}
 
 			const row = $('<div class="row"></div>')
 
 			const name = $('<div class="col"></div>')
-			name.html(item.name)
+			name.html(ingredient.name)
 			row.append(name)
 
 			const amount = $('<div class="col"></div>')
-			amount.html(item.amount)
+			amount.html(ingredient.amount)
 			row.append(amount)
 
 			const unit = $('<div class="col"></div>')
-			unit.html(item.unit)
+			unit.html(ingredient.unit)
 			row.append(unit)
 
 			table.append(row)
@@ -529,18 +536,6 @@
 		$('#navbar-' + page).toggleClass('active')
 	}
 
-	const initPantry = () => {
-		$.ajax({
-			error: onError,
-			method: 'GET',
-			success: (data, _, _2) => {
-				pantry = data
-				filterTable('')
-			},
-			url: DATA_URL + '/pantry'
-		})
-	}
-
 	const initProfile = () => {
 		$.ajax({
 			error: onError,
@@ -572,10 +567,10 @@
 		widget.backToRecipeView = backToRecipeView
 		widget.createAccount = createAccount
 		widget.editRecipe = editRecipe
-		widget.filterTable = filterTable
+		widget.filterPantryTable = filterPantryTable
+		widget.getPantry = getPantry
 		widget.hideRecipeView = hideRecipeView
 		widget.initAddPage = initAddPage
-		widget.initPantry = initPantry
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
 		widget.login = login
@@ -597,6 +592,6 @@
 $(() => {
 	app.initAddPage()
 	app.initRecipes()
-	app.initPantry()
+	app.getPantry()
 	app.initProfile()
 })
