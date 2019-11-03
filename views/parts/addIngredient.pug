@@ -2,15 +2,15 @@ div(class='row')
 	div(class='col')
 		div
 			label(for='name') Name
-				input(type='text' name='name' id='name' required)
+				input(type='text' name='name' id='ingredient-name' required)
 
 		div
 			label(for='amount') Amount
-				input(type='number' name='amount' id='amount' required)
+				input(type='number' name='amount' id='ingredient-amount' required)
 
 		div
 			label(for='unit') Unit
-				select(name='unit' id='unit')
+				select(name='unit' id='ingredient-unit')
 
 					-
 						const units = ['cup', 'floz', 'g', 'gal', 'kg', 'lb',

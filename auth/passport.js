@@ -1,29 +1,28 @@
-const bcrypt = require('bcrypt')
 const passport = require('passport')
 const { Strategy: LocalStrategy } = require('passport-local')
 
-const db = require('../js/localDB')
+const User = require('../models/User')
 
 passport.serializeUser((user, done) => {
-	done(null, user.username)
+	done(null, user.name)
 })
 
-passport.deserializeUser(async (username, done) => {
-	const {err, user} = await db.findUser(username, done)
-	return done(err, user)
+passport.deserializeUser((name, done) => {
+	User.findOne({name: name}, (err, user) => {
+		done(err, user)
+	})
 })
 
 // Sign in using username and password
-passport.use(new LocalStrategy(async (username, password, done) => {
-	const {err, user} = await db.findUser(username)
-	if (err) return done(err)
-	if (!user) return done(null, false)
+passport.use(new LocalStrategy(async (name, password, done) => {
+	const user = await User.findOne({ name: name })
+	if (!user) { return done(null, false, {msg: `User ${name} not found` }) }
 
-	bcrypt.compare(password, user.password, (err, isValid) => {
-		if (err) return done(err)
-		if (!isValid) return done(null, false)
+	user.comparePassword(password, (err, isMatch) => {
+		if (err) { return done(err) }
+		if (isMatch) { return done(null, user) }
 
-		return done(null, user)
+		return done(null, false, { msg: 'Invalid name or password' })
 	})
 }))
 

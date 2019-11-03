@@ -3,12 +3,10 @@ const path = require('path')
 const pug = require('pug')
 const router = express.Router()
 
-const config = require('../js/config.js')
-
-const cssURL = path.join(config.options.rootURL, 'css')
-const jsURL = path.join(config.options.rootURL, 'js')
-const dataURL = path.join(config.options.rootURL, 'data')
-const recipeURL = path.join(config.options.rootURL, 'recipe')
+const cssURL = path.join(process.env.ROOT_URL, 'css')
+const jsURL = path.join(process.env.ROOT_URL, 'js')
+const dataURL = path.join(process.env.ROOT_URL, 'data')
+const recipeURL = path.join(process.env.ROOT_URL, 'recipe')
 
 router.get('/', (req, res) => {
 	res.send(pug.renderFile('./views/add.pug', {

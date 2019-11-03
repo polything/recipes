@@ -73,7 +73,7 @@
 	// eslint-disable-next-line no-unused-vars
 	const saveRecipe = (url) => {
 		const recipe = {}
-		recipe.title = $('#recipe-form-name').val()
+		recipe.name = $('#recipe-form-name').val()
 		recipe.ingredients = []
 
 		$('#recipe-form-ingredients').find('li').each((idx, elem) => {
@@ -108,7 +108,7 @@
 	}
 
 	const formatRecipeEdit = (recipe) => {
-		$('#recipe-form-name').val(recipe.title)
+		$('#recipe-form-name').val(recipe.name)
 
 		$('#recipe-form-ingredients').html('')
 		recipe.ingredients.forEach(ingredient => {
@@ -133,19 +133,19 @@
 	const updateRecipeList = (recipes) => {
 		$('#searchResults').html('') // Clear contents
 		recipes.forEach((recipe) => {
-			// Recipe title
+			// Recipe name
 			const $link = $('<a></a>')
 			$link.attr('href', '#')
-			$link.click(() => showRecipeView(recipe.title))
-			$link.html(recipe.title)
+			$link.click(() => showRecipeView(recipe.name))
+			$link.html(recipe.name)
 
-			const $titleCol = $('<div></div>')
-			$titleCol.addClass('col-auto')
-			$titleCol.append($link)
+			const $nameCol = $('<div></div>')
+			$nameCol.addClass('col-auto')
+			$nameCol.append($link)
 
 			// Delete button
 			const $butt = $('<button>X</button>')
-			$butt.click('/data?title=' + recipe.title, deleteFunc)
+			$butt.click('/data?name=' + recipe.name, deleteFunc)
 
 			const $deleteCol = $('<div></div>')
 			$deleteCol.addClass('col-1')
@@ -153,7 +153,7 @@
 
 			const $row = $('<div></div>')
 			$row.addClass('row justify-content-between')
-			$row.append($titleCol)
+			$row.append($nameCol)
 			$row.append($deleteCol)
 
 			$('#searchResults').append($row)
@@ -163,7 +163,7 @@
 	// eslint-disable-next-line no-unused-vars
 	const queryDB = (term) => new Promise((resolve, reject) => {
 		const body = {
-			'options': {'ingredients': true, 'title': true},
+			'options': {'ingredients': true, 'name': true},
 			'term': term
 		}
 
@@ -202,7 +202,7 @@
 		if (term === '') {
 			updateRecipeList(defaultRecipes)
 		} else {
-			const opts = {'ingredients': true, 'title': true}
+			const opts = {'ingredients': true, 'name': true}
 			searchForRecipes(term, opts)
 		}
 	}
@@ -215,7 +215,7 @@
 	// eslint-disable-next-line no-unused-vars
 	const submitRecipe = () => {
 		const recipe = {}
-		recipe.title = $('#title').val()
+		recipe.name = $('#name').val()
 		recipe.ingredients = []
 
 		$('#ingredients').find('li').each((idx, elem) => {
@@ -252,11 +252,11 @@
 	// eslint-disable-next-line no-unused-vars
 	const submitIngredient = () => {
 		const ingredient = {}
-		ingredient.name = $('#name').val()
-		ingredient.amount = $('#amount').val()
-		ingredient.unit = $('#unit').val()
+		ingredient.name = $('#ingredient-name').val()
+		ingredient.amount = $('#ingredient-amount').val()
+		ingredient.unit = $('#ingredient-unit').val()
 
-		const url = DATA_URL + '/add/ingredient?name=' + ingredient.name
+		const url = DATA_URL + '/pantry?name=' + ingredient.name
 			+ '&amount=' + ingredient.amount
 			+ '&unit=' + ingredient.unit
 
@@ -497,14 +497,14 @@
 		$('#view-recipe').addClass('d-none')
 		$('#view-search').removeClass('d-none')
 		formatRecipeView({
-			title: 'Loading recipe...',
+			name: 'Loading recipe...',
 			ingredients: [],
 			directions: [],
 		})
 	}
 
 	const formatRecipeView = (recipe) => {
-		$('#recipe-name').html(recipe.title)
+		$('#recipe-name').html(recipe.name)
 
 		// Ingredients
 		$('#recipe-ingredients').html('') // Clear contents
@@ -554,7 +554,7 @@
 
 	const initRecipes = () => {
 		const term = 'a'
-		const opts = {'ingredients': true, 'title': true}
+		const opts = {'ingredients': true, 'name': true}
 		searchForRecipes(term, opts)
 	}
 
