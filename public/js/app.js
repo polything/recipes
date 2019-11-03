@@ -10,26 +10,6 @@
 	// eslint-disable-next-line no-unused-vars
 	let currentRecipe = {}
 
-	// Send JSON with method POST and call the callback when the response arrives
-	// eslint-disable-next-line no-unused-vars
-	const asyncPost = (url, data, callback) => {
-		const xhttp = new XMLHttpRequest()
-		xhttp.open('POST', url, true)
-		xhttp.setRequestHeader('Content-Type', 'application/json')
-		xhttp.onreadystatechange = () => {
-			if (this.readyState == XMLHttpRequest.DONE) {
-				if (this.status == 200) {
-					callback(null, JSON.parse(this.responseText))
-				} else {
-					callback({
-						'status': this.status
-					}, null)
-				}
-			}
-		}
-		xhttp.send(JSON.stringify(data))
-	}
-
 	const sendRecipeRequest = (term, opts) => {
 		const body = JSON.stringify({
 			'options': opts,
@@ -176,7 +156,7 @@
 	const deleteRecipe = (name) => {
 		$.ajax({
 			method: 'DELETE',
-			url: `/data?name=${name}`,
+			url: `${DATA_URL}?name=${name}`,
 		})
 	}
 
@@ -228,14 +208,10 @@
 
 		const recipes = {'recipes': [recipe]}
 
-		asyncPost(DATA_URL + '/add', recipes, (err, _) => {
-			if (err) {
-				// eslint-disable-next-line no-console
-				console.log(err)
-			} else {
-				// eslint-disable-next-line no-console
-				console.log('Data added')
-			}
+		$.ajax({
+			data: recipes,
+			method: 'POST',
+			url: `${DATA_URL}/add`,
 		})
 	}
 
