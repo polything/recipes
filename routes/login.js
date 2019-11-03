@@ -2,16 +2,18 @@ const express = require('express')
 const router = express.Router()
 
 const passport = require('passport')
-const db = require('../js/localDB')
 
-router.post('/', passport.authenticate('local'), function(req, res) {
-	db.findUser(req.body.username)
-		.then(userInfo => {
-			const data = {
-				username: userInfo.username
-			}
-			res.status(200).json(data)
+router.post('/', passport.authenticate('local'), (req, res, next) => {
+	passport.authenticate('local', (err, user, _) => {
+		if (err) { return next(err) }
+		if (!user) {
+			return res.status(400).json({}).end()
+		}
+		req.logIn(user, (err) => {
+			if (err) { return next(err) }
+			return res.status(200).json({ username: user.name }).end()
 		})
+	})(req, res, next)
 })
 
 module.exports = router

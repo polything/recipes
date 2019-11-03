@@ -2,206 +2,195 @@ const express = require('express')
 const passportConfig = require('../auth/passport')
 const router = express.Router()
 
-const config = require('../js/config')
-const crypto = require('../js/crypto')
-const db = require('../js/localDB')
 const util = require('../js/util')
-const ingredient = require('../js/ingredient')
 
-const REQUEST_TIMEOUT_MS = 500
-
-const validRequest = (req) => {
-	return req.body !== undefined && req.body !== null
-}
-
-const searchDB = (term, searchOptions, results, findFunc) =>
-	new Promise((resolve, _) => {
-		findFunc(term, searchOptions)
-			.then((dbResults) => {
-				// Filter dbResults in case of concurrent searchDB() calls
-				for (const dbResult of dbResults) {
-					const isStored = (recipe) =>
-						recipe.title.toLowerCase()
-							=== dbResult.title.toLowerCase()
-
-					// Don't add to results if it's already there
-					if (!results.some(isStored)) {
-						results.push(dbResult)
-					}
-				}
-
-				resolve(results)
-			})
-		setTimeout(resolve, REQUEST_TIMEOUT_MS, results)
-	})
+const Recipe = require('../models/Recipe')
+const User = require('../models/User')
 
 
 // Receive delete request
-router.delete('/', (req, res) => {
-	if (req.query.title && db.delete(req.query.title)) {
-		res.status(200)
-	} else {
-		res.status(404)
-	}
+router.delete('/', passportConfig.isAuthenticated, async (req, res) => {
+	if (!req.user) { return res.status(400).json({}).end() }
+
+	const recipe = await Recipe.findOne({ name: req.query.name }).lean()
+	if (!recipe) { return res.status(400).json({}).end() }
+
+	let result = await User.updateOne(
+		{ _id: req.user._id },
+		{ $pull: { recipes: recipe._id } },
+	)
+	if (!result) { return res.status(400).json({}).end() }
+
+	result = await Recipe.deleteOne({_id: recipe._id})
+	if (!result) { return res.status(400).json({}).end() }
+
+	return res.status(200).json({}).end()
 })
 
 
 // Get pantry
 router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
-	if (!req.user) {
-		return res.status(400).end()
-	}
-
-	const {err, pantry} = await db.getPantry(req.user)
-	if (err) { return res.status(500).json({}).end() }
-	return res.status(200).json(pantry).end()
+	if (!req.user) { return res.status(400).end() }
+	return res.status(200).json(req.user.pantry).end()
 })
 
 
-// Add pantry item
-router.post('/add/ingredient', (req, res) => {
-	const _ingredient = ingredient.create(req.query)
+// POST Add pantry item
+router.post('/pantry', passportConfig.isAuthenticated, async (req, res) => {
+	if (!req.user) { return res.status(400).end() }
 
-	if (_ingredient) {
-		db.addIngredient(_ingredient)
-			.then(() => {
-				res.status(200).end()
-			})
-			.catch(msg => {
-				// eslint-disable-next-line no-console
-				console.log('Tried adding ' + _ingredient.name + ' with error '
-					+ msg)
-				res.status(404).end()
-			})
-	} else {
-		res.status(400).end()
+	const data = {
+		amount: Number(req.query.amount),
+		name: req.query.name,
+		unit: req.query.unit,
 	}
+
+	if ((req.user.pantry.filter(v => v.name === data.name)).length > 0) {
+		return res.status(400).json({
+			msg: `Pantry already has ${data.name}`,
+		}).end()
+	}
+
+	const result = await User.findOneAndUpdate({name: req.user.name}, {
+		$push: { pantry: data }
+	})
+
+	if (!result) { return res.status(400).json({}).end() }
+
+	return res.status(200).json({}).end()
 })
 
 
-// Add recipe request
-router.post('/add', (req, res) => {
-	if (!validRequest(req)) return
-
-	if (!(req.body.recipes
-			&& Array.isArray(req.body.recipes)
-			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
-		res.status(304).json({}).end()
-		return
+// POST recipes
+router.post('/add', passportConfig.isAuthenticated, async (req, res) => {
+	if (!(req.user && Array.isArray(req.body.recipes))) {
+		return res.status(400).json({}).end()
 	}
 
-	db.add(req.body.recipes)
-		.then(() => res.status(200).json({}).end())
-		.catch(msg => {
-			// eslint-disable-next-line no-console
-			console.log('Tried adding ' + req.body.recipes + ' with error '
-				+ msg)
+	for (const recipe of req.body.recipes) {
+		// Check if a recipe by that name already exists
+		const foundRecipe = await Recipe.findOne({ name: recipe.name })
+		if (foundRecipe) {
+			return res.status(400).json({
+				msg: `Recipe with name ${recipe.name} exists`,
+			}).end()
+		}
 
-			res.status(304).json({}).end()
+		const ingredients = []
+		for (const ingredient of recipe.ingredients) {
+			const newIngredient = {
+				amount: Number(ingredient.amount),
+				name: ingredient.name,
+				note: ingredient.note || '',
+				prep: ingredient.prep || '',
+				unit: ingredient.unit,
+			}
+			ingredients.push(newIngredient)
+		}
+
+		const newRecipe = new Recipe({
+			directions: recipe.directions,
+			ingredients: ingredients,
+			name: recipe.name,
 		})
+
+		const err = newRecipe.validateSync()
+		if (err) { return res.status(400).json({}).end() }
+
+		try {
+			await newRecipe.save()
+		} catch (err) {
+			return res.status(500).json({}).end()
+		}
+
+		const result = await User.findByIdAndUpdate(req.user._id, {
+			$push: { recipes: newRecipe._id}
+		})
+
+		if (!result) { return res.status(400).json({}).end() }
+
+		return res.status(200).json({}).end()
+	}
 })
 
 
 // Receive search request
-router.post('/', (req, res) => {
-	if (!validRequest(req)) {
+router.post('/', async (req, res) => {
+	const term = req.body.term
+
+	const recipes = await Recipe.find({
+		$or: [
+			{ name: new RegExp(term, 'i') },
+			{ 'ingredients.name': new RegExp(term, 'i') },
+		]
+	}).lean()
+
+	return res.status(200).json(recipes).end()
+})
+
+router.get('/recipe/:name', async (req, res) => {
+	const name = req.params.name
+	const recipe = await Recipe.findOne({ name: name }).lean()
+	if (!recipe) { return res.status(400).json({ msg: `Recipe ${name} not found` }).end() }
+
+	return res.status(200).json(recipe).end()
+})
+
+router.post('/recipe/edit', async (req, res) => {
+	if (!(req.body.recipes
+			&& Array.isArray(req.body.recipes)
+			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
 		res.status(400).json({}).end()
 		return
 	}
 
-	const term = req.body.term
-	const searchOptions = req.body.options
-
-	Promise.resolve([])
-		// Search local
-		.then((results) => searchDB(term, searchOptions, results, db.find))
-		.then((results) => res.status(200).json(results).end())
-})
-
-router.get('/recipe/:name', (req, res) => {
-	const name = req.params.name
-	const opts = {
-		title: true,
-		exact: true,
-	}
-	db.find(name, opts)
-		.then(data => {
-			const ret = data.length > 0 ? data[0] : {}
-			res.status(200).json(ret).end()
-		})
-		.catch(msg => {
-			// eslint-disable-next-line no-console
-			console.log(msg)
-			res.status(500).end()
-		})
-})
-
-router.post('/recipe/edit', (req, res) => {
-	if (!(req.body.recipes
-			&& Array.isArray(req.body.recipes)
-			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
-		res.status(304).json({}).end()
-		return
+	const errs = []
+	for (const recipe of req.body.recipes) {
+		const result = await Recipe.replaceOne({ name: recipe.name }, recipe)
+		if (!result) {
+			errs.push({ msg: `Could not update ${recipe.name}` })
+		}
 	}
 
-	db.update(req.body.recipes)
-		.then(() => res.status(200).json({}).end())
-		.catch(msg => {
-			// eslint-disable-next-line no-console
-			console.log(msg)
-			res.status(304).json({}).end()
-		})
+	if (errs.length > 0) { return res.status(400).json(errs).end() }
+
+	return res.status(200).json({}).end()
 })
 
 router.get('/profile/createAllowed', (req, res) => {
 	res.status(200).json({
-		'allowed': config.options.allowAccountCreation
+		'allowed': process.env.ALLOW_ACCOUNT_CREATION,
 	}).end()
 })
 
-router.post('/profile/create', (req, res, next) => {
-	if (!config.options.allowAccountCreation) {
-		res.status(405).json({}).end()
-		return
+router.post('/profile/create', async (req, res, next) => {
+	if (!process.env.ALLOW_ACCOUNT_CREATION) {
+		return res.status(400).end({ msg: 'Account creation is not allowed' })
 	}
 
-	crypto.hash(req.body.password)
-		.then(hash => {
-			const user = {
-				username: req.body.username,
-				password: hash,
-				pantry: {},
-				recipes: [],
+	if (await User.findOne({ name: req.body.username })) {
+		return res.status(400).json({ msg: 'Name already exists' }).end()
+	}
+
+	const user = new User({
+		name: req.body.username,
+		password: req.body.password,
+	})
+	
+	user.save((err) => {
+		if (err) { return next(err) }
+		req.logIn(user, (err) => {
+			if (err) {
+				return next(err)
 			}
-
-			db.addUser(user)
-				.then((success) => {
-					if (success) {
-						req.login(user, (err) => {
-							if (err) return next(err)
-
-							res.status(200).json({}).end()
-						})
-					} else {
-						res.status(400).json({}).end()
-					}
-				})
-				.catch((err) => {
-					// eslint-disable-next-line no-console
-					console.log(err)
-					res.status(500).json({}).end()
-				})
+			res.redirect('/')
 		})
-		.catch(msg => {
-			// eslint-disable-next-line no-console
-			console.log(msg)
-			res.status(500).json({}).end()
-		})
+	})
 })
 
 router.get('/profile/logout', function(req, res) {
 	req.logout()
-	res.status(200).json({}).end()
+	return res.status(200).end()
 })
 
 module.exports = router
