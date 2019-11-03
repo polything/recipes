@@ -1,18 +1,17 @@
-div(id='view-search')
-	div(class='row')
-		div(class='col')
-			label(for='search') Search
-			input(
-				id='search'
-				class='form-control'
-				type='text'
-				onkeyup='app.search(event, this, (val) => app.onRecipeSearch(val))'
-			)
+#view-search
+	.row: .col
+		label(for='search') Search
+		input#search.form-control(
+			type='text'
+			onkeyup='app.search(event, this, (val) => app.onRecipeSearch(val))'
+		)
 
-	div(class='row mt-3')
-		div(class='col')
-			table
-				tbody(id='searchResults')
+	.mt-3#searchResults
 
-div(id='view-recipe' class='d-none')
+	#template-search-result.d-none: .row
+		.col: a
+		.col-auto: button.btn.btn-danger(type=button) X
+		.col-auto.px-0: button.btn.btn-success.d-none(type=button) Confirm
+
+#view-recipe.d-none
 	include recipe
