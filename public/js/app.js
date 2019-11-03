@@ -70,7 +70,6 @@
 		$('#recipe-form-ingredients').append($li)
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const saveRecipe = (url) => {
 		const recipe = {}
 		recipe.name = $('#recipe-form-name').val()
@@ -99,7 +98,6 @@
 		})
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const editRecipe = () => {
 		switchPage('edit-recipe')
 		$('#navbar').addClass('d-none')
@@ -123,63 +121,62 @@
 		$('#navbar').removeClass('d-none')
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const saveRecipeEdit = () => {
 		backToRecipeView()
 
 		saveRecipe(DATA_URL + '/recipe/edit')
 	}
 
+	const onDeleteRecipeClick = (id) => {
+		$(`#${id}-confirm`).removeClass('d-none')
+		// Remove existing click events so they don't stack
+		$(`#${id}-delete`).off()
+		$(`#${id}-delete`).click(() => onDeleteRecipeCancelClick(id))
+	}
+
+	const onDeleteRecipeCancelClick = (id) => {
+		$(`#${id}-confirm`).addClass('d-none')
+		// Remove existing click events so they don't stack
+		$(`#${id}-delete`).off()
+		$(`#${id}-delete`).click(() => onDeleteRecipeClick(id))
+	}
+
+	const createSearchResult = (name) => {
+		const $ret = $('#template-search-result').clone()
+		$ret.removeClass('d-none')
+
+		const id = getID()
+		$ret.attr('id', id)
+
+		const $buttons = $ret.find('button')
+		const $deleteButt = $buttons[0]
+		const $confirmButt = $buttons[1]
+		$($deleteButt).attr('id', `${id}-delete`)
+		$($confirmButt).attr('id', `${id}-confirm`)
+
+		$($confirmButt).click(() => deleteRecipe(name))
+
+		// Show the confirm button when clicked
+		$($deleteButt).click(() => onDeleteRecipeClick(id))
+
+		const $link = $ret.find('a')
+		$link.click(() => showRecipeView(name))
+		$link.html(name)
+
+		return $ret
+	}
+
 	const updateRecipeList = (recipes) => {
 		$('#searchResults').html('') // Clear contents
 		recipes.forEach((recipe) => {
-			// Recipe name
-			const $link = $('<a></a>')
-			$link.attr('href', '#')
-			$link.click(() => showRecipeView(recipe.name))
-			$link.html(recipe.name)
-
-			const $nameCol = $('<div></div>')
-			$nameCol.addClass('col-auto')
-			$nameCol.append($link)
-
-			// Delete button
-			const $butt = $('<button>X</button>')
-			$butt.click('/data?name=' + recipe.name, deleteFunc)
-
-			const $deleteCol = $('<div></div>')
-			$deleteCol.addClass('col-1')
-			$deleteCol.append($butt)
-
-			const $row = $('<div></div>')
-			$row.addClass('row justify-content-between')
-			$row.append($nameCol)
-			$row.append($deleteCol)
-
-			$('#searchResults').append($row)
+			$('#searchResults').append(createSearchResult(recipe.name))
 		})
 	}
 
-	// eslint-disable-next-line no-unused-vars
-	const queryDB = (term) => new Promise((resolve, reject) => {
-		const body = {
-			'options': {'ingredients': true, 'name': true},
-			'term': term
-		}
-
-		asyncPost(DATA_URL, body, (err, data) => {
-			if (err) {
-				reject(err)
-			} else {
-				resolve(data)
-			}
-		})
-	})
-
-	const deleteFunc = (event) => {
+	const deleteRecipe = (name) => {
 		$.ajax({
-			url: event.data,
-			method: 'DELETE'
+			method: 'DELETE',
+			url: `/data?name=${name}`,
 		})
 	}
 
@@ -197,7 +194,6 @@
 			})
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const onRecipeSearch = (term) => {
 		if (term === '') {
 			updateRecipeList(defaultRecipes)
@@ -207,12 +203,10 @@
 		}
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const search = (event, elem, callback) => {
 		callback(elem.value)
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const submitRecipe = () => {
 		const recipe = {}
 		recipe.name = $('#name').val()
@@ -249,7 +243,6 @@
 		getPantry()
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const submitIngredient = () => {
 		const ingredient = {}
 		ingredient.name = $('#ingredient-name').val()
@@ -272,7 +265,6 @@
 		return ('' + Math.random()).slice(2)
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const removeElement = (id) => {
 		$('#' + id).remove()
 	}
@@ -328,7 +320,6 @@
 		addIngredientInput()
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const switchProfilePrompt = (name) => {
 		$('.page-profile-prompt').addClass('d-none')
 		$('#profile-prompt-' + name).removeClass('d-none')
@@ -336,7 +327,6 @@
 		$('#profile-prompt-navbar-' + name).addClass('active')
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const onError = (_, statusStr, errStr) => {
 		// eslint-disable-next-line no-console
 		console.log(statusStr)
@@ -364,7 +354,6 @@
 		getPantry()
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const login = () => {
 		$.ajax({
 			error: onError,
@@ -388,7 +377,6 @@
 		filterPantryTable('')
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const logout = () => {
 		$.ajax({
 			error: onError,
@@ -405,7 +393,6 @@
 		console.log(data)
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const createAccount = () => {
 		$.ajax({
 			error: onError,
@@ -419,7 +406,6 @@
 		})
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const getPantry = () => {
 		$.ajax({
 			error: (_, _2, _3) => {
@@ -492,7 +478,6 @@
 		})
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const hideRecipeView = () => {
 		$('#view-recipe').addClass('d-none')
 		$('#view-search').removeClass('d-none')
@@ -528,7 +513,6 @@
 		})
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const switchPage = (page) => {
 		$('.page').addClass('d-none')
 		$('#page-' + page).removeClass('d-none')
