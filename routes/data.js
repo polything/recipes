@@ -6,10 +6,8 @@ const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
 
-// Receive delete request
+// Delete a recipe
 router.delete('/', passportConfig.isAuthenticated, async (req, res) => {
-	if (!req.user) { return res.status(400).json({}).end() }
-
 	const recipe = await Recipe.findOne({ name: req.query.name }).lean()
 	if (!recipe) { return res.status(400).json({}).end() }
 
