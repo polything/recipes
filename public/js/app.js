@@ -136,18 +136,18 @@
 		saveRecipe(`${DATA_URL}/recipe/edit`)
 	}
 
-	const onDeleteRecipeClick = (id) => {
+	const onRecipeDeleteClick = (id) => {
 		$(`#${id}-confirm`).removeClass('d-none')
 		// Remove existing click events so they don't stack
 		$(`#${id}-delete`).off()
-		$(`#${id}-delete`).click(() => onDeleteRecipeCancelClick(id))
+		$(`#${id}-delete`).click(() => onRecipeDeleteCancelClick(id))
 	}
 
-	const onDeleteRecipeCancelClick = (id) => {
+	const onRecipeDeleteCancelClick = (id) => {
 		$(`#${id}-confirm`).addClass('d-none')
 		// Remove existing click events so they don't stack
 		$(`#${id}-delete`).off()
-		$(`#${id}-delete`).click(() => onDeleteRecipeClick(id))
+		$(`#${id}-delete`).click(() => onRecipeDeleteClick(id))
 	}
 
 	const createSearchResult = (name) => {
@@ -163,10 +163,14 @@
 		$($deleteButt).attr('id', `${id}-delete`)
 		$($confirmButt).attr('id', `${id}-confirm`)
 
-		$($confirmButt).click(() => deleteRecipe(name))
+		// Delete the recipe on confirm
+		$($confirmButt).click(() => {
+			const url = `${DATA_URL}?name=${name}`
+			sendAjax('DELETE', {}, url, initRecipes, onError)
+		})
 
 		// Show the confirm button when clicked
-		$($deleteButt).click(() => onDeleteRecipeClick(id))
+		$($deleteButt).click(() => onRecipeDeleteClick(id))
 
 		const $link = $ret.find('a')
 		$link.click(() => showRecipeView(name))
@@ -179,13 +183,6 @@
 		$('#searchResults').html('') // Clear contents
 		recipes.forEach((recipe) => {
 			$('#searchResults').append(createSearchResult(recipe.name))
-		})
-	}
-
-	const deleteRecipe = (name) => {
-		$.ajax({
-			method: 'DELETE',
-			url: `${DATA_URL}?name=${name}`,
 		})
 	}
 
@@ -221,7 +218,7 @@
 		hideFormInvalid('#add-recipe-form-name')
 	}
 
-	const onAddRecipeError = (data, _, _2) => {
+	const onRecipeAddError = (data, _, _2) => {
 		resetAddRecipeInvalidForms()
 		const errs = data.responseJSON
 		if (errs.includes('name-exists')) {
@@ -229,13 +226,14 @@
 		}
 	}
 
-	const onAddRecipeSuccess = () => {
+	const onRecipeAddSuccess = () => {
 		// Reset add recipe input form
 		resetAddRecipeInvalidForms()
 		$('#add-recipe-form-name').val('')
 		$('#add-recipe-form-ingredients').html('')
 		addIngredientInput('add-recipe')
 		$('#add-recipe-form-directions').val('')
+		initRecipes()
 	}
 
 	const addRecipe = () => {
@@ -260,9 +258,9 @@
 
 		$.ajax({
 			data: recipe,
-			error: onAddRecipeError,
+			error: onRecipeAddError,
 			method: 'POST',
-			success: onAddRecipeSuccess,
+			success: onRecipeAddSuccess,
 			url: `${DATA_URL}/add`,
 		})
 	}
