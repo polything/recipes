@@ -7,8 +7,21 @@
 	let profileInfo = {}
 
 	// currentRecipe is used in parseRecipe(3)
-	// eslint-disable-next-line no-unused-vars
 	let currentRecipe = {}
+
+	// Show invalid formatting and help text of a form input.
+	// @param id{String} HTML ID selector of the input field.
+	const showFormInvalid = (id) => {
+		$(id).addClass('is-invalid')
+		$(`${id}-help`).removeClass('d-none')
+	}
+
+	// Hide invalid formatting and help text of a form input.
+	// @param id{String} HTML ID selector of the input field.
+	const hideFormInvalid = (id) => {
+		$(id).removeClass('is-invalid')
+		$(`${id}-help`).addClass('d-none')
+	}
 
 	const sendRecipeRequest = (term, opts) => {
 		const body = JSON.stringify({
@@ -26,6 +39,10 @@
 		})
 	}
 
+	// Create an ingredient input with a unique ID from the ingredient input
+	// template. The unique ID is assigned to the top div's id attribute.
+	//
+	// @return A JQuery element.
 	const createIngredientInput = () => {
 		const $ret = $('#template-ingredient-input').clone()
 		const id = getID()
@@ -187,12 +204,34 @@
 		callback(elem.value)
 	}
 
-	const submitRecipe = () => {
+	// Reset all input formatting for invalid values
+	const resetAddRecipeInvalidForms = () => {
+		hideFormInvalid('#add-recipe-form-name')
+	}
+
+	const onAddRecipeError = (data, _, _2) => {
+		resetAddRecipeInvalidForms()
+		const errs = data.responseJSON
+		if (errs.includes('name-exists')) {
+			showFormInvalid('#add-recipe-form-name')
+		}
+	}
+
+	const onAddRecipeSuccess = () => {
+		// Reset add recipe input form
+		resetAddRecipeInvalidForms()
+		$('#add-recipe-form-name').val('')
+		$('#add-recipe-form-ingredients').html('')
+		addIngredientInput('add-recipe')
+		$('#add-recipe-form-directions').val('')
+	}
+
+	const addRecipe = () => {
 		const recipe = {}
-		recipe.name = $('#name').val()
+		recipe.name = $('#add-recipe-form-name').val()
 		recipe.ingredients = []
 
-		$('#ingredients').find('li').each((idx, elem) => {
+		$('#add-recipe-form-ingredients').find('li').each((idx, elem) => {
 			const ingredient = {}
 			ingredient.name = $(elem).find('.name').first().val()
 			ingredient.amount = $(elem).find('.amount').first().val()
@@ -204,13 +243,14 @@
 		})
 
 		recipe.directions =
-			$('#directions').val().split('\n').filter(line => line !== '')
-
-		const recipes = {'recipes': [recipe]}
+			$('#add-recipe-form-directions').val().split('\n')
+				.filter((line) => line !== '')
 
 		$.ajax({
-			data: recipes,
+			data: recipe,
+			error: onAddRecipeError,
 			method: 'POST',
+			success: onAddRecipeSuccess,
 			url: `${DATA_URL}/add`,
 		})
 	}
@@ -245,55 +285,35 @@
 		$('#' + id).remove()
 	}
 
-	const addIngredientInput = () => {
-		const randID = 'ingredient-' + getID()
-		const div = $('<div>')
+	// Create an ingredient input element and append it to the ingredient list
+	// prefixed by `formType`.
+	//
+	// @param formType{String} The unique prefix for ingredient list. Used to
+	// 					 differentiate between edit and add ingredient form
+	// 					 lists.
+	// @param ingredient{Object} Ingredient object to prefill ingredient input
+	// 							 inputs.
+	const addIngredientInput = (formType, ingredient) => {
+		const $elem = createIngredientInput()
+		if (ingredient) {
+			$elem.find('.name').val(ingredient.name)
+			$elem.find('.amount').val(ingredient.amount)
+			$elem.find('.unit').val(ingredient.unit)
+			$elem.find('.prep').val(ingredient.prep)
+			$elem.find('.note').val(ingredient.note)
+		}
 
-		// Name
-		const nameLabel = $('<label>Name</label>')
-		$('<input type="text" class="name">').appendTo(nameLabel)
-		div.append(nameLabel)
+		// li will have ID so remove duplicate ID
+		const id = $elem.attr('id')
+		$elem.attr('id', '')
 
-		// Amount
-		const amountLabel = $('<label>Amount</label>')
-		$('<input type="number" class="amount">').appendTo(amountLabel)
-		div.append(amountLabel)
-
-		// Unit
-		const unitLabel = $('<label>Unit</label>')
-		const unitSelect = $('<select class="unit">')
-		const units = ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz',
-			'pint', 'quart', 'tbsp', 'tsp']
-
-		units.map((unit) => {
-			$('<option value="' + unit + '">' + unit + '</option>')
-				.appendTo(unitSelect)
-		})
-
-		unitLabel.append(unitSelect)
-		div.append(unitLabel)
-
-		// Preparation
-		const prepLabel = $('<label>Preparation</label>')
-		$('<input type="text" class="prep">').appendTo(prepLabel)
-		div.append(prepLabel)
-
-		// Note
-		const noteLabel = $('<label>Note</label>')
-		$('<input type="text" class="note">').appendTo(noteLabel)
-		div.append(noteLabel)
-
-		// Remove button
-		$('<button onclick="removeElement(\'' + randID + '\')">-</button>').appendTo(div)
-
-		const li = $('<li>')
-		li.attr('id', randID)
-		li.append(div)
-		$('#ingredients').append(li)
+		const $li = $('<li></li>').append($elem)
+		$li.attr('id', id)
+		$(`#${formType}-form-ingredients`).append($li)
 	}
 
 	const initAddPage = () => {
-		addIngredientInput()
+		addIngredientInput('add-recipe')
 	}
 
 	const switchProfilePrompt = (name) => {
@@ -332,14 +352,14 @@
 
 	const login = () => {
 		$.ajax({
+			data: {
+				'username': $('#login-form-name').val(),
+				'password': $('#login-form-pass').val(),
+			},
 			error: onError,
 			method: 'POST',
 			success: onLoginSuccess,
 			url: '/login',
-			data: {
-				'username': $('#login-form-name').val(),
-				'password': $('#login-form-pass').val()
-			}
 		})
 	}
 
@@ -522,8 +542,9 @@
 		// The recipe module to return
 		const widget = {}
 
-		widget.addIngredientInput = addIngredientInput
 		widget.addFormIngredient = addFormIngredient
+		widget.addIngredientInput = addIngredientInput
+		widget.addRecipe = addRecipe
 		widget.backToRecipeView = backToRecipeView
 		widget.createAccount = createAccount
 		widget.editRecipe = editRecipe
@@ -539,7 +560,6 @@
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
 		widget.submitIngredient = submitIngredient
-		widget.submitRecipe = submitRecipe
 		widget.switchPage = switchPage
 		widget.switchProfilePrompt = switchProfilePrompt
 
