@@ -1,14 +1,5 @@
-div(class='row')
-	div(class='col')
-		div
-			label(for='name') Title
-				input(type='text' name='name' id='name' required)
-		div
-			p Ingredients
-			ul(id='ingredients')
-			button(onclick='app.addIngredientInput()') + Ingredient
-		div
-			p Directions
-			textarea(id='directions' style='width:100%')
+- const formType = 'add-recipe'
 
-		button(onclick='app.submitRecipe()') Submit
+include ./recipeEdit
+
+.row: .col: button(onclick='app.addRecipe()') Submit

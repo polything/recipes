@@ -1,0 +1,12 @@
+.row.mb-3: .col: .input-group
+	.input-group-prepend: span.input-group-text Name
+	input.form-control(id=formType + '-form-name' type='text' autocomplete='off')
+	.invalid-feedback.d-none(id=formType + '-form-name-help') Recipe name taken
+
+.row: .col
+	ul(id=formType + '-form-ingredients')
+	button(onclick='app.addIngredientInput(\'' + formType + '\')') + Ingredient
+
+	.form-group: label Directions
+		textarea(id=formType + '-form-directions'
+			style='width:100%;' autocomplete='off')

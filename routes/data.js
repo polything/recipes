@@ -63,54 +63,52 @@ router.post('/pantry', passportConfig.isAuthenticated, async (req, res) => {
 
 // POST recipes
 router.post('/add', passportConfig.isAuthenticated, async (req, res) => {
-	if (!(req.user && Array.isArray(req.body.recipes))) {
-		return res.status(400).json({}).end()
+	if (!req.user) {
+		return res.status(401).json({}).end()
 	}
 
-	for (const recipe of req.body.recipes) {
-		// Check if a recipe by that name already exists
-		const foundRecipe = await Recipe.findOne({ name: recipe.name })
-		if (foundRecipe) {
-			return res.status(400).json({
-				msg: `Recipe with name ${recipe.name} exists`,
-			}).end()
-		}
+	const recipe = req.body
 
-		const ingredients = []
-		for (const ingredient of recipe.ingredients) {
-			const newIngredient = {
-				amount: Number(ingredient.amount),
-				name: ingredient.name,
-				note: ingredient.note || '',
-				prep: ingredient.prep || '',
-				unit: ingredient.unit,
-			}
-			ingredients.push(newIngredient)
-		}
-
-		const newRecipe = new Recipe({
-			directions: recipe.directions,
-			ingredients: ingredients,
-			name: recipe.name,
-		})
-
-		const err = newRecipe.validateSync()
-		if (err) { return res.status(400).json({}).end() }
-
-		try {
-			await newRecipe.save()
-		} catch (err) {
-			return res.status(500).json({}).end()
-		}
-
-		const result = await User.findByIdAndUpdate(req.user._id, {
-			$push: { recipes: newRecipe._id}
-		})
-
-		if (!result) { return res.status(400).json({}).end() }
-
-		return res.status(200).json({}).end()
+	// Check if a recipe by that name already exists
+	const foundRecipe = await Recipe.findOne({ name: recipe.name })
+	if (foundRecipe) {
+		return res.status(400).json(['name-exists']).end()
 	}
+
+	const ingredients = []
+	for (const ingredient of recipe.ingredients) {
+		const newIngredient = {
+			amount: Number(ingredient.amount),
+			name: ingredient.name,
+			note: ingredient.note || '',
+			prep: ingredient.prep || '',
+			unit: ingredient.unit,
+		}
+		ingredients.push(newIngredient)
+	}
+
+	const newRecipe = new Recipe({
+		directions: recipe.directions,
+		ingredients: ingredients,
+		name: recipe.name,
+	})
+
+	const err = newRecipe.validateSync()
+	if (err) { return res.status(400).json({}).end() }
+
+	try {
+		await newRecipe.save()
+	} catch (err) {
+		return res.status(500).json({}).end()
+	}
+
+	const result = await User.findByIdAndUpdate(req.user._id, {
+		$push: { recipes: newRecipe._id}
+	})
+
+	if (!result) { return res.status(400).json({}).end() }
+
+	return res.status(200).json({}).end()
 })
 
 
