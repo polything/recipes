@@ -2,8 +2,6 @@ const express = require('express')
 const passportConfig = require('../auth/passport')
 const router = express.Router()
 
-const util = require('../js/util')
-
 const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
@@ -134,23 +132,13 @@ router.get('/recipe/:name', async (req, res) => {
 	return res.status(200).json(recipe).end()
 })
 
-router.post('/recipe/edit', async (req, res) => {
-	if (!(req.body.recipes
-			&& Array.isArray(req.body.recipes)
-			&& req.body.recipes.every(recipe => util.isValidRecipe(recipe)))) {
-		res.status(400).json({}).end()
-		return
-	}
+router.post('/recipe/edit', passportConfig.isAuthenticated, async (req, res) => {
+	const recipe = new Recipe(req.body)
+	const err = recipe.validateSync()
+	if (err) { return res.status(400).json({}).end() }
 
-	const errs = []
-	for (const recipe of req.body.recipes) {
-		const result = await Recipe.replaceOne({ name: recipe.name }, recipe)
-		if (!result) {
-			errs.push({ msg: `Could not update ${recipe.name}` })
-		}
-	}
-
-	if (errs.length > 0) { return res.status(400).json(errs).end() }
+	const result = await Recipe.findOneAndUpdate({ name: recipe.name }, req.body)
+	if (!result) { return res.status(400).json({}).end() }
 
 	return res.status(200).json({}).end()
 })
@@ -174,7 +162,7 @@ router.post('/profile/create', async (req, res, next) => {
 		name: req.body.username,
 		password: req.body.password,
 	})
-	
+
 	user.save((err) => {
 		if (err) { return next(err) }
 		req.logIn(user, (err) => {

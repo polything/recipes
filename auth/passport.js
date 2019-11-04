@@ -29,5 +29,5 @@ passport.use(new LocalStrategy(async (name, password, done) => {
 // Login required middleware
 exports.isAuthenticated = (req, res, next) => {
 	if (req.isAuthenticated()) { return next() }
-	return res.status(400).end()
+	return res.status(401).end()
 }

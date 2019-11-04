@@ -9,6 +9,25 @@
 	// currentRecipe is used in parseRecipe(3)
 	let currentRecipe = {}
 
+	// Send an AJAX request with the correct settings to enable the server to
+	// parser the body as JSON.
+	// @param method{String} The HTTP method to use.
+	// @param data{Anything} A JSON value (Object, Array, number, etc.).
+	// @param url{String} The URL to send to.
+	// @param onSuccess{function} The success callback.
+	// @param onErr{function} The error callback.
+	const sendAjax = (method, data, url, onSuccess, onErr) => {
+		$.ajax({
+			contentType: 'application/json',
+			data: JSON.stringify(data),
+			dataType: 'json',
+			error: onErr,
+			method: method,
+			success: onSuccess,
+			url: url,
+		})
+	}
+
 	// Show invalid formatting and help text of a form input.
 	// @param id{String} HTML ID selector of the input field.
 	const showFormInvalid = (id) => {
@@ -75,7 +94,7 @@
 		$('#recipe-form-ingredients').find('li').each((idx, elem) => {
 			const ingredient = {}
 			ingredient.name = $(elem).find('.name').first().val()
-			ingredient.amount = $(elem).find('.amount').first().val()
+			ingredient.amount = Number($(elem).find('.amount').first().val())
 			ingredient.unit = $(elem).find('.unit').first().val()
 			ingredient.prep = $(elem).find('.prep').first().val()
 			ingredient.note = $(elem).find('.note').first().val()
@@ -86,13 +105,7 @@
 		recipe.directions =
 			$('#recipe-form-directions').val().split('\n').filter(line => line !== '')
 
-		const recipes = {'recipes': [recipe]}
-
-		$.ajax({
-			data: recipes,
-			method: 'POST',
-			url: url,
-		})
+		sendAjax('POST', recipe, url)
 	}
 
 	const editRecipe = () => {
@@ -120,8 +133,7 @@
 
 	const saveRecipeEdit = () => {
 		backToRecipeView()
-
-		saveRecipe(DATA_URL + '/recipe/edit')
+		saveRecipe(`${DATA_URL}/recipe/edit`)
 	}
 
 	const onDeleteRecipeClick = (id) => {
