@@ -218,6 +218,18 @@
 		hideFormInvalid('#add-recipe-form-name')
 	}
 
+	// Reset the add recipe form
+	const addRecipeFormReset = () => {
+		resetAddRecipeInvalidForms()
+		$('#add-recipe-form-name').val('')
+		$('#add-recipe-form-ingredients').html('')
+		addIngredientInput('add-recipe')
+		$('#add-recipe-form-directions').val('')
+		$('#add-recipe-btn').text('Save')
+		$('#add-recipe-btn').addClass('btn-light')
+		$('#add-recipe-btn').removeClass('btn-success')
+	}
+
 	const onRecipeAddError = (data, _, _2) => {
 		resetAddRecipeInvalidForms()
 		const errs = data.responseJSON
@@ -227,12 +239,9 @@
 	}
 
 	const onRecipeAddSuccess = () => {
-		// Reset add recipe input form
-		resetAddRecipeInvalidForms()
-		$('#add-recipe-form-name').val('')
-		$('#add-recipe-form-ingredients').html('')
-		addIngredientInput('add-recipe')
-		$('#add-recipe-form-directions').val('')
+		$('#add-recipe-btn').text('Saved!')
+		$('#add-recipe-btn').addClass('btn-success')
+		$('#add-recipe-btn').removeClass('btn-light')
 		initRecipes()
 	}
 
@@ -555,6 +564,7 @@
 		widget.addFormIngredient = addFormIngredient
 		widget.addIngredientInput = addIngredientInput
 		widget.addRecipe = addRecipe
+		widget.addRecipeFormReset = addRecipeFormReset
 		widget.backToRecipeView = backToRecipeView
 		widget.createAccount = createAccount
 		widget.editRecipe = editRecipe

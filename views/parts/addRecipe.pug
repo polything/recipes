@@ -2,4 +2,6 @@
 
 include ./recipeEdit
 
-.row: .col: button(onclick='app.addRecipe()') Submit
+.row.justify-content-center.align-items-center
+	.col-auto: button#add-recipe-btn.btn-lg.btn-light(onclick='app.addRecipe()') Save
+	.col-auto: button#add-recipe-reset-btn.btn.btn-secondary(onclick='app.addRecipeFormReset()') Reset
