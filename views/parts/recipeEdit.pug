@@ -7,6 +7,5 @@
 	ul(id=formType + '-form-ingredients')
 	button(onclick='app.addIngredientInput(\'' + formType + '\')') + Ingredient
 
-	.form-group: label Directions
-		textarea(id=formType + '-form-directions'
-			style='width:100%;' autocomplete='off')
+	.form-group: label.w-100 Directions
+		textarea.w-100(id=formType + '-form-directions' autocomplete='off')
