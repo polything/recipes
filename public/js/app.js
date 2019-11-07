@@ -126,13 +126,13 @@
 		$('#recipe-form-directions').val(recipe.directions.join('\n\n'))
 	}
 
-	const backToRecipeView = () => {
-		switchPage('home')
+	const backToRecipePage = () => {
+		switchPage('recipe')
 		$('#navbar').removeClass('d-none')
 	}
 
 	const saveRecipeEdit = () => {
-		backToRecipeView()
+		backToRecipePage()
 		saveRecipe(`${DATA_URL}/recipe/edit`)
 	}
 
@@ -157,23 +157,8 @@
 		const id = getID()
 		$ret.attr('id', id)
 
-		const $buttons = $ret.find('button')
-		const $deleteButt = $buttons[0]
-		const $confirmButt = $buttons[1]
-		$($deleteButt).attr('id', `${id}-delete`)
-		$($confirmButt).attr('id', `${id}-confirm`)
-
-		// Delete the recipe on confirm
-		$($confirmButt).click(() => {
-			const url = `${DATA_URL}?name=${name}`
-			sendAjax('DELETE', {}, url, initRecipes, onError)
-		})
-
-		// Show the confirm button when clicked
-		$($deleteButt).click(() => onRecipeDeleteClick(id))
-
 		const $link = $ret.find('a')
-		$link.click(() => showRecipeView(name))
+		$link.click(() => showRecipePage(name, false, 'home'))
 		$link.html(name)
 
 		return $ret
@@ -349,11 +334,45 @@
 		console.log(errStr)
 	}
 
+	// Create a profile recipe item.
+	// @param name{String} Name of the recipe.
+	const createProfileRecipe = (name) => {
+		const $ret = $('#template-profile-recipe').clone()
+		$ret.removeClass('d-none')
+
+		const id = getID()
+		$ret.attr('id', id)
+
+		const $buttons = $ret.find('button')
+		const $deleteButt = $buttons[0]
+		const $confirmButt = $buttons[1]
+		$($deleteButt).attr('id', `${id}-delete`)
+		$($confirmButt).attr('id', `${id}-confirm`)
+
+		// Delete the recipe on confirm
+		$($confirmButt).click(() => {
+			const url = `${DATA_URL}?name=${name}`
+			sendAjax('DELETE', {}, url, initRecipes, onError)
+		})
+
+		// Show the confirm button when clicked
+		$($deleteButt).click(() => onRecipeDeleteClick(id))
+
+		const $link = $ret.find('a')
+		$link.click(() => showRecipePage(name, true, 'profile'))
+		$link.html(name)
+
+		return $ret
+	}
+
+	// Update information displayed on profile with given information.
+	// @param data{Object} The new profile information.
 	const updateProfile = (data) => {
-		profileInfo = {
-			'username': data.username ? data.username : ''
-		}
-		$('#profile-name').text(profileInfo.username)
+		profileInfo = data
+		$('#profile-name').text(profileInfo.name)
+		profileInfo.recipes.forEach((recipe) => {
+			$('#profile-recipe-list').append(createProfileRecipe(recipe.name))
+		})
 	}
 
 	const switchProfile = (name) => {
@@ -474,33 +493,33 @@
 		formatRecipeView(data)
 	}
 
-	const getRecipeErr = (_, statusStr, errStr) => {
-		// eslint-disable-next-line no-console
-		console.log(statusStr)
-		// eslint-disable-next-line no-console
-		console.log(errStr)
-	}
-
-	const showRecipeView = (name) => {
-		$('#view-recipe').removeClass('d-none')
-		$('#view-search').addClass('d-none')
-
+	const getRecipe = (name) => {
 		$.ajax({
-			error: getRecipeErr,
+			error: onError,
 			method: 'GET',
 			success: parseRecipe,
 			url: DATA_URL + '/recipe/' + name,
 		})
 	}
 
-	const hideRecipeView = () => {
-		$('#view-recipe').addClass('d-none')
-		$('#view-search').removeClass('d-none')
-		formatRecipeView({
-			name: 'Loading recipe...',
-			ingredients: [],
-			directions: [],
+	const showRecipePage = (name, showSaveBtn, returnPage) => {
+		getRecipe(name)
+		if (showSaveBtn) { $('#recipe-save-btn').removeClass('d-none') }
+		else { $('#recipe-save-btn').addClass('d-none') }
+
+		// Remove existing click events so they don't stack
+		$('#recipe-back-btn').off()
+
+		// Set back button behavior to return to profile
+		$('#recipe-back-btn').click(() => {
+			switchPage(returnPage)
+			formatRecipeView({
+				name: 'Loading recipe...',
+				ingredients: [],
+				directions: [],
+			})
 		})
+		switchPage('recipe')
 	}
 
 	const formatRecipeView = (recipe) => {
@@ -565,12 +584,11 @@
 		widget.addIngredientInput = addIngredientInput
 		widget.addRecipe = addRecipe
 		widget.addRecipeFormReset = addRecipeFormReset
-		widget.backToRecipeView = backToRecipeView
+		widget.backToRecipePage = backToRecipePage
 		widget.createAccount = createAccount
 		widget.editRecipe = editRecipe
 		widget.filterPantryTable = filterPantryTable
 		widget.getPantry = getPantry
-		widget.hideRecipeView = hideRecipeView
 		widget.initAddPage = initAddPage
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
