@@ -11,27 +11,30 @@ html(lang='en')
 		script.
 			const DATA_URL = '#{dataURL}'
 
-	body(class='bg-dark text-white')
-		div(class='container')
+	body.bg-dark.text-white
+		.container
 			include ./parts/navbar
 
-			div(id='page-home' class='page')
+			#page-home.page
 				include ./parts/home
 
-			div(id='page-pantry' class='page d-none')
+			#page-pantry.page.d-none
 				include ./parts/pantry
 
-			div(id='page-add-recipe' class='page d-none')
+			#page-add-recipe.page.d-none
 				include ./parts/addRecipe
 
-			div(id='page-add-ingredient' class='page d-none')
+			#page-add-ingredient.page.d-none
 				include ./parts/addIngredient
 
-			div(id='page-edit-recipe' class='page d-none')
+			#page-edit-recipe.page.d-none
 				include ./editRecipe
 
-			div(id='page-profile' class='page d-none')
+			#page-recipe.page.d-none
+				include ./recipe
+
+			#page-profile.page.d-none
 				include ./profile
 
-		div(id='templates' class='d-none')
+		#templates.d-none
 			include ./parts/ingredientInput
