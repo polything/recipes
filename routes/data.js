@@ -163,18 +163,40 @@ router.post('/profile/create', async (req, res, next) => {
 
 	user.save((err) => {
 		if (err) { return next(err) }
-		req.logIn(user, (err) => {
-			if (err) {
-				return next(err)
-			}
-			res.redirect('/')
+
+		req.logIn(user, async (err) => {
+			if (err) { return res.status(500).json({}).end() }
+			const data = await User
+				.findOne({name: user.name}, 'name recipes')
+				.populate('recipes', 'name').lean()
+
+			return res.status(200).json(data).end()
 		})
 	})
 })
 
-router.get('/profile/logout', function(req, res) {
+router.post('/profile/change', passportConfig.isAuthenticated, async (req, res) => {
+	const user = req.user
+	user.password = req.body.newPass
+
+	try {
+		await user.validate()
+	} catch (err) {
+		return res.status(400).json({}).end()
+	}
+
+	try {
+		await user.save()
+	} catch (err) {
+		return res.status(500).json({}).end()
+	}
+
+	return res.status(200).json({}).end()
+})
+
+router.get('/profile/logout', passportConfig.isAuthenticated, (req, res) => {
 	req.logout()
-	return res.status(200).end()
+	return res.status(200).json({}).end()
 })
 
 module.exports = router

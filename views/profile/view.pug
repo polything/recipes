@@ -6,8 +6,30 @@
 
 #template-profile-recipe.d-none: .row
 	.col: a
-	.col-auto: button.btn.btn-danger(type=button) X
-	.col-auto.px-0: button.btn.btn-success.d-none(type=button) Confirm
+	.col-auto: button.btn.btn-outline-danger X
+	.col-auto.px-0: button.btn.btn-outline-success.d-none Confirm
 
-.row.justify-content-center.mt-3: .col-6
-	a.btn.btn-danger.btn-block(href='#' onclick='app.logout()') Logout
+
+//- Password change
+#change-pass-btn.row.justify-content-center.mt-3: .col-auto
+	button.btn.btn-outline-light(onclick='app.showChangePass()') Change password
+
+form#change-pass-form.mt-3.d-none
+	.row: .col Change password
+	.row
+		input#change-pass-1.col.form-control(type='password' placeholder='New' required)
+
+	.row
+		input#change-pass-2.col.form-control(type='password' placeholder='Confirm ' required)
+		#change-pass-2-help.invalid-feedback.d-none Password mismatch
+
+	.row.justify-content-center.mt-3
+		.col-auto
+			button#change-pass-submit-btn.btn.btn-outline-light(onclick='app.submitChangePass()') Change
+		.col-auto
+			button.btn.btn-outline-danger(onclick='app.hideChangePass()') Close
+
+
+//- Logout
+.row.justify-content-center.mt-5: .col-auto
+	button.btn.btn-outline-danger(onclick='app.logout()') Logout
