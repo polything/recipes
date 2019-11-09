@@ -370,9 +370,12 @@
 	const updateProfile = (data) => {
 		profileInfo = data
 		$('#profile-name').text(profileInfo.name)
-		profileInfo.recipes.forEach((recipe) => {
-			$('#profile-recipe-list').append(createProfileRecipe(recipe.name))
-		})
+		$('#profile-recipe-list').html('')
+		if (profileInfo.recipes) {
+			profileInfo.recipes.forEach((recipe) => {
+				$('#profile-recipe-list').append(createProfileRecipe(recipe.name))
+			})
+		}
 	}
 
 	const switchProfile = (name) => {
@@ -381,8 +384,6 @@
 	}
 
 	const onLoginSuccess = (data, _, _2) => {
-		// eslint-disable-next-line no-console
-		console.log('Logged in')
 		updateProfile(data)
 		switchProfile('view')
 		$('#navbar-pantry').removeClass('d-none')
@@ -405,10 +406,6 @@
 	}
 
 	const onLogoutSuccess = (data, _, _2) => {
-		// eslint-disable-next-line no-console
-		console.log('Logged out')
-		// eslint-disable-next-line no-console
-		console.log(data)
 		updateProfile(data)
 		$('#navbar-pantry').addClass('d-none')
 		$('#navbar-add-recipe').addClass('d-none')
@@ -582,6 +579,51 @@
 		searchForRecipes(term, opts)
 	}
 
+	const onChangePassSuccess = () =>{
+		$('#change-pass-submit-btn').addClass('btn-success')
+		$('#change-pass-submit-btn').removeClass('btn-outline-light')
+		$('#change-pass-submit-btn').html('Success')
+
+		setTimeout(resetChangePassForm, 5000)
+	}
+
+	const resetChangePassForm = () => {
+		$('#change-pass-form').trigger('reset')
+		$('#change-pass-submit-btn').removeClass('btn-success')
+		$('#change-pass-submit-btn').addClass('btn-outline-light')
+		$('#change-pass-submit-btn').html('Change')
+		resetChangePassFormValid()
+	}
+
+	const resetChangePassFormValid = () => {
+		hideFormInvalid('#change-pass-2')
+	}
+
+	const submitChangePass = () => {
+		resetChangePassFormValid()
+
+		const first = $('#change-pass-1').val()
+		const second = $('#change-pass-2').val()
+		if (first !== second) {
+			showFormInvalid('#change-pass-2')
+			return
+		}
+
+		const data = { newPass: second }
+		sendAjax('POST', data, DATA_URL + '/profile/change', onChangePassSuccess)
+	}
+
+	const showChangePass = () => {
+		$('#change-pass-form').removeClass('d-none')
+		$('#change-pass-btn').addClass('d-none')
+	}
+
+	const hideChangePass = () => {
+		$('#change-pass-form').addClass('d-none')
+		$('#change-pass-btn').removeClass('d-none')
+		resetChangePassForm()
+	}
+
 	const constructor = () => {
 		// The recipe module to return
 		const widget = {}
@@ -595,6 +637,7 @@
 		widget.editRecipe = editRecipe
 		widget.filterPantryTable = filterPantryTable
 		widget.getPantry = getPantry
+		widget.hideChangePass = hideChangePass
 		widget.initAddPage = initAddPage
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
@@ -603,6 +646,8 @@
 		widget.onRecipeSearch = onRecipeSearch
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
+		widget.showChangePass = showChangePass
+		widget.submitChangePass = submitChangePass
 		widget.submitIngredient = submitIngredient
 		widget.switchPage = switchPage
 		widget.switchProfilePrompt = switchProfilePrompt
