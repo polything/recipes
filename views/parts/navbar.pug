@@ -1,8 +1,6 @@
-div(id='navbar' class='row mb-3')
-	div(class='col')
-		nav(class='nav nav-pills nav-fill')
-			a(id='navbar-home' class='main-nav nav-item nav-link active' onclick='app.switchPage("home")' href='#') Home
-			a(id='navbar-pantry' class='main-nav nav-item nav-link' onclick='app.switchPage("pantry")' href='#') Pantry
-			a(id='navbar-add-recipe' class='main-nav nav-item nav-link' onclick='app.switchPage("add-recipe")' href='#') + Recipe
-			a(id='navbar-add-ingredient' class='main-nav nav-item nav-link' onclick='app.switchPage("add-ingredient")' href='#') + Ingredient
-			a(id='navbar-profile' class='main-nav nav-item nav-link' onclick='app.switchPage("profile")' href='#') Profile
+#navbar.row.mb-3: .col: nav.nav.nav-pills.nav-fill
+	a#navbar-home.main-nav.nav-item.nav-link.active(onclick='app.switchPage("home")' href='#') Home
+	a#navbar-pantry.main-nav.nav-item.nav-link.d-none(onclick='app.switchPage("pantry")' href='#') Pantry
+	a#navbar-add-recipe.main-nav.nav-item.nav-link.d-none(onclick='app.switchPage("add-recipe")' href='#') + Recipe
+	a#navbar-add-ingredient.main-nav.nav-item.nav-link.d-none(onclick='app.switchPage("add-ingredient")' href='#') + Ingredient
+	a#navbar-profile.main-nav.nav-item.nav-link(onclick='app.switchPage("profile")' href='#') Profile

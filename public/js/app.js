@@ -385,6 +385,9 @@
 		console.log('Logged in')
 		updateProfile(data)
 		switchProfile('view')
+		$('#navbar-pantry').removeClass('d-none')
+		$('#navbar-add-recipe').removeClass('d-none')
+		$('#navbar-add-ingredient').removeClass('d-none')
 		getPantry()
 	}
 
@@ -407,6 +410,9 @@
 		// eslint-disable-next-line no-console
 		console.log(data)
 		updateProfile(data)
+		$('#navbar-pantry').addClass('d-none')
+		$('#navbar-add-recipe').addClass('d-none')
+		$('#navbar-add-ingredient').addClass('d-none')
 		switchProfile('prompt')
 		filterPantryTable('')
 	}
