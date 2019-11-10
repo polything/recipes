@@ -141,6 +141,16 @@ router.post('/recipe/edit', passportConfig.isAuthenticated, async (req, res) => 
 	return res.status(200).json({}).end()
 })
 
+// DELETE user
+router.delete('/profile', passportConfig.isAuthenticated, async (req, res) => {
+	const data = await User.findOneAndDelete({name: req.user.name})
+	if (!data) { return res.status(500).json({}).end() }
+
+	req.logout()
+	return res.status(200).json({}).end()
+})
+
+// GET user
 router.get('/profile', passportConfig.isAuthenticated, async (req, res) => {
 	const data = await User
 		.findOne({name: req.user.name}, 'name recipes pantry')
