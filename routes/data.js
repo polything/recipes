@@ -141,6 +141,14 @@ router.post('/recipe/edit', passportConfig.isAuthenticated, async (req, res) => 
 	return res.status(200).json({}).end()
 })
 
+router.get('/profile', passportConfig.isAuthenticated, async (req, res) => {
+	const data = await User
+		.findOne({name: req.user.name}, 'name recipes pantry')
+		.populate('recipes', 'name').lean()
+
+	return res.status(200).json(data).end()
+})
+
 router.get('/profile/createAllowed', (req, res) => {
 	res.status(200).json({
 		'allowed': process.env.ALLOW_ACCOUNT_CREATION,
@@ -167,8 +175,7 @@ router.post('/profile/create', async (req, res, next) => {
 		req.logIn(user, async (err) => {
 			if (err) { return res.status(500).json({}).end() }
 			const data = await User
-				.findOne({name: user.name}, 'name recipes')
-				.populate('recipes', 'name').lean()
+				.findOne({name: user.name}, 'name recipes pantry').lean()
 
 			return res.status(200).json(data).end()
 		})
