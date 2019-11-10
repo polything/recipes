@@ -2,9 +2,8 @@
 /* global app, DATA_URL */
 
 (() => {
-	let pantry = {}
 	let defaultRecipes = []
-	let profileInfo = {}
+	let user = {}
 
 	// currentRecipe is used in parseRecipe(3)
 	let currentRecipe = {}
@@ -366,16 +365,17 @@
 	}
 
 	// Update information displayed on profile with given information.
-	// @param data{Object} The new profile information.
+	// @param data{Object} The new user information.
 	const updateProfile = (data) => {
-		profileInfo = data
-		$('#profile-name').text(profileInfo.name)
+		user = data
+		$('#profile-name').text(user.name)
 		$('#profile-recipe-list').html('')
-		if (profileInfo.recipes) {
-			profileInfo.recipes.forEach((recipe) => {
+		if (user.recipes) {
+			user.recipes.forEach((recipe) => {
 				$('#profile-recipe-list').append(createProfileRecipe(recipe.name))
 			})
 		}
+		filterPantryTable('')
 	}
 
 	const switchProfile = (name) => {
@@ -389,7 +389,6 @@
 		$('#navbar-pantry').removeClass('d-none')
 		$('#navbar-add-recipe').removeClass('d-none')
 		$('#navbar-add-ingredient').removeClass('d-none')
-		getPantry()
 	}
 
 	const login = () => {
@@ -443,19 +442,13 @@
 		})
 	}
 
+	const onGetPantrySuccess = (data, _, _2) => {
+		user.pantry = data
+		filterPantryTable('')
+	}
+
 	const getPantry = () => {
-		$.ajax({
-			error: (_, _2, _3) => {
-				pantry = {}
-				filterPantryTable('')
-			},
-			method: 'GET',
-			success: (data, _, _2) => {
-				pantry = data
-				filterPantryTable('')
-			},
-			url: DATA_URL + '/pantry',
-		})
+		sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
 	}
 
 	// Filter the table to ingredients whose names match the term.
@@ -464,8 +457,8 @@
 		const table = $('#filterTable')
 		table.html('') // Clear contents
 
-		for (const key in pantry) {
-			const ingredient = pantry[key]
+		for (const key in user.pantry) {
+			const ingredient = user.pantry[key]
 
 			// Filter out the ingredient if term is given and term is not a
 			// substring of ingredient name
@@ -557,20 +550,22 @@
 		$('#navbar-' + page).toggleClass('active')
 	}
 
+	// Callback for GET create allowed request.
+	const onGetCreateAllowedSuccess = (data, _, _2) => {
+		if (!data.allowed) {
+			$('#profile-prompt-navbar-create').addClass('d-none')
+			const $login = $('#profile-prompt-navbar-login')
+			$login.removeClass('active nav-link')
+			$login.removeAttr('onclick href')
+		}
+	}
+
+	// Initialize profile page
 	const initProfile = () => {
-		$.ajax({
-			error: onError,
-			method: 'GET',
-			success: (data, _, _2) => {
-				if (!data.allowed) {
-					$('#profile-prompt-navbar-create').addClass('d-none')
-					const $login = $('#profile-prompt-navbar-login')
-					$login.removeClass('active nav-link')
-					$login.removeAttr('onclick href')
-				}
-			},
-			url: DATA_URL + '/profile/createAllowed'
-		})
+		sendAjax('GET', {}, DATA_URL + '/profile/createAllowed',
+			onGetCreateAllowedSuccess)
+
+		sendAjax('GET', {}, DATA_URL + '/profile', onLoginSuccess)
 	}
 
 	const initRecipes = () => {
