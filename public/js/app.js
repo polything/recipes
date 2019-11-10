@@ -368,7 +368,7 @@
 	// @param data{Object} The new user information.
 	const updateProfile = (data) => {
 		user = data
-		$('#profile-name').text(user.name)
+		$('#profile-name').text(user.name ? user.name : '')
 		$('#profile-recipe-list').html('')
 		if (user.recipes) {
 			user.recipes.forEach((recipe) => {
@@ -619,6 +619,32 @@
 		resetChangePassForm()
 	}
 
+	// Hide the delete account button and show the confirm delete account
+	// buttons.
+	const confirmDeleteAccount = () => {
+		$('#profile-delete-btn').addClass('d-none')
+		$('#profile-delete-confirm-btns').removeClass('d-none')
+	}
+
+	// Hide the confirm delete account buttons and show the delete account
+	// button.
+	const resetDeleteAccount = () => {
+		$('#profile-delete-btn').removeClass('d-none')
+		$('#profile-delete-confirm-btns').addClass('d-none')
+	}
+
+	// When currently logged in user is deleted on the server, reset the confirm
+	// display and logout the user session.
+	const onDeleteAccountSuccess = () => {
+		resetDeleteAccount()
+		onLogoutSuccess({})
+	}
+
+	// Submit request to delete currently logged in user.
+	const deleteAccount = () => {
+		sendAjax('DELETE', {}, DATA_URL + '/profile', onDeleteAccountSuccess)
+	}
+
 	const constructor = () => {
 		// The recipe module to return
 		const widget = {}
@@ -628,7 +654,9 @@
 		widget.addRecipe = addRecipe
 		widget.addRecipeFormReset = addRecipeFormReset
 		widget.backToRecipePage = backToRecipePage
+		widget.confirmDeleteAccount = confirmDeleteAccount
 		widget.createAccount = createAccount
+		widget.deleteAccount = deleteAccount
 		widget.editRecipe = editRecipe
 		widget.filterPantryTable = filterPantryTable
 		widget.getPantry = getPantry
@@ -639,6 +667,7 @@
 		widget.login = login
 		widget.logout = logout
 		widget.onRecipeSearch = onRecipeSearch
+		widget.resetDeleteAccount = resetDeleteAccount
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
 		widget.showChangePass = showChangePass
