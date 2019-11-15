@@ -18,7 +18,7 @@
 	const sendAjax = (method, data, url, onSuccess, onErr) => {
 		$.ajax({
 			contentType: 'application/json',
-			data: JSON.stringify(data),
+			data: data ? JSON.stringify(data) : undefined,
 			dataType: 'json',
 			error: onErr,
 			method: method,
@@ -39,22 +39,6 @@
 	const hideFormInvalid = (id) => {
 		$(id).removeClass('is-invalid')
 		$(`${id}-help`).addClass('d-none')
-	}
-
-	const sendRecipeRequest = (term, opts) => {
-		const body = JSON.stringify({
-			'options': opts,
-			'term': term,
-		})
-
-		return $.ajax({
-			method: 'POST',
-			contentType: 'application/json',
-			processData: false,
-			dataType: 'json',
-			url: DATA_URL,
-			data: body,
-		})
 	}
 
 	// Create an ingredient input with a unique ID from the ingredient input
@@ -142,54 +126,6 @@
 		// Remove existing click events so they don't stack
 		$(`#${id}-delete`).off()
 		$(`#${id}-delete`).click(() => onRecipeDeleteClick(id))
-	}
-
-	const createSearchResult = (name) => {
-		const $ret = $('#template-search-result').clone()
-		$ret.removeClass('d-none')
-
-		const id = getID()
-		$ret.attr('id', id)
-
-		const $link = $ret.find('a')
-		$link.click(() => showRecipePage(name, false, 'home'))
-		$link.html(name)
-
-		return $ret
-	}
-
-	const updateRecipeList = (recipes) => {
-		$('#searchResults').html('') // Clear contents
-		recipes.forEach((recipe) => {
-			$('#searchResults').append(createSearchResult(recipe.name))
-		})
-	}
-
-	const searchForRecipes = (term, opts) => {
-		sendRecipeRequest(term, opts)
-			.done((recipes, _, _2) => {
-				if (defaultRecipes.length < 1) {
-					defaultRecipes = recipes
-				}
-				updateRecipeList(recipes)
-			})
-			.fail((_, _2, err) => {
-				// eslint-disable-next-line no-console
-				console.log(err)
-			})
-	}
-
-	const onRecipeSearch = (term) => {
-		if (term === '') {
-			updateRecipeList(defaultRecipes)
-		} else {
-			const opts = {'ingredients': true, 'name': true}
-			searchForRecipes(term, opts)
-		}
-	}
-
-	const search = (event, elem, callback) => {
-		callback(elem.value)
 	}
 
 	const getID = () => {
@@ -439,8 +375,7 @@
 
 	const initRecipes = () => {
 		const term = 'a'
-		const opts = {'ingredients': true, 'name': true}
-		searchForRecipes(term, opts)
+		searchForRecipes(term)
 	}
 
 	// PANTRY ADD VIEW =========================================================
@@ -511,7 +446,7 @@
 
 	// Request the user's pantry
 	const getPantry = () => {
-		sendAjax('GET', {}, DATA_URL + '/pantry', onGetPantrySuccess)
+		sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
 	}
 
 	// Update the pantry item list with the received pantry items.
@@ -593,14 +528,60 @@
 		$('#navbar').addClass('d-none')
 	}
 
+	// SEARCH ==================================================================
+
+	const onRecipeSearch = (term) => {
+		term = term.trim()
+		term = term.replace(/\s+/gi, ' ')
+		if (term === '') {
+			updateRecipeList(defaultRecipes)
+		} else {
+			searchForRecipes(term)
+		}
+	}
+
+	// Update the internal list of search results if not already set and update
+	// the search results.
+	const onRecipeSearchSuccess = (recipes, _, _2) => {
+		if (defaultRecipes.length < 1) {
+			defaultRecipes = recipes
+		}
+		updateRecipeList(recipes)
+	}
+
+	const search = (event, elem, callback) => {
+		callback(elem.value)
+	}
+
+	const searchForRecipes = (term) => {
+		term = encodeURIComponent(term)
+		sendAjax('GET', null, `${DATA_URL}/recipe?t=${term}`, onRecipeSearchSuccess)
+	}
+
+	const updateRecipeList = (recipes) => {
+		$('#searchResults').html('') // Clear contents
+		recipes.forEach((recipe) => {
+			const $item = $('#template-search-result').clone()
+			$item.removeClass('d-none')
+
+			const id = getID()
+			$item.attr('id', id)
+
+			const $link = $item.find('a')
+			$link.click(() => showRecipePage(recipe.name, false, 'home'))
+			$link.html(recipe.name)
+			$('#searchResults').append($item)
+		})
+	}
+
 	// PROFILE =================================================================
 
 	// Initialize profile page
 	const initProfile = () => {
-		sendAjax('GET', {}, DATA_URL + '/profile/createAllowed',
+		sendAjax('GET', null, DATA_URL + '/profile/createAllowed',
 			onGetCreateAllowedSuccess)
 
-		sendAjax('GET', {}, DATA_URL + '/profile', onLoginSuccess)
+		sendAjax('GET', null, DATA_URL + '/profile', onLoginSuccess)
 	}
 
 	const onChangePassSuccess = () =>{
