@@ -107,21 +107,6 @@ router.post('/add', passportConfig.isAuthenticated, async (req, res) => {
 	return res.status(200).json({}).end()
 })
 
-
-// Receive search request
-router.post('/', async (req, res) => {
-	const term = req.body.term
-
-	const recipes = await Recipe.find({
-		$or: [
-			{ name: new RegExp(term, 'i') },
-			{ 'ingredients.name': new RegExp(term, 'i') },
-		]
-	}).lean()
-
-	return res.status(200).json(recipes).end()
-})
-
 router.get('/recipe/:name', async (req, res) => {
 	const name = req.params.name
 	const recipe = await Recipe.findOne({ name: name }).lean()
@@ -214,6 +199,24 @@ router.post('/profile/change', passportConfig.isAuthenticated, async (req, res) 
 router.get('/profile/logout', passportConfig.isAuthenticated, (req, res) => {
 	req.logout()
 	return res.status(200).json({}).end()
+})
+
+// RECIPE ======================================================================
+
+// Receive search request
+router.get('/recipe', async (req, res) => {
+	let term = req.params.t
+	term = term.trim()
+	term = term.replace(/\s+/gi, ' ')
+
+	const recipes = await Recipe.find({
+		$or: [
+			{ name: new RegExp(term, 'i') },
+			{ 'ingredients.name': new RegExp(term, 'i') },
+		]
+	}).lean()
+
+	return res.status(200).json(recipes).end()
 })
 
 module.exports = router
