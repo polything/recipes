@@ -69,7 +69,6 @@
 		return $ret
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	const addFormIngredient = (ingredient) => {
 		const $elem = createIngredientInput()
 		const id = $elem.attr('id')
@@ -193,45 +192,6 @@
 		callback(elem.value)
 	}
 
-	// Reset all input formatting for invalid values
-	const resetAddRecipeInvalidForms = () => {
-		hideFormInvalid('#add-recipe-form-name')
-	}
-
-	// Reset the add recipe form
-	const addRecipeFormReset = () => {
-		resetAddRecipeInvalidForms()
-		$('#add-recipe-form-name').val('')
-		$('#add-recipe-form-ingredients').html('')
-		addIngredientInput('add-recipe')
-		$('#add-recipe-form-directions').val('')
-		$('#add-recipe-btn').text('Save')
-		$('#add-recipe-btn').addClass('btn-light')
-		$('#add-recipe-btn').removeClass('btn-success')
-	}
-
-	const onAddIngredientSuccess = (_, _2, _3) => {
-		getPantry()
-	}
-
-	const submitIngredient = () => {
-		const ingredient = {}
-		ingredient.name = $('#ingredient-name').val()
-		ingredient.amount = $('#ingredient-amount').val()
-		ingredient.unit = $('#ingredient-unit').val()
-
-		const url = DATA_URL + '/pantry?name=' + ingredient.name
-			+ '&amount=' + ingredient.amount
-			+ '&unit=' + ingredient.unit
-
-		$.ajax({
-			error: onError,
-			method: 'POST',
-			success: onAddIngredientSuccess,
-			url: url,
-		})
-	}
-
 	const getID = () => {
 		return ('' + Math.random()).slice(2)
 	}
@@ -268,7 +228,7 @@
 	}
 
 	const initAddPage = () => {
-		addIngredientInput('add-recipe')
+		addIngredientInput('recipe-add')
 	}
 
 	const switchProfilePrompt = (name) => {
@@ -334,7 +294,7 @@
 				$('#profile-recipe-list').append(createProfileRecipe(recipe.name))
 			})
 		}
-		filterPantryTable('')
+		filterPantryList('')
 	}
 
 	const switchProfile = (name) => {
@@ -347,7 +307,6 @@
 		switchProfile('view')
 		$('#navbar-pantry').removeClass('d-none')
 		$('#navbar-my-recipes').removeClass('d-none')
-		$('#navbar-add-ingredient').removeClass('d-none')
 	}
 
 	const login = () => {
@@ -367,9 +326,8 @@
 		updateProfile(data)
 		$('#navbar-pantry').addClass('d-none')
 		$('#navbar-my-recipes').addClass('d-none')
-		$('#navbar-add-ingredient').addClass('d-none')
 		switchProfile('prompt')
-		filterPantryTable('')
+		filterPantryList('')
 	}
 
 	const logout = () => {
@@ -399,48 +357,6 @@
 				'password': $('#create-form-pass').val()
 			}
 		})
-	}
-
-	const onGetPantrySuccess = (data, _, _2) => {
-		user.pantry = data
-		filterPantryTable('')
-	}
-
-	const getPantry = () => {
-		sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
-	}
-
-	// Filter the table to ingredients whose names match the term.
-	// @param term{String} The term to filter on.
-	const filterPantryTable = (term) => {
-		const table = $('#filterTable')
-		table.html('') // Clear contents
-
-		for (const key in user.pantry) {
-			const ingredient = user.pantry[key]
-
-			// Filter out the ingredient if term is given and term is not a
-			// substring of ingredient name
-			if (term !== '' && ingredient.name.indexOf(term) === -1) {
-				continue
-			}
-
-			const row = $('<div class="row"></div>')
-
-			const name = $('<div class="col"></div>')
-			name.html(ingredient.name)
-			row.append(name)
-
-			const amount = $('<div class="col"></div>')
-			amount.html(ingredient.amount)
-			row.append(amount)
-
-			const unit = $('<div class="col"></div>')
-			unit.html(ingredient.unit)
-			row.append(unit)
-
-			table.append(row)
-		}
 	}
 
 	const parseRecipe = (data, _, _2) => {
@@ -527,44 +443,91 @@
 		searchForRecipes(term, opts)
 	}
 
-	// RECIPE ADD ==============================================================
+	// PANTRY ADD VIEW =========================================================
 
-	// Hide the page where the user can add a recipe to their profile and show
-	// the "My Recipes" page.
-	const hideAddRecipePage = () => {
-		switchPage('my-recipes')
+	// Hide the pantry add page and show the pantry page.
+	const hidePantryAddPage = () => {
 		$('#navbar').removeClass('d-none')
+		switchPage('pantry')
 	}
 
-	// Show the page where the user can add a recipe to their profile and hide
-	// the "My Recipes" page.
-	const showAddRecipePage = () => {
-		switchPage('add-recipe')
+	// Hide the pantry page and show the pantry add page.
+	const showPantryAddPage = () => {
 		$('#navbar').addClass('d-none')
+		switchPage('pantry-add')
 	}
 
-	const onRecipeAddError = (data, _, _2) => {
-		resetAddRecipeInvalidForms()
-		const errs = data.responseJSON
-		if (errs.includes('name-exists')) {
-			showFormInvalid('#add-recipe-form-name')
+	// PANTRY ADD ==============================================================
+
+	const onPantryAddSuccess = (_, _2, _3) => {
+		getPantry()
+	}
+
+	const submitIngredient = () => {
+		const ingredient = {}
+		ingredient.name = $('#ingredient-name').val()
+		ingredient.amount = $('#ingredient-amount').val()
+		ingredient.unit = $('#ingredient-unit').val()
+
+		const url = DATA_URL + '/pantry?name=' + ingredient.name
+			+ '&amount=' + ingredient.amount
+			+ '&unit=' + ingredient.unit
+
+		sendAjax('POST', {}, url, onPantryAddSuccess)
+	}
+
+	// PANTRY VIEW =============================================================
+
+	// Update the pantry item list to items whose names match the term.
+	// @param term{String} The term to filter on.
+	const filterPantryList = (term) => {
+		const $list = $('#pantry-item-list')
+		$list.html('') // Clear contents
+
+		for (const key in user.pantry) {
+			const ingredient = user.pantry[key]
+
+			// Filter out the ingredient if term is given and term is not a
+			// substring of ingredient name
+			if (term !== '' && ingredient.name.indexOf(term) === -1) {
+				continue
+			}
+
+			// Clone template row
+			const $item = $('#template-pantry-item').clone()
+			$item.removeClass('d-none')
+
+			const $cols = $item.find('div')
+			const $name = $($cols[0])
+			const $amount = $($cols[1])
+			const $unit = $($cols[2])
+
+			$name.html(ingredient.name)
+			$amount.html(ingredient.amount)
+			$unit.html(ingredient.unit)
+			$('#pantry-item-list').append($item)
 		}
 	}
 
-	const onRecipeAddSuccess = () => {
-		$('#add-recipe-btn').text('Saved!')
-		$('#add-recipe-btn').addClass('btn-success')
-		$('#add-recipe-btn').removeClass('btn-light')
-		initRecipes()
-		initProfile()
+	// Request the user's pantry
+	const getPantry = () => {
+		sendAjax('GET', {}, DATA_URL + '/pantry', onGetPantrySuccess)
 	}
+
+	// Update the pantry item list with the received pantry items.
+	const onGetPantrySuccess = (data, _, _2) => {
+		user.pantry = data
+		filterPantryList('')
+	}
+
+	// RECIPE ADD ==============================================================
 
 	const addRecipe = () => {
 		const recipe = {}
-		recipe.name = $('#add-recipe-form-name').val()
+		recipe.name = $('#recipe-add-form-name').val()
 		recipe.ingredients = []
 
-		$('#add-recipe-form-ingredients').find('li').each((idx, elem) => {
+		$('#recipe-add-form-ingredients').find('li').each((idx, elem) => {
 			const ingredient = {}
 			ingredient.name = $(elem).find('.name').first().val()
 			ingredient.amount = $(elem).find('.amount').first().val()
@@ -576,11 +539,58 @@
 		})
 
 		recipe.directions =
-			$('#add-recipe-form-directions').val().split('\n')
+			$('#recipe-add-form-directions').val().split('\n')
 				.filter((line) => line !== '')
 
 		sendAjax('POST', recipe, `${DATA_URL}/add`, onRecipeAddSuccess,
 			onRecipeAddError)
+	}
+
+	// Reset the add recipe form
+	const addRecipeFormReset = () => {
+		resetAddRecipeInvalidForms()
+		$('#recipe-add-form-name').val('')
+		$('#recipe-add-form-ingredients').html('')
+		addIngredientInput('recipe-add')
+		$('#recipe-add-form-directions').val('')
+		$('#recipe-add-btn').text('Save')
+		$('#recipe-add-btn').addClass('btn-light')
+		$('#recipe-add-btn').removeClass('btn-success')
+	}
+
+	// Hide the page where the user can add a recipe to their profile and show
+	// the "My Recipes" page.
+	const hideAddRecipePage = () => {
+		switchPage('my-recipes')
+		$('#navbar').removeClass('d-none')
+	}
+
+	const onRecipeAddError = (data, _, _2) => {
+		resetAddRecipeInvalidForms()
+		const errs = data.responseJSON
+		if (errs.includes('name-exists')) {
+			showFormInvalid('#recipe-add-form-name')
+		}
+	}
+
+	const onRecipeAddSuccess = () => {
+		$('#recipe-add-btn').text('Saved!')
+		$('#recipe-add-btn').addClass('btn-success')
+		$('#recipe-add-btn').removeClass('btn-light')
+		initRecipes()
+		initProfile()
+	}
+
+	// Reset all input formatting for invalid values
+	const resetAddRecipeInvalidForms = () => {
+		hideFormInvalid('#recipe-add-form-name')
+	}
+
+	// Show the page where the user can add a recipe to their profile and hide
+	// the "My Recipes" page.
+	const showAddRecipePage = () => {
+		switchPage('recipe-add')
+		$('#navbar').addClass('d-none')
 	}
 
 	// PROFILE =================================================================
@@ -677,10 +687,10 @@
 		widget.createAccount = createAccount
 		widget.deleteAccount = deleteAccount
 		widget.editRecipe = editRecipe
-		widget.filterPantryTable = filterPantryTable
-		widget.getPantry = getPantry
+		widget.filterPantryList = filterPantryList
 		widget.hideAddRecipePage = hideAddRecipePage
 		widget.hideChangePass = hideChangePass
+		widget.hidePantryAddPage = hidePantryAddPage
 		widget.initAddPage = initAddPage
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
@@ -690,8 +700,9 @@
 		widget.resetDeleteAccount = resetDeleteAccount
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
-		widget.showChangePass = showChangePass
 		widget.showAddRecipePage = showAddRecipePage
+		widget.showChangePass = showChangePass
+		widget.showPantryAddPage = showPantryAddPage
 		widget.submitChangePass = submitChangePass
 		widget.submitIngredient = submitIngredient
 		widget.switchPage = switchPage
@@ -706,6 +717,5 @@
 $(() => {
 	app.initAddPage()
 	app.initRecipes()
-	app.getPantry()
 	app.initProfile()
 })

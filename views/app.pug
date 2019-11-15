@@ -5,7 +5,7 @@ html(lang='en')
 		meta(charset='utf-8')
 		meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
 		link(rel='stylesheet' href='/deps/css/bootstrap.min.css')
-		script(type='application/javascript' src='/deps/js/jquery.min.js')
+		script(type='application/javascript' src=jsURL + '/jquery.min.js')
 		link(rel='stylesheet' href=cssURL + '/style.css')
 		script(type='application/javascript' src=jsURL + '/app.js')
 		script.
@@ -24,11 +24,11 @@ html(lang='en')
 			#page-pantry.page.d-none
 				include ./parts/pantry
 
-			#page-add-recipe.page.d-none
-				include ./addRecipe
+			#page-recipe-add.page.d-none
+				include ./recipeAdd
 
-			#page-add-ingredient.page.d-none
-				include ./parts/addIngredient
+			#page-pantry-add.page.d-none
+				include ./pantryAdd
 
 			#page-edit-recipe.page.d-none
 				include ./editRecipe
