@@ -50,6 +50,19 @@
 		const id = getID()
 		$ret.attr('id', id)
 		$ret.find('button').click(() => removeElement(id))
+
+		$ret.find('#form-ingredient-name')
+			.attr('id', `${id}-form-ingredient-name`)
+
+		$ret.find('#form-ingredient-name-help')
+			.attr('id', `${id}-form-ingredient-name-help`)
+
+		$ret.find('#form-ingredient-amount')
+			.attr('id', `${id}-form-ingredient-amount`)
+
+		$ret.find('#form-ingredient-amount-help')
+			.attr('id', `${id}-form-ingredient-amount-help`)
+
 		return $ret
 	}
 
@@ -154,13 +167,7 @@
 			$elem.find('.note').val(ingredient.note)
 		}
 
-		// li will have ID so remove duplicate ID
-		const id = $elem.attr('id')
-		$elem.attr('id', '')
-
-		const $li = $('<li></li>').append($elem)
-		$li.attr('id', id)
-		$(`#${formType}-form-ingredients`).append($li)
+		$(`#${formType}-form-ingredients`).append($elem)
 	}
 
 	const initAddPage = () => {
@@ -458,6 +465,10 @@
 	// RECIPE ADD ==============================================================
 
 	const addRecipe = () => {
+		if (!validateRecipeForm('recipe-add')) {
+			return
+		}
+
 		const recipe = {}
 		recipe.name = $('#recipe-add-form-name').val()
 		recipe.ingredients = []
@@ -477,13 +488,13 @@
 			$('#recipe-add-form-directions').val().split('\n')
 				.filter((line) => line !== '')
 
-		sendAjax('POST', recipe, `${DATA_URL}/add`, onRecipeAddSuccess,
+		sendAjax('POST', recipe, `${DATA_URL}/recipe`, onRecipeAddSuccess,
 			onRecipeAddError)
 	}
 
 	// Reset the add recipe form
 	const addRecipeFormReset = () => {
-		resetAddRecipeInvalidForms()
+		resetRecipeAddInvalidForms()
 		$('#recipe-add-form-name').val('')
 		$('#recipe-add-form-ingredients').html('')
 		addIngredientInput('recipe-add')
@@ -495,13 +506,13 @@
 
 	// Hide the page where the user can add a recipe to their profile and show
 	// the "My Recipes" page.
-	const hideAddRecipePage = () => {
+	const hideRecipeAddPage = () => {
 		switchPage('my-recipes')
 		$('#navbar').removeClass('d-none')
 	}
 
 	const onRecipeAddError = (data, _, _2) => {
-		resetAddRecipeInvalidForms()
+		resetRecipeAddInvalidForms()
 		const errs = data.responseJSON
 		if (errs.includes('name-exists')) {
 			showFormInvalid('#recipe-add-form-name')
@@ -517,15 +528,49 @@
 	}
 
 	// Reset all input formatting for invalid values
-	const resetAddRecipeInvalidForms = () => {
+	const resetRecipeAddInvalidForms = () => {
 		hideFormInvalid('#recipe-add-form-name')
+		hideFormInvalid('#recipe-add-form-directions')
 	}
 
 	// Show the page where the user can add a recipe to their profile and hide
 	// the "My Recipes" page.
-	const showAddRecipePage = () => {
+	const showRecipeAddPage = () => {
 		switchPage('recipe-add')
 		$('#navbar').addClass('d-none')
+	}
+
+	// Validate the recipe form and highlight elements that fail validation.
+	// @return true if valid; false otherwise.
+	const validateRecipeForm = (formType) => {
+		let valid = true
+		let id = `#${formType}-form-name`
+		if ($(id).val() === '') {
+			showFormInvalid(id)
+			valid = false
+		}
+
+		const checkField = (elem, className) => {
+			const $elem = $(elem).find(className).first()
+			if ($elem.val() === '') {
+				showFormInvalid(`#${$elem.attr('id')}`)
+				valid = false
+			}
+		}
+
+		// Check empty fields for all ingredients
+		$(`#${formType}-form-ingredients`).find('.ingredient').each((_, elem) => {
+			checkField(elem, '.name')
+			checkField(elem, '.amount')
+		})
+
+		id = `#${formType}-form-directions`
+		if ($(id).val() === '') {
+			showFormInvalid(id)
+			valid = false
+		}
+
+		return valid
 	}
 
 	// SEARCH ==================================================================
@@ -669,7 +714,7 @@
 		widget.deleteAccount = deleteAccount
 		widget.editRecipe = editRecipe
 		widget.filterPantryList = filterPantryList
-		widget.hideAddRecipePage = hideAddRecipePage
+		widget.hideRecipeAddPage = hideRecipeAddPage
 		widget.hideChangePass = hideChangePass
 		widget.hidePantryAddPage = hidePantryAddPage
 		widget.initAddPage = initAddPage
@@ -681,7 +726,7 @@
 		widget.resetDeleteAccount = resetDeleteAccount
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
-		widget.showAddRecipePage = showAddRecipePage
+		widget.showRecipeAddPage = showRecipeAddPage
 		widget.showChangePass = showChangePass
 		widget.showPantryAddPage = showPantryAddPage
 		widget.submitChangePass = submitChangePass
