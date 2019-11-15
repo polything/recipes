@@ -111,22 +111,18 @@
 		switchPage('edit-recipe')
 		$('#navbar').addClass('d-none')
 
-		formatRecipeEdit(currentRecipe)
-	}
-
-	const formatRecipeEdit = (recipe) => {
-		$('#recipe-form-name').val(recipe.name)
+		$('#recipe-form-name').val(currentRecipe.name)
 
 		$('#recipe-form-ingredients').html('')
-		recipe.ingredients.forEach(ingredient => {
+		currentRecipe.ingredients.forEach(ingredient => {
 			addFormIngredient(ingredient)
 		})
 
-		$('#recipe-form-directions').val(recipe.directions.join('\n\n'))
+		$('#recipe-form-directions').val(currentRecipe.directions.join('\n\n'))
 	}
 
 	const backToRecipePage = () => {
-		switchPage('recipe')
+		switchPage('my-recipes')
 		$('#navbar').removeClass('d-none')
 	}
 
@@ -214,50 +210,6 @@
 		$('#add-recipe-btn').removeClass('btn-success')
 	}
 
-	const onRecipeAddError = (data, _, _2) => {
-		resetAddRecipeInvalidForms()
-		const errs = data.responseJSON
-		if (errs.includes('name-exists')) {
-			showFormInvalid('#add-recipe-form-name')
-		}
-	}
-
-	const onRecipeAddSuccess = () => {
-		$('#add-recipe-btn').text('Saved!')
-		$('#add-recipe-btn').addClass('btn-success')
-		$('#add-recipe-btn').removeClass('btn-light')
-		initRecipes()
-	}
-
-	const addRecipe = () => {
-		const recipe = {}
-		recipe.name = $('#add-recipe-form-name').val()
-		recipe.ingredients = []
-
-		$('#add-recipe-form-ingredients').find('li').each((idx, elem) => {
-			const ingredient = {}
-			ingredient.name = $(elem).find('.name').first().val()
-			ingredient.amount = $(elem).find('.amount').first().val()
-			ingredient.unit = $(elem).find('.unit').first().val()
-			ingredient.prep = $(elem).find('.prep').first().val()
-			ingredient.note = $(elem).find('.note').first().val()
-
-			recipe.ingredients.push(ingredient)
-		})
-
-		recipe.directions =
-			$('#add-recipe-form-directions').val().split('\n')
-				.filter((line) => line !== '')
-
-		$.ajax({
-			data: recipe,
-			error: onRecipeAddError,
-			method: 'POST',
-			success: onRecipeAddSuccess,
-			url: `${DATA_URL}/add`,
-		})
-	}
-
 	const onAddIngredientSuccess = (_, _2, _3) => {
 		getPantry()
 	}
@@ -333,8 +285,15 @@
 		console.log(errStr)
 	}
 
-	// Create a profile recipe item.
+	// Refresh the home and profile recipe lists.
+	const onDeleteRecipeSuccess = (_, _2, _3) => {
+		initRecipes()
+		initProfile()
+	}
+
+	// Create a recipe item for the profile page.
 	// @param name{String} Name of the recipe.
+	// @return {jQuery element} The recipe element.
 	const createProfileRecipe = (name) => {
 		const $ret = $('#template-profile-recipe').clone()
 		$ret.removeClass('d-none')
@@ -343,22 +302,22 @@
 		$ret.attr('id', id)
 
 		const $buttons = $ret.find('button')
-		const $deleteButt = $buttons[0]
-		const $confirmButt = $buttons[1]
-		$($deleteButt).attr('id', `${id}-delete`)
-		$($confirmButt).attr('id', `${id}-confirm`)
+		const $deleteBtn = $buttons[0]
+		const $confirmBtn = $buttons[1]
+		$($deleteBtn).attr('id', `${id}-delete`)
+		$($confirmBtn).attr('id', `${id}-confirm`)
 
 		// Delete the recipe on confirm
-		$($confirmButt).click(() => {
+		$($confirmBtn).click(() => {
 			const url = `${DATA_URL}?name=${name}`
-			sendAjax('DELETE', {}, url, initRecipes, onError)
+			sendAjax('DELETE', {}, url, onDeleteRecipeSuccess, onError)
 		})
 
 		// Show the confirm button when clicked
-		$($deleteButt).click(() => onRecipeDeleteClick(id))
+		$($deleteBtn).click(() => onRecipeDeleteClick(id))
 
 		const $link = $ret.find('a')
-		$link.click(() => showRecipePage(name, true, 'profile'))
+		$link.click(() => showRecipePage(name, true, 'my-recipes'))
 		$link.html(name)
 
 		return $ret
@@ -387,7 +346,7 @@
 		updateProfile(data)
 		switchProfile('view')
 		$('#navbar-pantry').removeClass('d-none')
-		$('#navbar-add-recipe').removeClass('d-none')
+		$('#navbar-my-recipes').removeClass('d-none')
 		$('#navbar-add-ingredient').removeClass('d-none')
 	}
 
@@ -407,7 +366,7 @@
 	const onLogoutSuccess = (data, _, _2) => {
 		updateProfile(data)
 		$('#navbar-pantry').addClass('d-none')
-		$('#navbar-add-recipe').addClass('d-none')
+		$('#navbar-my-recipes').addClass('d-none')
 		$('#navbar-add-ingredient').addClass('d-none')
 		switchProfile('prompt')
 		filterPantryTable('')
@@ -498,16 +457,17 @@
 		})
 	}
 
-	const showRecipePage = (name, showSaveBtn, returnPage) => {
+	const showRecipePage = (name, showEditBtn, returnPage) => {
 		getRecipe(name)
-		if (showSaveBtn) { $('#recipe-save-btn').removeClass('d-none') }
-		else { $('#recipe-save-btn').addClass('d-none') }
+		if (showEditBtn) { $('#recipe-edit-btn').removeClass('d-none') }
+		else { $('#recipe-edit-btn').addClass('d-none') }
 
 		// Remove existing click events so they don't stack
 		$('#recipe-back-btn').off()
 
-		// Set back button behavior to return to profile
+		// Set back button behavior to return to specified page
 		$('#recipe-back-btn').click(() => {
+			$('#navbar').removeClass('d-none')
 			switchPage(returnPage)
 			formatRecipeView({
 				name: 'Loading recipe...',
@@ -515,6 +475,7 @@
 				directions: [],
 			})
 		})
+		$('#navbar').addClass('d-none')
 		switchPage('recipe')
 	}
 
@@ -560,18 +521,76 @@
 		}
 	}
 
+	const initRecipes = () => {
+		const term = 'a'
+		const opts = {'ingredients': true, 'name': true}
+		searchForRecipes(term, opts)
+	}
+
+	// RECIPE ADD ==============================================================
+
+	// Hide the page where the user can add a recipe to their profile and show
+	// the "My Recipes" page.
+	const hideAddRecipePage = () => {
+		switchPage('my-recipes')
+		$('#navbar').removeClass('d-none')
+	}
+
+	// Show the page where the user can add a recipe to their profile and hide
+	// the "My Recipes" page.
+	const showAddRecipePage = () => {
+		switchPage('add-recipe')
+		$('#navbar').addClass('d-none')
+	}
+
+	const onRecipeAddError = (data, _, _2) => {
+		resetAddRecipeInvalidForms()
+		const errs = data.responseJSON
+		if (errs.includes('name-exists')) {
+			showFormInvalid('#add-recipe-form-name')
+		}
+	}
+
+	const onRecipeAddSuccess = () => {
+		$('#add-recipe-btn').text('Saved!')
+		$('#add-recipe-btn').addClass('btn-success')
+		$('#add-recipe-btn').removeClass('btn-light')
+		initRecipes()
+		initProfile()
+	}
+
+	const addRecipe = () => {
+		const recipe = {}
+		recipe.name = $('#add-recipe-form-name').val()
+		recipe.ingredients = []
+
+		$('#add-recipe-form-ingredients').find('li').each((idx, elem) => {
+			const ingredient = {}
+			ingredient.name = $(elem).find('.name').first().val()
+			ingredient.amount = $(elem).find('.amount').first().val()
+			ingredient.unit = $(elem).find('.unit').first().val()
+			ingredient.prep = $(elem).find('.prep').first().val()
+			ingredient.note = $(elem).find('.note').first().val()
+
+			recipe.ingredients.push(ingredient)
+		})
+
+		recipe.directions =
+			$('#add-recipe-form-directions').val().split('\n')
+				.filter((line) => line !== '')
+
+		sendAjax('POST', recipe, `${DATA_URL}/add`, onRecipeAddSuccess,
+			onRecipeAddError)
+	}
+
+	// PROFILE =================================================================
+
 	// Initialize profile page
 	const initProfile = () => {
 		sendAjax('GET', {}, DATA_URL + '/profile/createAllowed',
 			onGetCreateAllowedSuccess)
 
 		sendAjax('GET', {}, DATA_URL + '/profile', onLoginSuccess)
-	}
-
-	const initRecipes = () => {
-		const term = 'a'
-		const opts = {'ingredients': true, 'name': true}
-		searchForRecipes(term, opts)
 	}
 
 	const onChangePassSuccess = () =>{
@@ -660,6 +679,7 @@
 		widget.editRecipe = editRecipe
 		widget.filterPantryTable = filterPantryTable
 		widget.getPantry = getPantry
+		widget.hideAddRecipePage = hideAddRecipePage
 		widget.hideChangePass = hideChangePass
 		widget.initAddPage = initAddPage
 		widget.initProfile = initProfile
@@ -671,6 +691,7 @@
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
 		widget.showChangePass = showChangePass
+		widget.showAddRecipePage = showAddRecipePage
 		widget.submitChangePass = submitChangePass
 		widget.submitIngredient = submitIngredient
 		widget.switchPage = switchPage
