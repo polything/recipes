@@ -5,24 +5,10 @@ const router = express.Router()
 const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
-
-// Delete a recipe
-router.delete('/', passportConfig.isAuthenticated, async (req, res) => {
-	const recipe = await Recipe.findOne({ name: req.query.name }).lean()
-	if (!recipe) { return res.status(400).json({}).end() }
-
-	let result = await User.updateOne(
-		{ _id: req.user._id },
-		{ $pull: { recipes: recipe._id } },
-	)
-	if (!result) { return res.status(400).json({}).end() }
-
-	result = await Recipe.deleteOne({_id: recipe._id})
-	if (!result) { return res.status(400).json({}).end() }
-
-	return res.status(200).json({}).end()
-})
-
+// Publish 400 response with message
+const send400 = (res, msg) => {
+	res.status(400).json({msg: msg}).end()
+}
 
 // Get pantry
 router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
@@ -99,6 +85,8 @@ router.post('/profile/create', async (req, res, next) => {
 
 		req.logIn(user, async (err) => {
 			if (err) { return res.status(500).json({}).end() }
+
+			// recipes doesn't need to be populated because it's an empty list
 			const data = await User
 				.findOne({name: user.name}, 'name recipes pantry').lean()
 
@@ -131,7 +119,37 @@ router.get('/profile/logout', passportConfig.isAuthenticated, (req, res) => {
 	return res.status(200).json({}).end()
 })
 
+router.get('/profile/recipes', passportConfig.isAuthenticated, async (req, res) => {
+	const user = await User
+		.findById(req.user._id, 'recipes')
+		.populate('recipes', 'name').lean()
+
+	if (!user.recipes) { res.status(500).json({}).end() }
+	return res.status(200).json(user.recipes).end()
+})
+
+
 // RECIPE ======================================================================
+
+
+// Delete a recipe
+router.delete('/recipe/:id', passportConfig.isAuthenticated, async (req, res) => {
+	const id = req.params.id
+	const recipe = await Recipe.findById(id).lean()
+	if (!recipe) { return send400(res, `No recipe ${id}`) }
+
+	let result = await User.updateOne(
+		{ _id: req.user._id },
+		{ $pull: { recipes: id } },
+	)
+	if (!result) { return res.status(500).json({}).end() }
+
+	result = await Recipe.deleteOne({_id: id})
+	if (!result) { return res.status(500).json({}).end() }
+
+	return res.status(200).json({}).end()
+})
+
 
 // Receive search request
 router.get('/recipe', async (req, res) => {
@@ -149,19 +167,22 @@ router.get('/recipe', async (req, res) => {
 	return res.status(200).json(recipes).end()
 })
 
+
+// Get a specific recipe
+router.get('/recipe/:id', async (req, res) => {
+	const id = req.params.id
+	const recipe = await Recipe.findById(id).lean()
+	if (!recipe) {
+		return res.status(400).json({ msg: `Recipe ${id} not found` }).end()
+	}
+
+	return res.status(200).json(recipe).end()
+})
+
+
 // Add a recipe
 router.post('/recipe', passportConfig.isAuthenticated, async (req, res) => {
-	if (!req.user) {
-		return res.status(401).json({}).end()
-	}
-
 	const recipe = req.body
-
-	// Check if a recipe by that name already exists
-	const foundRecipe = await Recipe.findOne({ name: recipe.name })
-	if (foundRecipe) {
-		return res.status(400).json(['name-exists']).end()
-	}
 
 	const ingredients = []
 	for (const ingredient of recipe.ingredients) {
@@ -182,7 +203,7 @@ router.post('/recipe', passportConfig.isAuthenticated, async (req, res) => {
 	})
 
 	const err = newRecipe.validateSync()
-	if (err) { return res.status(400).json({}).end() }
+	if (err) { return send400(res, 'Invalid recipe format') }
 
 	try {
 		await newRecipe.save()
@@ -194,28 +215,33 @@ router.post('/recipe', passportConfig.isAuthenticated, async (req, res) => {
 		$push: { recipes: newRecipe._id}
 	})
 
-	if (!result) { return res.status(400).json({}).end() }
+	if (!result) { return res.status(500).json({}).end() }
 
 	return res.status(200).json({}).end()
 })
 
-// Get a specific recipe
-router.get('/recipe/:name', async (req, res) => {
-	const name = req.params.name
-	const recipe = await Recipe.findOne({ name: name }).lean()
-	if (!recipe) { return res.status(400).json({ msg: `Recipe ${name} not found` }).end() }
-
-	return res.status(200).json(recipe).end()
-})
 
 // Edit a recipe
 router.post('/recipe/edit', passportConfig.isAuthenticated, async (req, res) => {
-	const recipe = new Recipe(req.body)
-	const err = recipe.validateSync()
-	if (err) { return res.status(400).json({}).end() }
+	const recipe = req.body
 
-	const result = await Recipe.findOneAndUpdate({ name: recipe.name }, req.body)
-	if (!result) { return res.status(400).json({}).end() }
+	// Check that the user owns the recipe
+	const user = await User.findById(req.user._id, 'recipes')
+		.populate('recipes', 'name').lean()
+
+	if (!user) { return res.status(500).json({}).end() }
+
+	const matches = user.recipes.filter((_recipe) => _recipe._id === recipe._id)
+	if (!matches) { return send400(res, 'Recipe not owned') }
+	//if (!recipeIDs.includes(recipe._id)) { return send400(res, 'Recipe not owned') }
+
+	// Modify the recipe
+	const err = new Recipe(recipe).validateSync()
+	if (err) { return send400(res, 'Invalid recipe format') }
+
+	const query = recipe._id
+	const result = await Recipe.findByIdAndUpdate(query, recipe)
+	if (!result) { return send400(res, 'Could not find recipe to update') }
 
 	return res.status(200).json({}).end()
 })

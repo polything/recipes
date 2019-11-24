@@ -81,33 +81,13 @@
 		$('#recipe-form-ingredients').append($li)
 	}
 
-	const saveRecipe = (url) => {
-		const recipe = {}
-		recipe.name = $('#recipe-form-name').val()
-		recipe.ingredients = []
-
-		$('#recipe-form-ingredients').find('li').each((idx, elem) => {
-			const ingredient = {}
-			ingredient.name = $(elem).find('.name').first().val()
-			ingredient.amount = Number($(elem).find('.amount').first().val())
-			ingredient.unit = $(elem).find('.unit').first().val()
-			ingredient.prep = $(elem).find('.prep').first().val()
-			ingredient.note = $(elem).find('.note').first().val()
-
-			recipe.ingredients.push(ingredient)
-		})
-
-		recipe.directions =
-			$('#recipe-form-directions').val().split('\n').filter(line => line !== '')
-
-		sendAjax('POST', recipe, url)
-	}
 
 	const editRecipe = () => {
 		switchPage('edit-recipe')
 		$('#navbar').addClass('d-none')
 
 		$('#recipe-form-name').val(currentRecipe.name)
+		$('#recipe-form-name').attr('recipe-id', currentRecipe._id)
 
 		$('#recipe-form-ingredients').html('')
 		currentRecipe.ingredients.forEach(ingredient => {
@@ -120,11 +100,6 @@
 	const backToRecipePage = () => {
 		switchPage('my-recipes')
 		$('#navbar').removeClass('d-none')
-	}
-
-	const saveRecipeEdit = () => {
-		backToRecipePage()
-		saveRecipe(`${DATA_URL}/recipe/edit`)
 	}
 
 	const onRecipeDeleteClick = (id) => {
@@ -196,12 +171,12 @@
 
 	// Create a recipe item for the profile page.
 	// @param name{String} Name of the recipe.
+	// @param id{Sting} ID ofthe recipe.
 	// @return {jQuery element} The recipe element.
-	const createProfileRecipe = (name) => {
+	const createProfileRecipe = (name, id) => {
 		const $ret = $('#template-profile-recipe').clone()
 		$ret.removeClass('d-none')
 
-		const id = getID()
 		$ret.attr('id', id)
 
 		const $buttons = $ret.find('button')
@@ -212,7 +187,7 @@
 
 		// Delete the recipe on confirm
 		$($confirmBtn).click(() => {
-			const url = `${DATA_URL}?name=${name}`
+			const url = `${DATA_URL}/recipe/${id}`
 			sendAjax('DELETE', {}, url, onDeleteRecipeSuccess, onError)
 		})
 
@@ -220,25 +195,12 @@
 		$($deleteBtn).click(() => onRecipeDeleteClick(id))
 
 		const $link = $ret.find('a')
-		$link.click(() => showRecipePage(name, true, 'my-recipes'))
+		$link.click(() => showRecipePage(id, true, 'my-recipes'))
 		$link.html(name)
 
 		return $ret
 	}
 
-	// Update information displayed on profile with given information.
-	// @param data{Object} The new user information.
-	const updateProfile = (data) => {
-		user = data
-		$('#profile-name').text(user.name ? user.name : '')
-		$('#profile-recipe-list').html('')
-		if (user.recipes) {
-			user.recipes.forEach((recipe) => {
-				$('#profile-recipe-list').append(createProfileRecipe(recipe.name))
-			})
-		}
-		filterPantryList('')
-	}
 
 	const switchProfile = (name) => {
 		$('.page-profile').addClass('d-none')
@@ -307,17 +269,16 @@
 		formatRecipeView(data)
 	}
 
-	const getRecipe = (name) => {
+	const getRecipe = (id) => {
 		$.ajax({
-			error: onError,
 			method: 'GET',
 			success: parseRecipe,
-			url: DATA_URL + '/recipe/' + name,
+			url: `${DATA_URL}/recipe/${id}`,
 		})
 	}
 
-	const showRecipePage = (name, showEditBtn, returnPage) => {
-		getRecipe(name)
+	const showRecipePage = (id, showEditBtn, returnPage) => {
+		getRecipe(id)
 		if (showEditBtn) { $('#recipe-edit-btn').removeClass('d-none') }
 		else { $('#recipe-edit-btn').addClass('d-none') }
 
@@ -382,6 +343,7 @@
 
 	const initRecipes = () => {
 		const term = 'a'
+		defaultRecipes = []
 		searchForRecipes(term)
 	}
 
@@ -462,6 +424,44 @@
 		filterPantryList('')
 	}
 
+	// RECIPE ==================================================================
+
+	// Get the contents of the recipe form.
+	// @return{Object} Recipe.
+	const getRecipeFormContent = () => {
+		const recipe = {}
+		recipe._id = $('#recipe-form-name').attr('recipe-id')
+		recipe.name = $('#recipe-form-name').val()
+		recipe.ingredients = []
+
+		$('#recipe-form-ingredients').find('li').each((idx, elem) => {
+			const ingredient = {}
+			ingredient.name = $(elem).find('.name').first().val()
+			ingredient.amount = Number($(elem).find('.amount').first().val())
+			ingredient.unit = $(elem).find('.unit').first().val()
+			ingredient.prep = $(elem).find('.prep').first().val()
+			ingredient.note = $(elem).find('.note').first().val()
+
+			recipe.ingredients.push(ingredient)
+		})
+
+		recipe.directions =
+			$('#recipe-form-directions').val().split('\n')
+				.filter(line => line !== '')
+
+		return recipe
+	}
+
+
+	const getRecipes = async () => {
+		return await $.ajax({
+			dataType: 'json',
+			method: 'GET',
+			url: `${DATA_URL}/profile/recipes`,
+		})
+	}
+
+
 	// RECIPE ADD ==============================================================
 
 	const addRecipe = () => {
@@ -473,7 +473,7 @@
 		recipe.name = $('#recipe-add-form-name').val()
 		recipe.ingredients = []
 
-		$('#recipe-add-form-ingredients').find('li').each((idx, elem) => {
+		$('#recipe-add-form-ingredients').find('.ingredient').each((idx, elem) => {
 			const ingredient = {}
 			ingredient.name = $(elem).find('.name').first().val()
 			ingredient.amount = $(elem).find('.amount').first().val()
@@ -573,7 +573,28 @@
 		return valid
 	}
 
-	// SEARCH ==================================================================
+
+	// RECIPE EDIT =============================================================
+
+
+	// Update user recipes and search results.
+	const onRecipeEditSuccess = async () => {
+		user.recipes = await getRecipes()
+		updateProfileRecipes(user.recipes)
+		initRecipes()
+	}
+
+
+	// Request save of recipe edit and return to user recipes page
+	const saveRecipeEdit = () => {
+		backToRecipePage()
+		const recipe = getRecipeFormContent()
+		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess)
+	}
+
+
+	// RECIPE SEARCH ===========================================================
+
 
 	const onRecipeSearch = (term) => {
 		term = term.trim()
@@ -600,7 +621,8 @@
 
 	const searchForRecipes = (term) => {
 		term = encodeURIComponent(term)
-		sendAjax('GET', null, `${DATA_URL}/recipe?t=${term}`, onRecipeSearchSuccess)
+		sendAjax('GET', null, `${DATA_URL}/recipe?t=${term}`,
+			onRecipeSearchSuccess)
 	}
 
 	const updateRecipeList = (recipes) => {
@@ -613,7 +635,7 @@
 			$item.attr('id', id)
 
 			const $link = $item.find('a')
-			$link.click(() => showRecipePage(recipe.name, false, 'home'))
+			$link.click(() => showRecipePage(recipe._id, false, 'home'))
 			$link.html(recipe.name)
 			$('#searchResults').append($item)
 		})
@@ -699,6 +721,31 @@
 	const deleteAccount = () => {
 		sendAjax('DELETE', {}, DATA_URL + '/profile', onDeleteAccountSuccess)
 	}
+
+
+	// Update recipes listed for the profile.
+	// @param {Object} Array of recipes.
+	const updateProfileRecipes = (recipes) => {
+		$('#profile-recipe-list').html('')
+		recipes.forEach((recipe) => {
+			$('#profile-recipe-list').append(
+				createProfileRecipe(recipe.name, recipe._id))
+		})
+	}
+
+
+	// Update information displayed on profile with given information.
+	// @param data{Object} The new user information.
+	const updateProfile = (data) => {
+		// Update local user data
+		user = data
+		$('#profile-name').text(data.name ? data.name : '')
+		if (data.recipes) { updateProfileRecipes(data.recipes) }
+		filterPantryList('')
+	}
+
+
+	// EXPORT ==================================================================
 
 	const constructor = () => {
 		// The recipe module to return
