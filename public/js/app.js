@@ -245,23 +245,17 @@
 	}
 
 	const onCreateAccountSuccess = (data, _, _2) => {
-		// eslint-disable-next-line no-console
-		console.log('Created account')
-		// eslint-disable-next-line no-console
-		console.log(data)
+		onLoginSuccess(data)
 	}
 
 	const createAccount = () => {
-		$.ajax({
-			error: onError,
-			method: 'POST',
-			success: onCreateAccountSuccess,
-			url: DATA_URL + '/profile/create',
-			data: {
-				'username': $('#create-form-name').val(),
-				'password': $('#create-form-pass').val()
-			}
-		})
+		const url = `${DATA_URL}/profile/create`
+		const data = {
+			'username': $('#create-form-name').val(),
+			'password': $('#create-form-pass').val()
+		}
+
+		sendAjax('POST', data, url, onCreateAccountSuccess)
 	}
 
 	const parseRecipe = (data, _, _2) => {
