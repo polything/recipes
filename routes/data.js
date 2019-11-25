@@ -5,10 +5,7 @@ const router = express.Router()
 const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
-// Publish 400 response with message
-const send400 = (res, msg) => {
-	res.status(400).json({msg: msg}).end()
-}
+const util = require('../js/util')
 
 // Get pantry
 router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
@@ -136,7 +133,7 @@ router.get('/profile/recipes', passportConfig.isAuthenticated, async (req, res) 
 router.delete('/recipe/:id', passportConfig.isAuthenticated, async (req, res) => {
 	const id = req.params.id
 	const recipe = await Recipe.findById(id).lean()
-	if (!recipe) { return send400(res, `No recipe ${id}`) }
+	if (!recipe) { return util.send400(res, `No recipe ${id}`) }
 
 	let result = await User.updateOne(
 		{ _id: req.user._id },
@@ -203,7 +200,7 @@ router.post('/recipe', passportConfig.isAuthenticated, async (req, res) => {
 	})
 
 	const err = newRecipe.validateSync()
-	if (err) { return send400(res, 'Invalid recipe format') }
+	if (err) { return util.send400(res, 'Invalid recipe format') }
 
 	try {
 		await newRecipe.save()
@@ -232,16 +229,18 @@ router.post('/recipe/edit', passportConfig.isAuthenticated, async (req, res) => 
 	if (!user) { return res.status(500).json({}).end() }
 
 	const matches = user.recipes.filter((_recipe) => _recipe._id === recipe._id)
-	if (!matches) { return send400(res, 'Recipe not owned') }
-	//if (!recipeIDs.includes(recipe._id)) { return send400(res, 'Recipe not owned') }
+	if (!matches) {
+		return util.send400(res, `Recipe "${recipe.name}" not owned`)
+	}
 
 	// Modify the recipe
 	const err = new Recipe(recipe).validateSync()
-	if (err) { return send400(res, 'Invalid recipe format') }
+	if (err) { return util.send400(res, `Recipe "${recipe.name}" format`) }
 
-	const query = recipe._id
-	const result = await Recipe.findByIdAndUpdate(query, recipe)
-	if (!result) { return send400(res, 'Could not find recipe to update') }
+	const result = await Recipe.findByIdAndUpdate(recipe._id, recipe)
+	if (!result) {
+		return util.send400(res, `Could not find recipe "${recipe.name}"`)
+	}
 
 	return res.status(200).json({}).end()
 })
