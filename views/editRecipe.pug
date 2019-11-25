@@ -1,8 +1,8 @@
-div(class='row mb-3')
-	div(class='col-auto mr-auto')
-		a(href='#' class='btn btn-secondary' onclick='app.backToRecipePage()') <
-	div(class='col-auto')
-		a(href='#' class='btn btn-success' onclick='app.saveRecipeEdit()') Save
+.row.mb-3.mt-2
+	.col-auto.mr-auto
+		button.btn.btn-secondary(onclick='app.backToRecipePage()') <
+	.col-auto
+		button.btn.btn-success(onclick='app.saveRecipeEdit()') Save
 
 include ./parts/recipeForm
 

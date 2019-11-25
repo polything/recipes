@@ -8,38 +8,6 @@
 	// currentRecipe is used in parseRecipe(3)
 	let currentRecipe = {}
 
-	// Send an AJAX request with the correct settings to enable the server to
-	// parser the body as JSON.
-	// @param method{String} The HTTP method to use.
-	// @param data{Anything} A JSON value (Object, Array, number, etc.).
-	// @param url{String} The URL to send to.
-	// @param onSuccess{function} The success callback.
-	// @param onErr{function} The error callback.
-	const sendAjax = (method, data, url, onSuccess, onErr) => {
-		$.ajax({
-			contentType: 'application/json',
-			data: data ? JSON.stringify(data) : undefined,
-			dataType: 'json',
-			error: onErr,
-			method: method,
-			success: onSuccess,
-			url: url,
-		})
-	}
-
-	// Show invalid formatting and help text of a form input.
-	// @param id{String} HTML ID selector of the input field.
-	const showFormInvalid = (id) => {
-		$(id).addClass('is-invalid')
-		$(`${id}-help`).removeClass('d-none')
-	}
-
-	// Hide invalid formatting and help text of a form input.
-	// @param id{String} HTML ID selector of the input field.
-	const hideFormInvalid = (id) => {
-		$(id).removeClass('is-invalid')
-		$(`${id}-help`).addClass('d-none')
-	}
 
 	// Create an ingredient input with a unique ID from the ingredient input
 	// template. The unique ID is assigned to the top div's id attribute.
@@ -156,11 +124,9 @@
 		$('#profile-prompt-navbar-' + name).addClass('active')
 	}
 
-	const onError = (_, statusStr, errStr) => {
-		// eslint-disable-next-line no-console
-		console.log(statusStr)
-		// eslint-disable-next-line no-console
-		console.log(errStr)
+	const onError = (data, _, _2) => {
+		data = data.responseJSON
+		showAlert(data.msg)
 	}
 
 	// Refresh the home and profile recipe lists.
@@ -583,7 +549,8 @@
 	const saveRecipeEdit = () => {
 		backToRecipePage()
 		const recipe = getRecipeFormContent()
-		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess)
+		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
+			onError)
 	}
 
 
@@ -739,6 +706,70 @@
 	}
 
 
+	// ALERT ===================================================================
+
+
+	// Hide the alert element.
+	const hideAlert = () => {
+		$('#alert').slideUp('slow')
+	}
+
+	// Initialize the alert element by allowing it to be displayed and then
+	// immediately slide up so that it doesn't render and allows `slideDown()`
+	// to work.
+	const initAlert = () => {
+		$('#alert').removeClass('d-none')
+		$('#alert').slideUp(0)
+	}
+
+	// Show the alert element.
+	const showAlert = (text) => {
+		$('#alert').text(text)
+		$('#alert').slideDown('slow', () => {
+			setTimeout(() => {
+				hideAlert()
+			}, 2000)
+		})
+	}
+
+
+	// UTIL ====================================================================
+
+
+	// Hide invalid formatting and help text of a form input.
+	// @param id{String} HTML ID selector of the input field.
+	const hideFormInvalid = (id) => {
+		$(id).removeClass('is-invalid')
+		$(`${id}-help`).addClass('d-none')
+	}
+
+	// Send an AJAX request with the correct settings to enable the server to
+	// parser the body as JSON.
+	// @param method{String} The HTTP method to use.
+	// @param data{Anything} A JSON value (Object, Array, number, etc.).
+	// @param url{String} The URL to send to.
+	// @param onSuccess{function} The success callback.
+	// @param onErr{function} The error callback.
+	const sendAjax = (method, data, url, onSuccess, onErr) => {
+		$.ajax({
+			contentType: 'application/json',
+			data: data ? JSON.stringify(data) : undefined,
+			dataType: 'json',
+			error: onErr,
+			method: method,
+			success: onSuccess,
+			url: url,
+		})
+	}
+
+	// Show invalid formatting and help text of a form input.
+	// @param id{String} HTML ID selector of the input field.
+	const showFormInvalid = (id) => {
+		$(id).addClass('is-invalid')
+		$(`${id}-help`).removeClass('d-none')
+	}
+
+
 	// EXPORT ==================================================================
 
 	const constructor = () => {
@@ -755,9 +786,10 @@
 		widget.deleteAccount = deleteAccount
 		widget.editRecipe = editRecipe
 		widget.filterPantryList = filterPantryList
-		widget.hideRecipeAddPage = hideRecipeAddPage
 		widget.hideChangePass = hideChangePass
 		widget.hidePantryAddPage = hidePantryAddPage
+		widget.hideRecipeAddPage = hideRecipeAddPage
+		widget.initAlert = initAlert
 		widget.initAddPage = initAddPage
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
@@ -767,9 +799,9 @@
 		widget.resetDeleteAccount = resetDeleteAccount
 		widget.saveRecipeEdit = saveRecipeEdit
 		widget.search = search
-		widget.showRecipeAddPage = showRecipeAddPage
 		widget.showChangePass = showChangePass
 		widget.showPantryAddPage = showPantryAddPage
+		widget.showRecipeAddPage = showRecipeAddPage
 		widget.submitChangePass = submitChangePass
 		widget.submitIngredient = submitIngredient
 		widget.switchPage = switchPage
@@ -785,4 +817,5 @@ $(() => {
 	app.initAddPage()
 	app.initRecipes()
 	app.initProfile()
+	app.initAlert()
 })
