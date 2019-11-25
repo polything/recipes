@@ -12,7 +12,7 @@ router.post('/', (req, res, next) => {
 		req.logIn(user, async (err) => {
 			if (err) { return next(err) }
 			const data = await User
-				.findOne({name: user.name}, 'name recipes')
+				.findById(user._id, 'name recipes pantry')
 				.populate('recipes', 'name').lean()
 
 			return res.status(200).json(data).end()
