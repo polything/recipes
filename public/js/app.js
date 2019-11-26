@@ -160,9 +160,9 @@
 		// Show the confirm button when clicked
 		$($deleteBtn).click(() => onRecipeDeleteClick(id))
 
-		const $link = $ret.find('a')
+		const $link = $ret.find('.profile-recipe')
 		$link.click(() => showRecipePage(id, true, 'my-recipes'))
-		$link.html(name)
+		$link.text(name)
 
 		return $ret
 	}
