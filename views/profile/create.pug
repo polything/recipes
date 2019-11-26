@@ -1,15 +1,9 @@
-div(class='row')
-	div(class='col input-group')
-		div(class='input-group-prepend')
-			span(class='input-group-text') Username
-		input(id='create-form-name' type='text' class='form-control' required)
+.row: .col.input-group
+	.input-group-prepend: span.input-group-text Username
+	input#create-form-name.form-control(type='text' required)
 
-div(class='row')
-	div(class='col input-group')
-		div(class='input-group-prepend')
-			span(class='input-group-text') Password
-		input(id='create-form-pass' type='password' class='form-control' required)
+.row.mb-3: .col.input-group
+	.input-group-prepend: span.input-group-text Password
+	input#create-form-pass.form-control(type='password' required)
 
-div(class='row')
-	div(class='col')
-		a(href='#' class='btn btn-success' onclick='app.createAccount()') Create Account
+.row: .col: button.btn.btn-success(onclick='app.createAccount()') Create Account

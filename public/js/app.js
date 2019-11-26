@@ -173,26 +173,6 @@
 		$('#profile-' + name).removeClass('d-none')
 	}
 
-	const onLoginSuccess = (data, _, _2) => {
-		updateProfile(data)
-		switchProfile('view')
-		$('#navbar-pantry').removeClass('d-none')
-		$('#navbar-my-recipes').removeClass('d-none')
-	}
-
-	const login = () => {
-		$.ajax({
-			data: {
-				'username': $('#login-form-name').val(),
-				'password': $('#login-form-pass').val(),
-			},
-			error: onError,
-			method: 'POST',
-			success: onLoginSuccess,
-			url: '/login',
-		})
-	}
-
 	const onLogoutSuccess = (data, _, _2) => {
 		updateProfile(data)
 		$('#navbar-pantry').addClass('d-none')
@@ -284,13 +264,6 @@
 		})
 	}
 
-	const switchPage = (page) => {
-		$('.page').addClass('d-none')
-		$('#page-' + page).removeClass('d-none')
-		$('.main-nav').removeClass('active')
-		$('#navbar-' + page).toggleClass('active')
-	}
-
 	// Callback for GET create allowed request.
 	const onGetCreateAllowedSuccess = (data, _, _2) => {
 		if (!data.allowed) {
@@ -307,7 +280,61 @@
 		searchForRecipes(term)
 	}
 
+
+	// ALERT ===================================================================
+
+
+	// Hide the alert element.
+	const hideAlert = () => {
+		$('#alert').slideUp('slow')
+	}
+
+	// Initialize the alert element by allowing it to be displayed and then
+	// immediately slide up so that it doesn't render and allows `slideDown()`
+	// to work.
+	const initAlert = () => {
+		$('#alert').removeClass('d-none')
+		$('#alert').slideUp(0)
+	}
+
+	// Show the alert element.
+	const showAlert = (text) => {
+		$('#alert').text(text)
+		$('#alert').slideDown('slow', () => {
+			setTimeout(() => {
+				hideAlert()
+			}, 2000)
+		})
+	}
+
+
+	// LOGIN ===================================================================
+
+
+	const login = () => {
+		const data = {
+			'username': $('#login-form-name').val(),
+			'password': $('#login-form-pass').val(),
+		}
+
+		sendAjax('POST', data, '/login', onLoginSuccess, onLoginError)
+	}
+
+	const onLoginError = (_, _2, _3) => {
+		$('#login-help').removeClass('d-none')
+	}
+
+	const onLoginSuccess = (data, _, _2) => {
+		$('#login-help').addClass('d-none')
+		updateProfile(data)
+		switchProfile('view')
+		$('#navbar-pantry').removeClass('d-none')
+		$('#navbar-my-recipes').removeClass('d-none')
+	}
+
+
 	// PANTRY ADD VIEW =========================================================
+
 
 	// Hide the pantry add page and show the pantry page.
 	const hidePantryAddPage = () => {
@@ -321,7 +348,9 @@
 		switchPage('pantry-add')
 	}
 
+
 	// PANTRY ADD ==============================================================
+
 
 	const onPantryAddSuccess = (_, _2, _3) => {
 		getPantry()
@@ -340,7 +369,9 @@
 		sendAjax('POST', {}, url, onPantryAddSuccess)
 	}
 
+
 	// PANTRY VIEW =============================================================
+
 
 	// Update the pantry item list to items whose names match the term.
 	// @param term{String} The term to filter on.
@@ -384,7 +415,114 @@
 		filterPantryList('')
 	}
 
+
+	// PROFILE =================================================================
+
+
+	// Initialize profile page
+	const initProfile = () => {
+		sendAjax('GET', null, DATA_URL + '/profile/createAllowed',
+			onGetCreateAllowedSuccess)
+
+		sendAjax('GET', null, DATA_URL + '/profile', onLoginSuccess)
+	}
+
+	const onChangePassSuccess = () => {
+		$('#change-pass-submit-btn').addClass('btn-success')
+		$('#change-pass-submit-btn').removeClass('btn-outline-light')
+		$('#change-pass-submit-btn').html('Success')
+
+		setTimeout(resetChangePassForm, 5000)
+	}
+
+	const resetChangePassForm = () => {
+		$('#change-pass-form').trigger('reset')
+		$('#change-pass-submit-btn').removeClass('btn-success')
+		$('#change-pass-submit-btn').addClass('btn-outline-light')
+		$('#change-pass-submit-btn').html('Change')
+		resetChangePassFormValid()
+	}
+
+	const resetChangePassFormValid = () => {
+		hideFormInvalid('#change-pass-2')
+	}
+
+	const submitChangePass = () => {
+		resetChangePassFormValid()
+
+		const first = $('#change-pass-1').val()
+		const second = $('#change-pass-2').val()
+		if (first !== second) {
+			showFormInvalid('#change-pass-2')
+			return
+		}
+
+		const data = { newPass: second }
+		sendAjax('POST', data, DATA_URL + '/profile/change', onChangePassSuccess)
+	}
+
+	const showChangePass = () => {
+		$('#change-pass-form').removeClass('d-none')
+		$('#change-pass-btn').addClass('d-none')
+	}
+
+	const hideChangePass = () => {
+		$('#change-pass-form').addClass('d-none')
+		$('#change-pass-btn').removeClass('d-none')
+		resetChangePassForm()
+	}
+
+	// Hide the delete account button and show the confirm delete account
+	// buttons.
+	const confirmDeleteAccount = () => {
+		$('#profile-delete-btn').addClass('d-none')
+		$('#profile-delete-confirm-btns').removeClass('d-none')
+	}
+
+	// Hide the confirm delete account buttons and show the delete account
+	// button.
+	const resetDeleteAccount = () => {
+		$('#profile-delete-btn').removeClass('d-none')
+		$('#profile-delete-confirm-btns').addClass('d-none')
+	}
+
+	// When currently logged in user is deleted on the server, reset the confirm
+	// display and logout the user session.
+	const onDeleteAccountSuccess = () => {
+		resetDeleteAccount()
+		onLogoutSuccess({})
+	}
+
+	// Submit request to delete currently logged in user.
+	const deleteAccount = () => {
+		sendAjax('DELETE', {}, DATA_URL + '/profile', onDeleteAccountSuccess)
+	}
+
+
+	// Update recipes listed for the profile.
+	// @param {Object} Array of recipes.
+	const updateProfileRecipes = (recipes) => {
+		$('#profile-recipe-list').html('')
+		recipes.forEach((recipe) => {
+			$('#profile-recipe-list').append(
+				createProfileRecipe(recipe.name, recipe._id))
+		})
+	}
+
+
+	// Update information displayed on profile with given information.
+	// @param data{Object} The new user information.
+	const updateProfile = (data) => {
+		// Update local user data
+		user = data
+		$('#profile-name').text(data.name ? data.name : '')
+		if (data.recipes) { updateProfileRecipes(data.recipes) }
+		filterPantryList('')
+	}
+
+
 	// RECIPE ==================================================================
+
 
 	// Get the contents of the recipe form.
 	// @return{Object} Recipe.
@@ -423,6 +561,7 @@
 
 
 	// RECIPE ADD ==============================================================
+
 
 	const addRecipe = () => {
 		if (!validateRecipeForm('recipe-add')) {
@@ -602,136 +741,6 @@
 		})
 	}
 
-	// PROFILE =================================================================
-
-	// Initialize profile page
-	const initProfile = () => {
-		sendAjax('GET', null, DATA_URL + '/profile/createAllowed',
-			onGetCreateAllowedSuccess)
-
-		sendAjax('GET', null, DATA_URL + '/profile', onLoginSuccess)
-	}
-
-	const onChangePassSuccess = () =>{
-		$('#change-pass-submit-btn').addClass('btn-success')
-		$('#change-pass-submit-btn').removeClass('btn-outline-light')
-		$('#change-pass-submit-btn').html('Success')
-
-		setTimeout(resetChangePassForm, 5000)
-	}
-
-	const resetChangePassForm = () => {
-		$('#change-pass-form').trigger('reset')
-		$('#change-pass-submit-btn').removeClass('btn-success')
-		$('#change-pass-submit-btn').addClass('btn-outline-light')
-		$('#change-pass-submit-btn').html('Change')
-		resetChangePassFormValid()
-	}
-
-	const resetChangePassFormValid = () => {
-		hideFormInvalid('#change-pass-2')
-	}
-
-	const submitChangePass = () => {
-		resetChangePassFormValid()
-
-		const first = $('#change-pass-1').val()
-		const second = $('#change-pass-2').val()
-		if (first !== second) {
-			showFormInvalid('#change-pass-2')
-			return
-		}
-
-		const data = { newPass: second }
-		sendAjax('POST', data, DATA_URL + '/profile/change', onChangePassSuccess)
-	}
-
-	const showChangePass = () => {
-		$('#change-pass-form').removeClass('d-none')
-		$('#change-pass-btn').addClass('d-none')
-	}
-
-	const hideChangePass = () => {
-		$('#change-pass-form').addClass('d-none')
-		$('#change-pass-btn').removeClass('d-none')
-		resetChangePassForm()
-	}
-
-	// Hide the delete account button and show the confirm delete account
-	// buttons.
-	const confirmDeleteAccount = () => {
-		$('#profile-delete-btn').addClass('d-none')
-		$('#profile-delete-confirm-btns').removeClass('d-none')
-	}
-
-	// Hide the confirm delete account buttons and show the delete account
-	// button.
-	const resetDeleteAccount = () => {
-		$('#profile-delete-btn').removeClass('d-none')
-		$('#profile-delete-confirm-btns').addClass('d-none')
-	}
-
-	// When currently logged in user is deleted on the server, reset the confirm
-	// display and logout the user session.
-	const onDeleteAccountSuccess = () => {
-		resetDeleteAccount()
-		onLogoutSuccess({})
-	}
-
-	// Submit request to delete currently logged in user.
-	const deleteAccount = () => {
-		sendAjax('DELETE', {}, DATA_URL + '/profile', onDeleteAccountSuccess)
-	}
-
-
-	// Update recipes listed for the profile.
-	// @param {Object} Array of recipes.
-	const updateProfileRecipes = (recipes) => {
-		$('#profile-recipe-list').html('')
-		recipes.forEach((recipe) => {
-			$('#profile-recipe-list').append(
-				createProfileRecipe(recipe.name, recipe._id))
-		})
-	}
-
-
-	// Update information displayed on profile with given information.
-	// @param data{Object} The new user information.
-	const updateProfile = (data) => {
-		// Update local user data
-		user = data
-		$('#profile-name').text(data.name ? data.name : '')
-		if (data.recipes) { updateProfileRecipes(data.recipes) }
-		filterPantryList('')
-	}
-
-
-	// ALERT ===================================================================
-
-
-	// Hide the alert element.
-	const hideAlert = () => {
-		$('#alert').slideUp('slow')
-	}
-
-	// Initialize the alert element by allowing it to be displayed and then
-	// immediately slide up so that it doesn't render and allows `slideDown()`
-	// to work.
-	const initAlert = () => {
-		$('#alert').removeClass('d-none')
-		$('#alert').slideUp(0)
-	}
-
-	// Show the alert element.
-	const showAlert = (text) => {
-		$('#alert').text(text)
-		$('#alert').slideDown('slow', () => {
-			setTimeout(() => {
-				hideAlert()
-			}, 2000)
-		})
-	}
-
 
 	// UTIL ====================================================================
 
@@ -769,8 +778,16 @@
 		$(`${id}-help`).removeClass('d-none')
 	}
 
+	const switchPage = (page) => {
+		$('.page').addClass('d-none')
+		$('#page-' + page).removeClass('d-none')
+		$('.main-nav').removeClass('active')
+		$('#navbar-' + page).toggleClass('active')
+	}
+
 
 	// EXPORT ==================================================================
+
 
 	const constructor = () => {
 		// The recipe module to return
