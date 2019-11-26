@@ -6,6 +6,6 @@ a {
 	color: #02ddf9;
 }
 
-#searchResults .row:hover {
+.hover-row:hover {
 	background-color: #222;
 }
