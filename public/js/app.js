@@ -731,11 +731,10 @@
 			const $item = $('#template-search-result').clone()
 			$item.removeClass('d-none')
 
-			const id = getID()
-			$item.attr('id', id)
+			$item.attr('id', recipe._id)
+			$item.click(() => showRecipePage(recipe._id, false, 'home'))
 
-			const $link = $item.find('a')
-			$link.click(() => showRecipePage(recipe._id, false, 'home'))
+			const $link = $item.find('.col')
 			$link.html(recipe.name)
 			$('#searchResults').append($item)
 		})
