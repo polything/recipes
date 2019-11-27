@@ -124,11 +124,6 @@
 		$('#profile-prompt-navbar-' + name).addClass('active')
 	}
 
-	const onError = (data, _, _2) => {
-		data = data.responseJSON
-		showAlert(data.msg)
-	}
-
 	// Refresh the home and profile recipe lists.
 	const onDeleteRecipeSuccess = (_, _2, _3) => {
 		initRecipes()
@@ -318,17 +313,17 @@
 	// LOGOUT ==================================================================
 
 
+	const logout = () => {
+		sendAjax('GET', null, `${DATA_URL}/profile/logout`, onLogoutSuccess,
+			onError)
+	}
+
 	const onLogoutSuccess = (data, _, _2) => {
 		updateProfile(data)
 		$('#navbar-pantry').addClass('d-none')
 		$('#navbar-my-recipes').addClass('d-none')
 		switchProfile('prompt')
 		filterPantryList('')
-	}
-
-	const logout = () => {
-		sendAjax('GET', null, `${DATA_URL}/profile/logout`, onLogoutSuccess,
-			onError)
 	}
 
 
@@ -401,6 +396,15 @@
 		getPantry()
 	}
 
+	// Show pantry amount editing elements.
+	const showPantryAmountEdit = (id) => {
+		const $edit = $(`#${id} .pantry-amount-edit`)
+		$edit.removeClass('d-none')
+
+		$(`#${id} .pantry-editable`).addClass('d-none')
+		$edit.find('.pantry-amount-input').focus()
+	}
+
 	// Request saving pantry amount edit.
 	const submitPantryAmountEdit = (id) => {
 		const data = {}
@@ -412,13 +416,19 @@
 		sendAjax('POST', data, `${DATA_URL}/pantry`, onPantryAmountEditSuccess)
 	}
 
-	// Show pantry amount editing elements.
-	const showPantryAmountEdit = (id) => {
-		const $edit = $(`#${id} .pantry-amount-edit`)
-		$edit.removeClass('d-none')
 
-		$(`#${id} .pantry-editable`).addClass('d-none')
-		$edit.find('.pantry-amount-input').focus()
+	// PANTRY SEARCH ===========================================================
+
+
+	// Handler for when the pantry search input value has changed.
+	// @param event The event type.
+	// @param term The search term in the input element.
+	const onPantrySearch = (event, term) => {
+		// Ignore modifier key up events
+		if (isModifierKey(event.key)) { return }
+
+		term = sanitizeSearchString(term)
+		filterPantryList(term)
 	}
 
 
@@ -762,9 +772,14 @@
 	// RECIPE SEARCH ===========================================================
 
 
-	const onRecipeSearch = (term) => {
-		term = term.trim()
-		term = term.replace(/\s+/gi, ' ')
+	// Handler for when the recipe search input value has changed.
+	// @param event The event type.
+	// @param term The search term in the input element.
+	const onRecipeSearch = (event, term) => {
+		// Ignore modifier key up events
+		if (isModifierKey(event.key)) { return }
+
+		term = sanitizeSearchString(term)
 		if (term === '') {
 			updateRecipeList(defaultRecipes)
 		} else {
@@ -779,10 +794,6 @@
 			defaultRecipes = recipes
 		}
 		updateRecipeList(recipes)
-	}
-
-	const search = (event, elem, callback) => {
-		callback(elem.value)
 	}
 
 	const searchForRecipes = (term) => {
@@ -815,6 +826,20 @@
 	const hideFormInvalid = (id) => {
 		$(id).removeClass('is-invalid')
 		$(`${id}-help`).addClass('d-none')
+	}
+
+	// Determine if the key is a modifier key (Alt, Control, Shift) or not.
+	// @param key The key to check.
+	// @return true if key is modifier key; false otherwise.
+	const isModifierKey = (key) => {
+		return ['Alt', 'Control', 'Shift'].includes(key)
+	}
+
+	// Handler for displaying receiving AJAX errors.
+	// @data The received data.
+	const onError = (data, _, _2) => {
+		data = data.responseJSON
+		showAlert(data.msg)
 	}
 
 	// Send an AJAX request with the correct settings to enable the server to
@@ -850,6 +875,14 @@
 		$('#navbar-' + page).toggleClass('active')
 	}
 
+	// Sanitize the given search string.
+	// @param str The string to sanitize.
+	// @return The sanitized string.
+	const sanitizeSearchString = (str) => {
+		str = str.trim()
+		return str.replace(/\s+/gi, ' ')
+	}
+
 
 	// EXPORT ==================================================================
 
@@ -877,10 +910,10 @@
 		widget.initRecipes = initRecipes
 		widget.login = login
 		widget.logout = logout
+		widget.onPantrySearch = onPantrySearch
 		widget.onRecipeSearch = onRecipeSearch
 		widget.resetDeleteAccount = resetDeleteAccount
 		widget.saveRecipeEdit = saveRecipeEdit
-		widget.search = search
 		widget.showChangePass = showChangePass
 		widget.showPantryAddPage = showPantryAddPage
 		widget.showRecipeAddPage = showRecipeAddPage
