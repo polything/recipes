@@ -167,27 +167,9 @@
 		return $ret
 	}
 
-
 	const switchProfile = (name) => {
 		$('.page-profile').addClass('d-none')
 		$('#profile-' + name).removeClass('d-none')
-	}
-
-	const onLogoutSuccess = (data, _, _2) => {
-		updateProfile(data)
-		$('#navbar-pantry').addClass('d-none')
-		$('#navbar-my-recipes').addClass('d-none')
-		switchProfile('prompt')
-		filterPantryList('')
-	}
-
-	const logout = () => {
-		$.ajax({
-			error: onError,
-			method: 'GET',
-			success: onLogoutSuccess,
-			url: DATA_URL + '/profile/logout'
-		})
 	}
 
 	const onCreateAccountSuccess = (data, _, _2) => {
@@ -245,10 +227,10 @@
 		// Ingredients
 		$('#recipe-ingredients').html('') // Clear contents
 		recipe.ingredients.forEach(ingredient => {
-			const prep = ingredient.prep !== null ? ', ' + ingredient.prep : ''
-			const note = ingredient.note !== null ? ' (' + ingredient.note + ')' : ''
-			const str = ingredient.amount + ' ' + ingredient.unit + ' '
-				+ ingredient.name + prep + note
+			const prep = ingredient.prep ? ', ' + ingredient.prep : ''
+			const note = ingredient.note ? ' (' + ingredient.note + ')' : ''
+			const str = `${ingredient.amount} ${ingredient.unit} `
+				+ `${ingredient.name}${prep}${note}`
 
 			const $elem = $('<li></li>')
 			$elem.html(str)
@@ -330,6 +312,23 @@
 		switchProfile('view')
 		$('#navbar-pantry').removeClass('d-none')
 		$('#navbar-my-recipes').removeClass('d-none')
+	}
+
+
+	// LOGOUT ==================================================================
+
+
+	const onLogoutSuccess = (data, _, _2) => {
+		updateProfile(data)
+		$('#navbar-pantry').addClass('d-none')
+		$('#navbar-my-recipes').addClass('d-none')
+		switchProfile('prompt')
+		filterPantryList('')
+	}
+
+	const logout = () => {
+		sendAjax('GET', null, `${DATA_URL}/profile/logout`, onLogoutSuccess,
+			onError)
 	}
 
 
