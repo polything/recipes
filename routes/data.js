@@ -13,32 +13,6 @@ router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
 	return res.status(200).json(req.user.pantry).end()
 })
 
-
-// POST Add pantry item
-router.post('/pantry', passportConfig.isAuthenticated, async (req, res) => {
-	if (!req.user) { return res.status(400).end() }
-
-	const data = {
-		amount: Number(req.query.amount),
-		name: req.query.name,
-		unit: req.query.unit,
-	}
-
-	if ((req.user.pantry.filter(v => v.name === data.name)).length > 0) {
-		return res.status(400).json({
-			msg: `Pantry already has ${data.name}`,
-		}).end()
-	}
-
-	const result = await User.findOneAndUpdate({name: req.user.name}, {
-		$push: { pantry: data }
-	})
-
-	if (!result) { return res.status(400).json({}).end() }
-
-	return res.status(200).json({}).end()
-})
-
 // DELETE user
 router.delete('/profile', passportConfig.isAuthenticated, async (req, res) => {
 	const data = await User.findOneAndDelete({name: req.user.name})
@@ -123,6 +97,41 @@ router.get('/profile/recipes', passportConfig.isAuthenticated, async (req, res) 
 
 	if (!user.recipes) { res.status(500).json({}).end() }
 	return res.status(200).json(user.recipes).end()
+})
+
+
+// PANTRY ======================================================================
+
+
+// POST Add/update pantry item
+router.post('/pantry', passportConfig.isAuthenticated, async (req, res) => {
+	const data = util.getPantryItem(req)
+
+	if (!data._id) {
+		try {
+			await User.findByIdAndUpdate(req.user._id, {
+				$push: { pantry: data }
+			}, { runValidators: true })
+
+			return res.status(200).json({}).end()
+		} catch (_) {
+			return util.send400(res, `Could not add ${data.name}`)
+		}
+	}
+
+	try {
+		await User.updateOne({'pantry._id': data._id}, {
+			$set: {
+				'pantry.$.amount': data.amount,
+				'pantry.$.name': data.name,
+				'pantry.$.unit': data.unit,
+			}
+		}, { runValidators: true, upsert: true })
+
+		return res.status(200).json({}).end()
+	} catch (e) {
+		return util.send400(res, `Could not update ${data.name}`)
+	}
 })
 
 

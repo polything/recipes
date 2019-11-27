@@ -355,17 +355,70 @@
 		getPantry()
 	}
 
+	// Request saving the pantry item.
 	const submitIngredient = () => {
 		const ingredient = {}
-		ingredient.name = $('#ingredient-name').val()
+		ingredient.name = $('#ingredient-name').val().trim()
 		ingredient.amount = $('#ingredient-amount').val()
 		ingredient.unit = $('#ingredient-unit').val()
 
-		const url = DATA_URL + '/pantry?name=' + ingredient.name
-			+ '&amount=' + ingredient.amount
-			+ '&unit=' + ingredient.unit
+		const url = `${DATA_URL}/pantry`
 
-		sendAjax('POST', {}, url, onPantryAddSuccess)
+		sendAjax('POST', ingredient, url, onPantryAddSuccess)
+	}
+
+
+	// PANTRY EDIT =============================================================
+
+
+	// Hide the pantry amount editing elements.
+	const hidePantryAmountEdit = (id) => {
+		$(`#${id} .pantry-editable`).removeClass('d-none')
+		$(`#${id} .pantry-amount-edit`).addClass('d-none')
+	}
+
+	// Event handler for when the user clicks to edit a pantry item amount.
+	const onPantryAmountEdit = (data) => {
+		const id = data.data
+		showPantryAmountEdit(id)
+	}
+
+	// Event handler for when the user approves a pantry item amount edit.
+	const onPantryAmountEditApprove = (data) => {
+		const id = data.data
+		submitPantryAmountEdit(id)
+		hidePantryAmountEdit(id)
+	}
+
+	// Event handler for when the user cancels a pantry item amount edit.
+	const onPantryAmountEditCancel = (data) => {
+		const id = data.data
+		hidePantryAmountEdit(id)
+	}
+
+	// Event handler for when pantry item amount edit succeeds.
+	const onPantryAmountEditSuccess = (_, _2, _3) => {
+		getPantry()
+	}
+
+	// Request saving pantry amount edit.
+	const submitPantryAmountEdit = (id) => {
+		const data = {}
+		data._id = id
+		data.name = $(`#${id} .pantry-name`).text().trim()
+		data.amount = $(`#${id} .pantry-amount-input`).val()
+		data.unit = $(`#${id} .pantry-unit`).text().trim()
+
+		sendAjax('POST', data, `${DATA_URL}/pantry`, onPantryAmountEditSuccess)
+	}
+
+	// Show pantry amount editing elements.
+	const showPantryAmountEdit = (id) => {
+		const $edit = $(`#${id} .pantry-amount-edit`)
+		$edit.removeClass('d-none')
+
+		$(`#${id} .pantry-editable`).addClass('d-none')
+		$edit.find('.pantry-amount-input').focus()
 	}
 
 
@@ -390,15 +443,29 @@
 			// Clone template row
 			const $item = $('#template-pantry-item').clone()
 			$item.removeClass('d-none')
+			$item.attr('id', ingredient._id)
 
-			const $cols = $item.find('div')
-			const $name = $($cols[0])
-			const $amount = $($cols[1])
-			const $unit = $($cols[2])
+			// Name text
+			$item.find('.pantry-name').text(ingredient.name)
 
-			$name.html(ingredient.name)
-			$amount.html(ingredient.amount)
-			$unit.html(ingredient.unit)
+			// Edit click area
+			$item.find('.pantry-editable').click(ingredient._id,
+				onPantryAmountEdit)
+
+			// Amount text
+			$item.find('.pantry-amount').text(ingredient.amount)
+
+			// Unit text
+			$item.find('.pantry-unit').text(` ${ingredient.unit}`)
+
+			// Edit elements
+			$item.find('.pantry-amount-edit input').val(ingredient.amount)
+			$item.find('.btn-success').click(ingredient._id,
+				onPantryAmountEditApprove)
+
+			$item.find('.btn-danger').click(ingredient._id,
+				onPantryAmountEditCancel)
+
 			$('#pantry-item-list').append($item)
 		}
 	}
@@ -411,7 +478,7 @@
 	// Update the pantry item list with the received pantry items.
 	const onGetPantrySuccess = (data, _, _2) => {
 		user.pantry = data
-		filterPantryList('')
+		filterPantryList($('#filter').val().trim())
 	}
 
 
