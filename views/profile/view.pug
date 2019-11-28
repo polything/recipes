@@ -10,15 +10,18 @@
 form#change-pass-form.mt-3.d-none
 	.row: .col Change password
 	.row
-		input#change-pass-1.col.form-control(type='password' placeholder='New' required)
+		input#change-pass-1.col.form-control(type='password' placeholder='New'
+			autocomplete='off' required)
 
 	.row
-		input#change-pass-2.col.form-control(type='password' placeholder='Confirm ' required)
+		input#change-pass-2.col.form-control(type='password'
+			placeholder='Confirm' autocomplete='off' required)
 		#change-pass-2-help.invalid-feedback.d-none Password mismatch
 
 	.row.justify-content-center.mt-3
 		.col-auto
-			button#change-pass-submit-btn.btn.btn-light(onclick='app.submitChangePass()') Change
+			button#change-pass-submit-btn.btn.btn-light(
+				onclick='app.submitChangePass()') Change
 		.col-auto
 			button.btn.btn-danger(onclick='app.hideChangePass()') Close
 

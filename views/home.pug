@@ -2,8 +2,9 @@
 	.row: .col
 		input#search.form-control(
 			type='text'
-			placeholder='Search'
+			autocomplete='off'
 			onkeyup='app.onRecipeSearch(event, this.value)'
+			placeholder='Search'
 		)
 
 	.mt-3#searchResults

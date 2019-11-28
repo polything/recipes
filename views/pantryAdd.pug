@@ -3,10 +3,12 @@
 
 .row: .col
 	div: label(for='name') Name
-		input(type='text' name='name' id='ingredient-name' required)
+		input#ingredient-name(type='text' name='name' autocomplete='off'
+			required)
 
 	div: label(for='amount') Amount
-		input(type='number' name='amount' id='ingredient-amount' required)
+		input#ingredient-amount(type='number' name='amount' autocomplete='off'
+			required)
 
 	div: label(for='unit') Unit
 		select(name='unit' id='ingredient-unit')
