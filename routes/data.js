@@ -163,6 +163,7 @@ router.get('/recipe', async (req, res) => {
 	term = term.trim()
 	term = term.replace(/\s+/gi, ' ')
 
+	const ret = []
 	const recipes = await Recipe.find({
 		$or: [
 			{ name: new RegExp(term, 'i') },
@@ -170,7 +171,18 @@ router.get('/recipe', async (req, res) => {
 		]
 	}).lean()
 
-	return res.status(200).json(recipes).end()
+	for (const recipe of recipes) {
+		const user = await User.findOne({ 'recipes': recipe._id }, 'name')
+			.lean()
+
+		if (user) {
+			recipe.ownerID = user._id
+			recipe.ownerName = user.name
+			ret.push(recipe)
+		}
+	}
+
+	return res.status(200).json(ret).end()
 })
 
 
