@@ -811,8 +811,12 @@
 			$item.attr('id', recipe._id)
 			$item.click(() => showRecipePage(recipe._id, false, 'home'))
 
-			const $link = $item.find('.col')
-			$link.html(recipe.name)
+			const $name = $item.find('.recipe-name')
+			$name.text(recipe.name)
+
+			const $author = $item.find('.recipe-author')
+			$author.attr('id', recipe.ownerID)
+			$author.text(recipe.ownerName)
 			$('#searchResults').append($item)
 		})
 	}
