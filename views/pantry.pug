@@ -1,10 +1,9 @@
 .row
-	.col.pr-0: input(
-			id='filter'
-			class='form-control'
+	.col.pr-0: input#filter.form-control(
 			type='text'
-			placeholder='Search'
-			onkeyup='app.onPantrySearch(event, this.value)')
+			autocomplete='off'
+			onkeyup='app.onPantrySearch(event, this.value)'
+			placeholder='Search')
 
 	.col-auto: button#pantry-add-btn.btn.btn-light(onclick='app.showPantryAddPage()') +
 
@@ -18,7 +17,7 @@
 		span.pantry-amount
 		span.pantry-unit
 	.col-4.px-1.pantry-amount-edit.d-none.input-group
-		input.pantry-amount-input.form-control(type='number')
+		input.pantry-amount-input.form-control(type='number' autocomplete='off')
 		.input-group-append
 			button.btn.btn-success &#x2714;
 			button.btn.btn-danger x
