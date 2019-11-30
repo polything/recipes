@@ -7,12 +7,6 @@ const User = require('../models/User')
 
 const util = require('../js/util')
 
-// Get pantry
-router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
-	if (!req.user) { return res.status(400).end() }
-	return res.status(200).json(req.user.pantry).end()
-})
-
 // DELETE user
 router.delete('/profile', passportConfig.isAuthenticated, async (req, res) => {
 	const data = await User.findOneAndDelete({name: req.user.name})
@@ -102,6 +96,35 @@ router.get('/profile/recipes', passportConfig.isAuthenticated, async (req, res) 
 
 // PANTRY ======================================================================
 
+
+// Delete item in the pantry
+router.delete('/pantry/:id', passportConfig.isAuthenticated, async (req, res) => {
+	const id = req.params.id
+
+	// Check user has pantry item
+	const matches = req.user.pantry.filter((item) => item._id === id)
+
+	// Good as deleted if not found
+	if (!matches) {
+		console.log('no matches')
+		return util.send200(res)
+	}
+
+	// Delete the item
+	const user = await User.findByIdAndUpdate(req.user._id,
+		{ $pull: { 'pantry': { _id: id } } })
+
+	if (!user) {
+		return util.send500(res, `Could not delete pantry item ${id}`)
+	}
+
+	return util.send200(res)
+})
+
+// Get pantry
+router.get('/pantry', passportConfig.isAuthenticated, async (req, res) => {
+	return util.send200(res, req.user.pantry)
+})
 
 // POST Add/update pantry item
 router.post('/pantry', passportConfig.isAuthenticated, async (req, res) => {
