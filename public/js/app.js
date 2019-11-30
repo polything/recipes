@@ -441,7 +441,7 @@
 	const submitPantryItemEdit = (id) => {
 		const data = {}
 		data._id = id
-		data.name = $(`#${id} .pantry-name`).text().trim()
+		data.name = $(`#${id} .pantry-edit-name`).val().trim()
 		data.amount = $(`#${id} .pantry-edit-amount`).val()
 		data.unit = $(`#${id} .pantry-edit-unit`).val()
 
@@ -502,13 +502,12 @@
 			$item.find('.pantry-unit').text(` ${ingredient.unit}`)
 
 			// Edit elements
+			$item.find('.pantry-edit-name').val(ingredient.name)
 			$item.find('.pantry-edit-amount').val(ingredient.amount)
 			$item.find('.pantry-edit-unit').val(ingredient.unit)
+			$item.find('.pantry-edit-cancel').click(id, onPantryItemEditCancel)
 			$item.find('.pantry-edit-confirm').click(id,
 				onPantryItemEditApprove)
-
-			$item.find('.pantry-edit-cancel').click(id,
-				onPantryItemEditCancel)
 
 			// Show the confirm button when clicked
 			const $del = $item.find('.pantry-delete')
