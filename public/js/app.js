@@ -363,57 +363,89 @@
 	}
 
 
-	// PANTRY EDIT =============================================================
+	// PANTRY DELETE ===========================================================
 
 
-	// Hide the pantry amount editing elements.
-	const hidePantryAmountEdit = (id) => {
-		$(`#${id} .pantry-editable`).removeClass('d-none')
-		$(`#${id} .pantry-amount-edit`).addClass('d-none')
-	}
-
-	// Event handler for when the user clicks to edit a pantry item amount.
-	const onPantryAmountEdit = (data) => {
-		const id = data.data
-		showPantryAmountEdit(id)
-	}
-
-	// Event handler for when the user approves a pantry item amount edit.
-	const onPantryAmountEditApprove = (data) => {
-		const id = data.data
-		submitPantryAmountEdit(id)
-		hidePantryAmountEdit(id)
-	}
-
-	// Event handler for when the user cancels a pantry item amount edit.
-	const onPantryAmountEditCancel = (data) => {
-		const id = data.data
-		hidePantryAmountEdit(id)
-	}
-
-	// Event handler for when pantry item amount edit succeeds.
-	const onPantryAmountEditSuccess = (_, _2, _3) => {
+	// Handler for when deleting a pantry item is successful.
+	const onDeletePantrySuccess = (_, _2, _3) => {
 		getPantry()
 	}
 
-	// Show pantry amount editing elements.
-	const showPantryAmountEdit = (id) => {
-		const $edit = $(`#${id} .pantry-amount-edit`)
+	// Handler for when the confirm option is displayed and the user cancels
+	// the pantry item delete.
+	// @param id{String} The ID of the pantry item being deleted.
+	const onPantryDeleteCancelClick = (id) => {
+		$(`#${id}-delete-confirm`).parent().addClass('d-none')
+		// Remove existing click events so they don't stack
+		$(`#${id}-delete`).off()
+		$(`#${id}-delete`).click(() => onPantryDeleteClick(id))
+	}
+
+	// Handler for when the delete button is clicked. Displays the confirm
+	// button and modifies the delete button behavior to cancel the delete
+	// operation.
+	// @param id{String} The ID of the pantry item being deleted.
+	const onPantryDeleteClick = (id) => {
+		$(`#${id}-delete-confirm`).parent().removeClass('d-none')
+		// Remove existing click events so they don't stack
+		$(`#${id}-delete`).off()
+		$(`#${id}-delete`).click(() => onPantryDeleteCancelClick(id))
+	}
+
+
+	// PANTRY EDIT =============================================================
+
+
+	// Hide the pantry item editing elements.
+	const hidePantryItemEdit = (id) => {
+		$(`#${id} .pantry-editable`).removeClass('d-none')
+		$(`#${id} .pantry-edit`).addClass('d-none')
+	}
+
+	// Event handler for when the user clicks to edit a pantry item.
+	const onPantryItemEdit = (data) => {
+		const id = data.data
+		showPantryItemEdit(id)
+	}
+
+	// Event handler for when the user approves a pantry item edit.
+	const onPantryItemEditApprove = (data) => {
+		const id = data.data
+		submitPantryItemEdit(id)
+		hidePantryItemEdit(id)
+	}
+
+	// Event handler for when the user cancels a pantry item edit.
+	const onPantryItemEditCancel = (data) => {
+		const id = data.data
+		hidePantryItemEdit(id)
+	}
+
+	// Event handler for when pantry item edit succeeds.
+	const onPantryItemEditSuccess = (_, _2, _3) => {
+		getPantry()
+	}
+
+	// Show pantry item editing elements.
+	// @param id{String} The ID of the pantry item.
+	const showPantryItemEdit = (id) => {
+		const $edit = $(`#${id} .pantry-edit`)
 		$edit.removeClass('d-none')
 
 		$(`#${id} .pantry-editable`).addClass('d-none')
-		$edit.find('.pantry-amount-input').focus()
+		$edit.find('.pantry-edit-amount').focus()
 	}
 
-	// Request saving pantry amount edit.
-	const submitPantryAmountEdit = (id) => {
+	// Request saving pantry item edit.
+	// @param id{String} The ID of the pantry item.
+	const submitPantryItemEdit = (id) => {
 		const data = {}
 		data._id = id
 		data.name = $(`#${id} .pantry-name`).text().trim()
-		data.amount = $(`#${id} .pantry-amount-input`).val()
-		data.unit = $(`#${id} .pantry-unit`).text().trim()
+		data.amount = $(`#${id} .pantry-edit-amount`).val()
+		data.unit = $(`#${id} .pantry-edit-unit`).val()
 
-		sendAjax('POST', data, `${DATA_URL}/pantry`, onPantryAmountEditSuccess)
+		sendAjax('POST', data, `${DATA_URL}/pantry`, onPantryItemEditSuccess)
 	}
 
 
@@ -461,7 +493,7 @@
 			$item.find('.pantry-name').text(ingredient.name)
 
 			// Edit click area
-			$item.find('.pantry-editable').click(id, onPantryAmountEdit)
+			$item.find('.pantry-editable').click(id, onPantryItemEdit)
 
 			// Amount text
 			$item.find('.pantry-amount').text(ingredient.amount)
@@ -470,12 +502,13 @@
 			$item.find('.pantry-unit').text(` ${ingredient.unit}`)
 
 			// Edit elements
-			$item.find('.pantry-amount-edit input').val(ingredient.amount)
-			$item.find('.pantry-amount-confirm').click(id,
-				onPantryAmountEditApprove)
+			$item.find('.pantry-edit-amount').val(ingredient.amount)
+			$item.find('.pantry-edit-unit').val(ingredient.unit)
+			$item.find('.pantry-edit-confirm').click(id,
+				onPantryItemEditApprove)
 
-			$item.find('.pantry-amount-cancel').click(id,
-				onPantryAmountEditCancel)
+			$item.find('.pantry-edit-cancel').click(id,
+				onPantryItemEditCancel)
 
 			// Show the confirm button when clicked
 			const $del = $item.find('.pantry-delete')
@@ -499,36 +532,10 @@
 		sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
 	}
 
-	// Handler for when deleting a pantry item is successful.
-	const onDeletePantrySuccess = (_, _2, _3) => {
-		getPantry()
-	}
-
 	// Update the pantry item list with the received pantry items.
 	const onGetPantrySuccess = (data, _, _2) => {
 		user.pantry = data
 		filterPantryList($('#filter').val().trim())
-	}
-
-	// Handler for when the confirm option is displayed and the user cancels
-	// the pantry item delete.
-	// @param id{String} The ID of the pantry item being deleted.
-	const onPantryDeleteCancelClick = (id) => {
-		$(`#${id}-delete-confirm`).parent().addClass('d-none')
-		// Remove existing click events so they don't stack
-		$(`#${id}-delete`).off()
-		$(`#${id}-delete`).click(() => onPantryDeleteClick(id))
-	}
-
-	// Handler for when the delete button is clicked. Displays the confirm
-	// button and modifies the delete button behavior to cancel the delete
-	// operation.
-	// @param id{String} The ID of the pantry item being deleted.
-	const onPantryDeleteClick = (id) => {
-		$(`#${id}-delete-confirm`).parent().removeClass('d-none')
-		// Remove existing click events so they don't stack
-		$(`#${id}-delete`).off()
-		$(`#${id}-delete`).click(() => onPantryDeleteCancelClick(id))
 	}
 
 
