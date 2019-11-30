@@ -12,11 +12,13 @@
 
 
 #template-pantry-item.row.py-1.align-items-center.hover-row.d-none
-	.col.pantry-name
-	.col.px-1.pantry-editable
+	//- Add py-2 to the name/units so that there's a bigger click area
+	.col.py-2.pantry-name.pantry-editable
+	.col.px-1.py-2.pantry-editable
 		span.pantry-amount
 		span.pantry-unit
-	.col.px-1.pantry-edit.d-none.input-group
+	.col.px-1.pantry-edit.input-group.d-none
+		input.pantry-edit-name.form-control(type='text' autocomplete='off')
 		input.pantry-edit-amount.form-control(type='number'
 			autocomplete='off')
 
