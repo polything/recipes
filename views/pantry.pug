@@ -12,12 +12,16 @@
 
 
 #template-pantry-item.row.py-1.align-items-center.hover-row.d-none
-	.col-8.pantry-name
-	.col-4.px-1.pantry-editable
+	.col.pantry-name
+	.col.px-1.pantry-editable
 		span.pantry-amount
 		span.pantry-unit
-	.col-4.px-1.pantry-amount-edit.d-none.input-group
-		input.pantry-amount-input.form-control(type='number' autocomplete='off')
+	.col.px-1.pantry-amount-edit.d-none.input-group
+		input.pantry-amount-input.form-control(type='number'
+			autocomplete='off')
 		.input-group-append
-			button.btn.btn-success &#x2714;
-			button.btn.btn-danger x
+			button.btn.btn-success.pantry-amount-confirm &#x2714;
+			button.btn.btn-danger.pantry-amount-cancel x
+
+	.col-auto: button.btn.btn-danger.pantry-delete x
+	.col-auto.pl-0.d-none: button.btn.btn-success.pantry-delete-confirm &#x2714;

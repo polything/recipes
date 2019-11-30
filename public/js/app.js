@@ -71,14 +71,14 @@
 	}
 
 	const onRecipeDeleteClick = (id) => {
-		$(`#${id}-confirm`).removeClass('d-none')
+		$(`#${id}-confirm`).parent().removeClass('d-none')
 		// Remove existing click events so they don't stack
 		$(`#${id}-delete`).off()
 		$(`#${id}-delete`).click(() => onRecipeDeleteCancelClick(id))
 	}
 
 	const onRecipeDeleteCancelClick = (id) => {
-		$(`#${id}-confirm`).addClass('d-none')
+		$(`#${id}-confirm`).parent().addClass('d-none')
 		// Remove existing click events so they don't stack
 		$(`#${id}-delete`).off()
 		$(`#${id}-delete`).click(() => onRecipeDeleteClick(id))
@@ -450,17 +450,18 @@
 				continue
 			}
 
+			const id = ingredient._id
+
 			// Clone template row
 			const $item = $('#template-pantry-item').clone()
 			$item.removeClass('d-none')
-			$item.attr('id', ingredient._id)
+			$item.attr('id', id)
 
 			// Name text
 			$item.find('.pantry-name').text(ingredient.name)
 
 			// Edit click area
-			$item.find('.pantry-editable').click(ingredient._id,
-				onPantryAmountEdit)
+			$item.find('.pantry-editable').click(id, onPantryAmountEdit)
 
 			// Amount text
 			$item.find('.pantry-amount').text(ingredient.amount)
@@ -470,11 +471,24 @@
 
 			// Edit elements
 			$item.find('.pantry-amount-edit input').val(ingredient.amount)
-			$item.find('.btn-success').click(ingredient._id,
+			$item.find('.pantry-amount-confirm').click(id,
 				onPantryAmountEditApprove)
 
-			$item.find('.btn-danger').click(ingredient._id,
+			$item.find('.pantry-amount-cancel').click(id,
 				onPantryAmountEditCancel)
+
+			// Show the confirm button when clicked
+			const $del = $item.find('.pantry-delete')
+			$del.attr('id', `${id}-delete`)
+			$del.click(() => onPantryDeleteClick(id))
+
+			// Delete the pantry item on confirm
+			const $delConfirm = $item.find('.pantry-delete-confirm')
+			$delConfirm.attr('id', `${id}-delete-confirm`)
+			$delConfirm.click(() => {
+				const url = `${DATA_URL}/pantry/${id}`
+				sendAjax('DELETE', {}, url, onDeletePantrySuccess, onError)
+			})
 
 			$('#pantry-item-list').append($item)
 		}
@@ -485,10 +499,36 @@
 		sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
 	}
 
+	// Handler for when deleting a pantry item is successful.
+	const onDeletePantrySuccess = (_, _2, _3) => {
+		getPantry()
+	}
+
 	// Update the pantry item list with the received pantry items.
 	const onGetPantrySuccess = (data, _, _2) => {
 		user.pantry = data
 		filterPantryList($('#filter').val().trim())
+	}
+
+	// Handler for when the confirm option is displayed and the user cancels
+	// the pantry item delete.
+	// @param id{String} The ID of the pantry item being deleted.
+	const onPantryDeleteCancelClick = (id) => {
+		$(`#${id}-delete-confirm`).parent().addClass('d-none')
+		// Remove existing click events so they don't stack
+		$(`#${id}-delete`).off()
+		$(`#${id}-delete`).click(() => onPantryDeleteClick(id))
+	}
+
+	// Handler for when the delete button is clicked. Displays the confirm
+	// button and modifies the delete button behavior to cancel the delete
+	// operation.
+	// @param id{String} The ID of the pantry item being deleted.
+	const onPantryDeleteClick = (id) => {
+		$(`#${id}-delete-confirm`).parent().removeClass('d-none')
+		// Remove existing click events so they don't stack
+		$(`#${id}-delete`).off()
+		$(`#${id}-delete`).click(() => onPantryDeleteCancelClick(id))
 	}
 
 
