@@ -105,10 +105,7 @@ router.delete('/pantry/:id', passportConfig.isAuthenticated, async (req, res) =>
 	const matches = req.user.pantry.filter((item) => item._id === id)
 
 	// Good as deleted if not found
-	if (!matches) {
-		console.log('no matches')
-		return util.send200(res)
-	}
+	if (!matches) { return util.send200(res) }
 
 	// Delete the item
 	const user = await User.findByIdAndUpdate(req.user._id,

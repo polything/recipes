@@ -2,72 +2,14 @@
 /* global app, DATA_URL */
 
 (() => {
+	let currentRecipe = {}
 	let defaultRecipes = []
 	let user = {}
 
-	// currentRecipe is used in parseRecipe(3)
-	let currentRecipe = {}
-
-
-	// Create an ingredient input with a unique ID from the ingredient input
-	// template. The unique ID is assigned to the top div's id attribute.
-	//
-	// @return A JQuery element.
-	const createIngredientInput = () => {
-		const $ret = $('#template-ingredient-input').clone()
-		const id = getID()
-		$ret.attr('id', id)
-		$ret.find('button').click(() => removeElement(id))
-
-		$ret.find('#form-ingredient-name')
-			.attr('id', `${id}-form-ingredient-name`)
-
-		$ret.find('#form-ingredient-name-help')
-			.attr('id', `${id}-form-ingredient-name-help`)
-
-		$ret.find('#form-ingredient-amount')
-			.attr('id', `${id}-form-ingredient-amount`)
-
-		$ret.find('#form-ingredient-amount-help')
-			.attr('id', `${id}-form-ingredient-amount-help`)
-
-		return $ret
-	}
-
-	const addFormIngredient = (ingredient) => {
-		const $elem = createIngredientInput()
-		const id = $elem.attr('id')
-		if (ingredient) {
-			$elem.find('.name').val(ingredient.name)
-			$elem.find('.amount').val(ingredient.amount)
-			$elem.find('.unit').val(ingredient.unit)
-			$elem.find('.prep').val(ingredient.prep)
-			$elem.find('.note').val(ingredient.note)
-		}
-		const $li = $('<li></li>').append($elem)
-		$li.attr('id', id)
-		$('#recipe-form-ingredients').append($li)
-	}
-
-
-	const editRecipe = () => {
-		switchPage('edit-recipe')
-		$('#navbar').addClass('d-none')
-
-		$('#recipe-form-name').val(currentRecipe.name)
-		$('#recipe-form-name').attr('recipe-id', currentRecipe._id)
-
-		$('#recipe-form-ingredients').html('')
-		currentRecipe.ingredients.forEach(ingredient => {
-			addFormIngredient(ingredient)
-		})
-
-		$('#recipe-form-directions').val(currentRecipe.directions.join('\n\n'))
-	}
 
 	const backToRecipePage = () => {
 		switchPage('my-recipes')
-		$('#navbar').removeClass('d-none')
+		showNavBar()
 	}
 
 	const onRecipeDeleteClick = (id) => {
@@ -92,42 +34,11 @@
 		$('#' + id).remove()
 	}
 
-	// Create an ingredient input element and append it to the ingredient list
-	// prefixed by `formType`.
-	//
-	// @param formType{String} The unique prefix for ingredient list. Used to
-	// 					 differentiate between edit and add ingredient form
-	// 					 lists.
-	// @param ingredient{Object} Ingredient object to prefill ingredient input
-	// 							 inputs.
-	const addIngredientInput = (formType, ingredient) => {
-		const $elem = createIngredientInput()
-		if (ingredient) {
-			$elem.find('.name').val(ingredient.name)
-			$elem.find('.amount').val(ingredient.amount)
-			$elem.find('.unit').val(ingredient.unit)
-			$elem.find('.prep').val(ingredient.prep)
-			$elem.find('.note').val(ingredient.note)
-		}
-
-		$(`#${formType}-form-ingredients`).append($elem)
-	}
-
-	const initAddPage = () => {
-		addIngredientInput('recipe-add')
-	}
-
 	const switchProfilePrompt = (name) => {
 		$('.page-profile-prompt').addClass('d-none')
 		$('#profile-prompt-' + name).removeClass('d-none')
 		$('.profile-nav').removeClass('active')
 		$('#profile-prompt-navbar-' + name).addClass('active')
-	}
-
-	// Refresh the home and profile recipe lists.
-	const onDeleteRecipeSuccess = (_, _2, _3) => {
-		initRecipes()
-		initProfile()
 	}
 
 	// Create a recipe item for the profile page.
@@ -204,7 +115,7 @@
 
 		// Set back button behavior to return to specified page
 		$('#recipe-back-btn').click(() => {
-			$('#navbar').removeClass('d-none')
+			showNavBar()
 			switchPage(returnPage)
 			formatRecipeView({
 				name: 'Loading recipe...',
@@ -212,7 +123,7 @@
 				directions: [],
 			})
 		})
-		$('#navbar').addClass('d-none')
+		hideNavBar()
 		switchPage('recipe')
 	}
 
@@ -332,13 +243,13 @@
 
 	// Hide the pantry add page and show the pantry page.
 	const hidePantryAddPage = () => {
-		$('#navbar').removeClass('d-none')
+		showNavBar()
 		switchPage('pantry')
 	}
 
 	// Hide the pantry page and show the pantry add page.
 	const showPantryAddPage = () => {
-		$('#navbar').addClass('d-none')
+		hideNavBar()
 		switchPage('pantry-add')
 	}
 
@@ -623,7 +534,7 @@
 
 	// Update recipes listed for the profile.
 	// @param {Object} Array of recipes.
-	const updateProfileRecipes = (recipes) => {
+	const updateMyRecipes = (recipes) => {
 		$('#profile-recipe-list').html('')
 		recipes.forEach((recipe) => {
 			$('#profile-recipe-list').append(
@@ -638,39 +549,12 @@
 		// Update local user data
 		user = data
 		$('#profile-name').text(data.name ? data.name : '')
-		if (data.recipes) { updateProfileRecipes(data.recipes) }
+		if (data.recipes) { updateMyRecipes(data.recipes) }
 		filterPantryList('')
 	}
 
 
 	// RECIPE ==================================================================
-
-
-	// Get the contents of the recipe form.
-	// @return{Object} Recipe.
-	const getRecipeFormContent = () => {
-		const recipe = {}
-		recipe._id = $('#recipe-form-name').attr('recipe-id')
-		recipe.name = $('#recipe-form-name').val()
-		recipe.ingredients = []
-
-		$('#recipe-form-ingredients').find('li').each((idx, elem) => {
-			const ingredient = {}
-			ingredient.name = $(elem).find('.name').first().val()
-			ingredient.amount = Number($(elem).find('.amount').first().val())
-			ingredient.unit = $(elem).find('.unit').first().val()
-			ingredient.prep = $(elem).find('.prep').first().val()
-			ingredient.note = $(elem).find('.note').first().val()
-
-			recipe.ingredients.push(ingredient)
-		})
-
-		recipe.directions =
-			$('#recipe-form-directions').val().split('\n')
-				.filter(line => line !== '')
-
-		return recipe
-	}
 
 
 	const getRecipes = async () => {
@@ -685,19 +569,164 @@
 	// RECIPE ADD ==============================================================
 
 
-	const addRecipe = () => {
-		if (!validateRecipeForm('recipe-add')) {
-			return
+	// Switch back to the "My Recipes" page.
+	const onRecipeAddBack = () => {
+		switchPage('my-recipes')
+		showNavBar()
+	}
+
+	// Error handling for errors from the server.
+	// @param data{Object} The error data.
+	const onRecipeAddError = (data, _, _2) => {
+		resetRecipeFormInvalid()
+		const errs = data.responseJSON
+		if (errs.includes('name-exists')) {
+			showFormInvalid('#recipe-form-name', 'That name is taken')
+		}
+	}
+
+	// Handle when the recipe form is reset when adding a new recipe.
+	const onRecipeAddReset = () => {
+		resetRecipeFormInvalid()
+		resetRecipeFormInputs()
+	}
+
+	// Submit the recipe to the server for saving.
+	const onRecipeAddSave = () => {
+		resetRecipeFormInvalid()
+		if (!recipeFormValid()) { return }
+
+		const recipe = getRecipeFormRecipe()
+
+		sendAjax('POST', recipe, `${DATA_URL}/recipe`, onRecipeAddSuccess,
+			onRecipeAddError)
+	}
+
+	// Handle when the recipe is saved to the server.
+	const onRecipeAddSuccess = () => {
+		$('#recipe-form-save').text('Saved!')
+		$('#recipe-form-save').addClass('btn-success')
+		$('#recipe-form-save').removeClass('btn-light')
+		initRecipes()
+		initProfile()
+	}
+
+	// Show the page where the user can add a recipe to their profile.
+	const showRecipeAddPage = () => {
+		resetRecipeFormInputs()
+		resetRecipeFormButtons()
+
+		switchPage('recipe-form')
+		hideNavBar()
+
+		setNewBtnClick('#recipe-form-back', onRecipeAddBack)
+		setNewBtnClick('#recipe-form-save', onRecipeAddSave)
+		setNewBtnClick('#recipe-form-reset', onRecipeAddReset)
+	}
+
+
+	// RECIPE DELETE ===========================================================
+
+
+	// Refresh the home and profile recipe lists.
+	const onDeleteRecipeSuccess = (_, _2, _3) => {
+		initRecipes()
+		initProfile()
+	}
+
+
+	// RECIPE EDIT =============================================================
+
+
+	// Handler for when a recipe edit is started.
+	const showRecipeEditPage = () => {
+		setRecipeForm(currentRecipe)
+
+		switchPage('recipe-form')
+		hideNavBar()
+
+		setNewBtnClick('#recipe-form-back', onRecipeEditBack)
+		setNewBtnClick('#recipe-form-save', onRecipeEditSave)
+		setNewBtnClick('#recipe-form-reset', onRecipeEditReset)
+	}
+
+	// Hide the recipe form page and show the recipe page.
+	const onRecipeEditBack = () => {
+		switchPage('recipe')
+	}
+
+	// Submit the recipe edit for saving.
+	const onRecipeEditSave = () => {
+		resetRecipeFormInvalid()
+		if (!recipeFormValid()) { return }
+
+		const recipe = getRecipeFormRecipe()
+		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
+			onError)
+
+		$('#recipe-form-save').text('Saving...')
+	}
+
+	// Reset the edited recipe to the original.
+	const onRecipeEditReset = () => {
+		setRecipeForm(currentRecipe)
+	}
+
+	// Update user recipes and search results.
+	const onRecipeEditSuccess = async () => {
+		$('#recipe-form-save').text('Saved!')
+		$('#recipe-form-save').addClass('btn-success')
+		$('#recipe-form-save').removeClass('btn-secondary')
+		user.recipes = await getRecipes()
+		updateMyRecipes(user.recipes)
+
+		// Reset the search results
+		defaultRecipes = []
+		searchForRecipes(getSearchTerm())
+	}
+
+
+	// RECIPE FORM =============================================================
+
+
+	// Add an ingredient form element to the recipe form.
+	const addRecipeFormIngredient = (ingredient) => {
+		const id = ingredient ? ingredient._id : getID()
+		const $elem = $('#template-ingredient-form').clone()
+		$elem.removeClass('d-none')
+
+		$elem.attr('id', id)
+		$elem.find('button').click(() => removeElement(id))
+
+		if (ingredient) {
+			$elem.find('.name').val(ingredient.name)
+			$elem.find('.amount').val(ingredient.amount)
+			$elem.find('.unit').val(ingredient.unit)
+			$elem.find('.prep').val(ingredient.prep)
+			$elem.find('.note').val(ingredient.note)
 		}
 
+		// Set IDs on fields with help messages
+		$elem.find('.name').attr('id', `${id}-name`)
+		$elem.find('.name-help').attr('id', `${id}-name-help`)
+		$elem.find('.amount').attr('id', `${id}-amount`)
+		$elem.find('.amount-help').attr('id', `${id}-amount-help`)
+
+		$('#recipe-form-ingredients').append($elem)
+	}
+
+	// Get the recipe from the recipe form.
+	// @return{Object} Recipe.
+	const getRecipeFormRecipe = () => {
 		const recipe = {}
-		recipe.name = $('#recipe-add-form-name').val()
+		recipe._id = $('#recipe-form-name').attr('recipe-id')
+		recipe.name = $('#recipe-form-name').val()
 		recipe.ingredients = []
 
-		$('#recipe-add-form-ingredients').find('.ingredient').each((idx, elem) => {
+		$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
 			const ingredient = {}
 			ingredient.name = $(elem).find('.name').first().val()
-			ingredient.amount = $(elem).find('.amount').first().val()
+			ingredient.amount = Number($(elem).find('.amount').first().val())
 			ingredient.unit = $(elem).find('.unit').first().val()
 			ingredient.prep = $(elem).find('.prep').first().val()
 			ingredient.note = $(elem).find('.note').first().val()
@@ -705,87 +734,51 @@
 			recipe.ingredients.push(ingredient)
 		})
 
-		recipe.directions =
-			$('#recipe-add-form-directions').val().split('\n')
-				.filter((line) => line !== '')
+		// Sanitize directions by removing extraneous lines/spaces
+		let directions = $('#recipe-form-directions').val()
+		directions = directions.replace(/  +/, ' ')
+		directions = directions.split('\n')
+		directions = directions.filter(line => line !== '')
 
-		sendAjax('POST', recipe, `${DATA_URL}/recipe`, onRecipeAddSuccess,
-			onRecipeAddError)
-	}
+		recipe.directions = directions
 
-	// Reset the add recipe form
-	const addRecipeFormReset = () => {
-		resetRecipeAddInvalidForms()
-		$('#recipe-add-form-name').val('')
-		$('#recipe-add-form-ingredients').html('')
-		addIngredientInput('recipe-add')
-		$('#recipe-add-form-directions').val('')
-		$('#recipe-add-btn').text('Save')
-		$('#recipe-add-btn').addClass('btn-light')
-		$('#recipe-add-btn').removeClass('btn-success')
-	}
-
-	// Hide the page where the user can add a recipe to their profile and show
-	// the "My Recipes" page.
-	const hideRecipeAddPage = () => {
-		switchPage('my-recipes')
-		$('#navbar').removeClass('d-none')
-	}
-
-	const onRecipeAddError = (data, _, _2) => {
-		resetRecipeAddInvalidForms()
-		const errs = data.responseJSON
-		if (errs.includes('name-exists')) {
-			showFormInvalid('#recipe-add-form-name')
-		}
-	}
-
-	const onRecipeAddSuccess = () => {
-		$('#recipe-add-btn').text('Saved!')
-		$('#recipe-add-btn').addClass('btn-success')
-		$('#recipe-add-btn').removeClass('btn-light')
-		initRecipes()
-		initProfile()
-	}
-
-	// Reset all input formatting for invalid values
-	const resetRecipeAddInvalidForms = () => {
-		hideFormInvalid('#recipe-add-form-name')
-		hideFormInvalid('#recipe-add-form-directions')
-	}
-
-	// Show the page where the user can add a recipe to their profile and hide
-	// the "My Recipes" page.
-	const showRecipeAddPage = () => {
-		switchPage('recipe-add')
-		$('#navbar').addClass('d-none')
+		return recipe
 	}
 
 	// Validate the recipe form and highlight elements that fail validation.
 	// @return true if valid; false otherwise.
-	const validateRecipeForm = (formType) => {
+	const recipeFormValid = () => {
 		let valid = true
-		let id = `#${formType}-form-name`
-		if ($(id).val() === '') {
-			showFormInvalid(id)
+		let id = '#recipe-form-name'
+
+		// Check recipe name
+		const name = $(id).val()
+		if (name === '') {
+			showFormInvalid(id, 'Cannot be empty')
+			valid = false
+		} else if (name.length < 3) {
+			showFormInvalid(id, 'Must be at least 3 characters')
 			valid = false
 		}
 
+		// Check ingredient fields and showing help messages if invalid
 		const checkField = (elem, className) => {
-			const $elem = $(elem).find(className).first()
-			if ($elem.val() === '') {
-				showFormInvalid(`#${$elem.attr('id')}`)
+			const $elem = $(elem)
+			const $child = $elem.find(`.${className}`).first()
+			if ($child.val() === '') {
+				const id = `#${$elem.attr('id')}-${className}`
+				showFormInvalid(id)
 				valid = false
 			}
 		}
 
-		// Check empty fields for all ingredients
-		$(`#${formType}-form-ingredients`).find('.ingredient').each((_, elem) => {
-			checkField(elem, '.name')
-			checkField(elem, '.amount')
+		// Check fields for all ingredients
+		$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
+			checkField(elem, 'name')
+			checkField(elem, 'amount')
 		})
 
-		id = `#${formType}-form-directions`
+		id = '#recipe-form-directions'
 		if ($(id).val() === '') {
 			showFormInvalid(id)
 			valid = false
@@ -794,29 +787,60 @@
 		return valid
 	}
 
-
-	// RECIPE EDIT =============================================================
-
-
-	// Update user recipes and search results.
-	const onRecipeEditSuccess = async () => {
-		user.recipes = await getRecipes()
-		updateProfileRecipes(user.recipes)
-		initRecipes()
+	// Reset all input formatting for invalid values.
+	const resetRecipeFormInvalid = () => {
+		hideFormInvalid('#recipe-form-name')
+		hideFormInvalid('#recipe-form-directions')
+		$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
+			const id = $(elem).attr('id')
+			hideFormInvalid(`#${id}-name`)
+			hideFormInvalid(`#${id}-amount`)
+		})
 	}
 
+	// Reset the recipe form inputs.
+	const resetRecipeFormInputs = () => {
+		resetRecipeFormInvalid()
+		$('#recipe-form-name').val('')
+		$('#recipe-form-ingredients').html('')
+		addRecipeFormIngredient()
+		$('#recipe-form-directions').val('')
+		$('#recipe-form-save').text('Save')
+		$('#recipe-form-save').addClass('btn-secondary')
+		$('#recipe-form-save').removeClass('btn-success')
+	}
 
-	// Request save of recipe edit and return to user recipes page
-	const saveRecipeEdit = () => {
-		backToRecipePage()
-		const recipe = getRecipeFormContent()
-		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
-			onError)
+	// Remove recipe form button behavior.
+	const resetRecipeFormButtons = () => {
+		$('#recipe-form-back').off()
+		$('#recipe-form-save').off()
+		$('#recipe-form-reset').off()
+	}
+
+	// Set the values in the recipe form with information from the given recipe.
+	// @param recipe{Object} The recipe.
+	const setRecipeForm = (recipe) => {
+		$('#recipe-form-name').val(recipe.name)
+		$('#recipe-form-name').attr('recipe-id', recipe._id)
+
+		// Insert ingredient form elements
+		$('#recipe-form-ingredients').html('')
+		recipe.ingredients.forEach(ingredient => {
+			addRecipeFormIngredient(ingredient)
+		})
+
+		$('#recipe-form-directions').val(recipe.directions.join('\n\n'))
 	}
 
 
 	// RECIPE SEARCH ===========================================================
 
+
+	// Get the term in the search bar.
+	// @return {String} The search term.
+	const getSearchTerm = () => {
+		return $('#search').val().trim()
+	}
 
 	// Handler for when the recipe search input value has changed.
 	// @param event The event type.
@@ -878,6 +902,11 @@
 		$(`${id}-help`).addClass('d-none')
 	}
 
+	// Hide the navbar from view.
+	const hideNavBar = () => {
+		$('#navbar').addClass('d-none')
+	}
+
 	// Determine if the key is a modifier key (Alt, Control, Shift) or not.
 	// @param key The key to check.
 	// @return true if key is modifier key; false otherwise.
@@ -890,6 +919,14 @@
 	const onError = (data, _, _2) => {
 		data = data.responseJSON
 		showAlert(data.msg)
+	}
+
+	// Sanitize the given search string.
+	// @param str The string to sanitize.
+	// @return The sanitized string.
+	const sanitizeSearchString = (str) => {
+		str = str.trim()
+		return str.replace(/\s+/gi, ' ')
 	}
 
 	// Send an AJAX request with the correct settings to enable the server to
@@ -911,11 +948,30 @@
 		})
 	}
 
+	// Set new button behavior by resetting click behavior and assigning a new
+	// one.
+	// @param id Element ID.
+	// @param func Function to call.
+	const setNewBtnClick = (id, func) => {
+		$(id).off()
+		$(id).click(func)
+	}
+
 	// Show invalid formatting and help text of a form input.
 	// @param id{String} HTML ID selector of the input field.
-	const showFormInvalid = (id) => {
+	// @param msg{String} Message to display.
+	const showFormInvalid = (id, msg) => {
 		$(id).addClass('is-invalid')
 		$(`${id}-help`).removeClass('d-none')
+
+		if (msg) {
+			$(`${id}-help`).text(msg)
+		}
+	}
+
+	// Display the navbar.
+	const showNavBar = () => {
+		$('#navbar').removeClass('d-none')
 	}
 
 	const switchPage = (page) => {
@@ -923,14 +979,6 @@
 		$('#page-' + page).removeClass('d-none')
 		$('.main-nav').removeClass('active')
 		$('#navbar-' + page).toggleClass('active')
-	}
-
-	// Sanitize the given search string.
-	// @param str The string to sanitize.
-	// @return The sanitized string.
-	const sanitizeSearchString = (str) => {
-		str = str.trim()
-		return str.replace(/\s+/gi, ' ')
 	}
 
 
@@ -941,32 +989,27 @@
 		// The recipe module to return
 		const widget = {}
 
-		widget.addFormIngredient = addFormIngredient
-		widget.addIngredientInput = addIngredientInput
-		widget.addRecipe = addRecipe
-		widget.addRecipeFormReset = addRecipeFormReset
+		widget.addRecipeFormIngredient = addRecipeFormIngredient
 		widget.backToRecipePage = backToRecipePage
 		widget.confirmDeleteAccount = confirmDeleteAccount
 		widget.createAccount = createAccount
 		widget.deleteAccount = deleteAccount
-		widget.editRecipe = editRecipe
 		widget.filterPantryList = filterPantryList
 		widget.hideChangePass = hideChangePass
 		widget.hidePantryAddPage = hidePantryAddPage
-		widget.hideRecipeAddPage = hideRecipeAddPage
 		widget.initAlert = initAlert
-		widget.initAddPage = initAddPage
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
 		widget.login = login
 		widget.logout = logout
 		widget.onPantrySearch = onPantrySearch
 		widget.onRecipeSearch = onRecipeSearch
+		widget.onRecipeAddSave = onRecipeAddSave
 		widget.resetDeleteAccount = resetDeleteAccount
-		widget.saveRecipeEdit = saveRecipeEdit
 		widget.showChangePass = showChangePass
 		widget.showPantryAddPage = showPantryAddPage
 		widget.showRecipeAddPage = showRecipeAddPage
+		widget.showRecipeEditPage = showRecipeEditPage
 		widget.submitChangePass = submitChangePass
 		widget.submitIngredient = submitIngredient
 		widget.switchPage = switchPage
@@ -979,7 +1022,6 @@
 })()
 
 $(() => {
-	app.initAddPage()
 	app.initRecipes()
 	app.initProfile()
 	app.initAlert()
