@@ -28,7 +28,7 @@ router.get('/profile', passportConfig.isAuthenticated, async (req, res) => {
 
 router.get('/profile/createAllowed', (req, res) => {
 	res.status(200).json({
-		'allowed': process.env.ALLOW_ACCOUNT_CREATION,
+		'allowed': profile.creationAllowed(),
 	}).end()
 })
 

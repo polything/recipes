@@ -1,6 +1,6 @@
 const test = require('ava')
 
-const profile = require('../js/profile')
+const profile = require('../../js/profile')
 
 test('true when "true"', t => {
 	process.env.ALLOW_ACCOUNT_CREATION = 'true'

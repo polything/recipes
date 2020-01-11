@@ -21,7 +21,7 @@ server-update: #env=prod
 	ssh recipes "${goto_src} && ${git_update}"
 	ssh recipes "${goto_src} && npm i"
 
-test:
+test: node_modules
 	npm test
 
 title:
