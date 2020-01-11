@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"scripts": {
 		"lint": "node ./node_modules/eslint/bin/eslint.js . && echo \"No linting issues\"",
-		"start": "node app.js"
+		"start": "node app.js",
+		"test": "ava"
 	},
 	"author": "",
 	"license": "MIT",
@@ -24,6 +25,7 @@
 	},
 	"main": "app.js",
 	"devDependencies": {
+		"ava": "^2.4.0",
 		"eslint": "^6.4.0",
 		"mocha": "^6.1.4"
 	}

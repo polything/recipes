@@ -5,6 +5,7 @@ const router = express.Router()
 const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
+const profile = require('../js/profile')
 const util = require('../js/util')
 
 // DELETE user
@@ -32,8 +33,9 @@ router.get('/profile/createAllowed', (req, res) => {
 })
 
 router.post('/profile/create', async (req, res, next) => {
-	if (!process.env.ALLOW_ACCOUNT_CREATION) {
-		return res.status(400).end({ msg: 'Account creation is not allowed' })
+	if (!profile.creationAllowed()) {
+		const data = { msg: 'Account creation is not allowed' }
+		return res.status(400).json(data).end()
 	}
 
 	if (await User.findOne({ name: req.body.username })) {
