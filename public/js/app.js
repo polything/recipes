@@ -118,38 +118,14 @@
 			showNavBar()
 			switchPage(returnPage)
 			formatRecipeView({
-				name: 'Loading recipe...',
-				ingredients: [],
 				directions: [],
+				ingredients: [],
+				name: 'Loading recipe...',
+				servings: 1,
 			})
 		})
 		hideNavBar()
 		switchPage('recipe')
-	}
-
-	const formatRecipeView = (recipe) => {
-		$('#recipe-name').html(recipe.name)
-
-		// Ingredients
-		$('#recipe-ingredients').html('') // Clear contents
-		recipe.ingredients.forEach(ingredient => {
-			const prep = ingredient.prep ? ', ' + ingredient.prep : ''
-			const note = ingredient.note ? ' (' + ingredient.note + ')' : ''
-			const str = `${ingredient.amount} ${ingredient.unit} `
-				+ `${ingredient.name}${prep}${note}`
-
-			const $elem = $('<li></li>')
-			$elem.html(str)
-			$('#recipe-ingredients').append($elem)
-		})
-
-		// Directions
-		$('#recipe-directions').html('') // Clear contents
-		recipe.directions.forEach(direction => {
-			const $elem = $('<p></p>')
-			$elem.html(direction)
-			$('#recipe-directions').append($elem)
-		})
 	}
 
 	// Callback for GET create allowed request.
@@ -565,6 +541,32 @@
 		})
 	}
 
+	const formatRecipeView = (recipe) => {
+		$('#recipe-name').html(recipe.name)
+		$('#recipe-servings').html(recipe.servings || '1')
+
+		// Ingredients
+		$('#recipe-ingredients').html('') // Clear contents
+		recipe.ingredients.forEach(ingredient => {
+			const prep = ingredient.prep ? ', ' + ingredient.prep : ''
+			const note = ingredient.note ? ' (' + ingredient.note + ')' : ''
+			const str = `${ingredient.amount} ${ingredient.unit} `
+				+ `${ingredient.name}${prep}${note}`
+
+			const $elem = $('<li></li>')
+			$elem.html(str)
+			$('#recipe-ingredients').append($elem)
+		})
+
+		// Directions
+		$('#recipe-directions').html('') // Clear contents
+		recipe.directions.forEach(direction => {
+			const $elem = $('<p></p>')
+			$elem.html(direction)
+			$('#recipe-directions').append($elem)
+		})
+	}
+
 
 	// RECIPE ADD ==============================================================
 
@@ -721,6 +723,7 @@
 		const recipe = {}
 		recipe._id = $('#recipe-form-name').attr('recipe-id')
 		recipe.name = $('#recipe-form-name').val()
+		recipe.servings = $('#recipe-form-servings').val()
 		recipe.ingredients = []
 
 		$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
@@ -760,6 +763,8 @@
 			showFormInvalid(id, 'Must be at least 3 characters')
 			valid = false
 		}
+
+		// No recipe servings check
 
 		// Check ingredient fields and showing help messages if invalid
 		const checkField = (elem, className) => {
@@ -802,6 +807,7 @@
 	const resetRecipeFormInputs = () => {
 		resetRecipeFormInvalid()
 		$('#recipe-form-name').val('')
+		$('#recipe-form-servings').val('')
 		$('#recipe-form-ingredients').html('')
 		addRecipeFormIngredient()
 		$('#recipe-form-directions').val('')
@@ -820,8 +826,9 @@
 	// Set the values in the recipe form with information from the given recipe.
 	// @param recipe{Object} The recipe.
 	const setRecipeForm = (recipe) => {
-		$('#recipe-form-name').val(recipe.name)
 		$('#recipe-form-name').attr('recipe-id', recipe._id)
+		$('#recipe-form-name').val(recipe.name)
+		$('#recipe-form-servings').val(recipe.servings)
 
 		// Insert ingredient form elements
 		$('#recipe-form-ingredients').html('')

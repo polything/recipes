@@ -1,24 +1,29 @@
-# Recipe
-A Raspberry Pi recipe server.
+# Recipes
+A server for recipes.
+
+## Starting the service
+
+Copy `.env.example` to `.env`, change the value of `SESSION_SECRET`, and then run the start command.
+
+```
+$ cp .env.example .env
+$ make serve
+```
 
 ## Configuration
 
-### Config path
-Set the configuration file to use by setting `RECIPE_CONFIG` to the path of the configuration file to use. If `RECIPE_CONFIG` is not specified, `config.json` in the repo is used.
+**File**
+Rename the given `.env.example` to `.env` and modify with custom values.
 
-### Configuration file
-* `port {integer}` Port to serve requests on.
-* `rootURL {string}` URL of the application's root.
-* `localDB` Local database configuration options.
-    * `type {string}` The name of the file (without the `.js` extension). For example, if the adapter is `mongodb.js`, the value would be `mongodb`.
-    * `options {Object}` Options for this particular database adapter.
+**Environment variable**
+Configuration options can also be specified as environment variables instead of in a `.env` file.
 
-## Configuration options access
-To access the configuration file in code, import `js/config.js` and access options from the `options` member.
+### Configuration options
 
-```javascript
-// dbAdapters/mydb.js
-const config = require('../js/config')
-
-console.log(config.options.localDB.options.myoption)
-```
+key | default | description
+:---: | :---: | :---
+`ALLOW_ACCOUNT_CREATION` | `false` | Allow clients to create accounts. If `false`, the option to create an account is not shown to the client.
+`MONGODB_URI` | `undefined` | The URI of the MongoDB server to connect to.
+`PORT` | `3000` | The port to have the service bind to (e.g. 3000).
+`ROOT_URL` | `/` | The URI this service serves from. For example, if a reverse proxy forwards the URI `https://mysite.com/recipes` to this service, then the value must be `/recipes` in order for the service to serve its assets and reach API calls for the client.
+`SESSION_SECRET` | `undefined` | The secret used to sign session ID cookies. See [express-session](https://github.com/expressjs/session) for more information. It is **highly** recommended to change this from the default.

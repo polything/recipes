@@ -22,6 +22,7 @@ const recipeSchema = new mongoose.Schema({
 	dateAdded: { type: Date, default: Date.now },
 	directions: [{ type: String, trim: true, minlength: 3 }],
 	ingredients: [recipeIngredientSchema],
+	servings: { type: Number, default: 1, min: 1 },
 	name: {
 		type: String,
 		required: true,
