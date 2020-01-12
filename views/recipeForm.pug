@@ -11,6 +11,11 @@ form
 
 		#recipe-form-name-help.invalid-feedback.d-none Recipe name taken
 
+	.form-group.row.mb-3
+		label.col-form-label.col-auto.pr-2(for='recipe-form-servings') Servings
+		.col.pl-0: input#recipe-form-servings.form-control(type='number'
+			autocomplete='off' min='0' step='1' placeholder='1')
+
 	.form-row: .col
 		div Ingredients
 

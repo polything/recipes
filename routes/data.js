@@ -240,6 +240,7 @@ router.post('/recipe', passportConfig.isAuthenticated, async (req, res) => {
 		directions: recipe.directions,
 		ingredients: ingredients,
 		name: recipe.name,
+		servings: recipe.servings,
 	})
 
 	const err = newRecipe.validateSync()
