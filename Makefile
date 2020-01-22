@@ -1,29 +1,29 @@
-goto_src=cd ~/recipes/$(env)
-git_update=git fetch origin $(env) && git checkout $(env) && git reset --hard FETCH_HEAD
+pack ::= "public.tgz"
+src ::= "~/recipes"
 
-logs: #type=error|access
-	ssh recipes "${goto_src} && tail -f ./log-${type}.log"
+clean:
+	-rm -r ${pack} *.log tests_output
+
+deploy: clean package upload server-restart
 
 node_modules: package.json
-	@make title text="Installing dependencies"
 	npm install
 
+package:
+	tar -czf ${pack} app.js auth js models package.json package-lock.json public routes views
+
 serve: node_modules
-	@make title text="Starting server"
 	nodemon start
 
-server-reload: #env=prod
-	@make title text="Rebuilding server"
-	ssh recipes "${goto_src}"
-
-server-update: #env=prod
-	@make title text="Fetching prod branch and updating src"
-	ssh recipes "${goto_src} && ${git_update}"
-	ssh recipes "${goto_src} && npm i"
+server-restart:
+	-ssh recipes "cd ${src} && npm install"
 
 test: node_modules
 	npm test
 
-title:
-	@echo "\033[92m>>> $(text)\033[0m"
+upload: package
+	-ssh recipes "cd ${src} && rm -r *"
+	scp ${pack} recipes:${src}
+	ssh recipes "cd ${src} && tar -xzf ${pack} && rm ${pack}"
 
+.PHONY: clean deploy package serve server-restart test upload
