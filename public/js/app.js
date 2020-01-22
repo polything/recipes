@@ -93,6 +93,7 @@
 	}
 
 	const parseRecipe = (data, _, _2) => {
+		data.servings = data.servings || 1
 		currentRecipe = data
 		formatRecipeView(data)
 	}
@@ -142,6 +143,7 @@
 		const term = 'a'
 		defaultRecipes = []
 		searchForRecipes(term)
+		$('#recipe-servings').change(onRecipeServingsChange)
 	}
 
 
@@ -543,11 +545,48 @@
 
 	const formatRecipeView = (recipe) => {
 		$('#recipe-name').html(recipe.name)
-		$('#recipe-servings').html(recipe.servings || '1')
+		$('#recipe-servings').val(recipe.servings)
 
 		// Ingredients
+		updateIngredients(recipe.ingredients)
+
+		// Directions
+		$('#recipe-directions').html('') // Clear contents
+		recipe.directions.forEach(direction => {
+			const $elem = $('<p></p>')
+			$elem.html(direction)
+			$('#recipe-directions').append($elem)
+		})
+	}
+
+	// Handler for when recipe servings is changed in recipe display. Calculates
+	// new scaled values and updates the view.
+	const onRecipeServingsChange = () => {
+		const percent = $('#recipe-servings').val() / currentRecipe.servings
+		const scaled = scaleIngredients(currentRecipe.ingredients, percent)
+		updateIngredients(scaled)
+	}
+
+	// Calculate the new ratios of ingredients for the specified servings of the
+	// recipe. If the percentage is 1, return the original array.
+	// @return Array of ingredients with ingredient amount scaled by percentage.
+	const scaleIngredients = (ingredients, percent) => {
+		if (percent === 1) { return ingredients }
+
+		// Deep clone ingredients
+		const ret = JSON.parse(JSON.stringify(ingredients))
+		ret.forEach(ingredient => {
+			// Round to two places
+			const num = ingredient.amount * percent
+			ingredient.amount = Math.round(num * 100) / 100
+		})
+		return ret
+	}
+
+	// Update the ingredient view
+	const updateIngredients = (ingredients) => {
 		$('#recipe-ingredients').html('') // Clear contents
-		recipe.ingredients.forEach(ingredient => {
+		ingredients.forEach(ingredient => {
 			const prep = ingredient.prep ? ', ' + ingredient.prep : ''
 			const note = ingredient.note ? ' (' + ingredient.note + ')' : ''
 			const str = `${ingredient.amount} ${ingredient.unit} `
@@ -556,14 +595,6 @@
 			const $elem = $('<li></li>')
 			$elem.html(str)
 			$('#recipe-ingredients').append($elem)
-		})
-
-		// Directions
-		$('#recipe-directions').html('') // Clear contents
-		recipe.directions.forEach(direction => {
-			const $elem = $('<p></p>')
-			$elem.html(direction)
-			$('#recipe-directions').append($elem)
 		})
 	}
 
