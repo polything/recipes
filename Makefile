@@ -1,4 +1,4 @@
-pack ::= "public.tgz"
+pack ::= "app.tgz"
 src ::= "~/recipes"
 
 clean:
@@ -9,8 +9,8 @@ deploy: clean package upload server-restart
 node_modules: package.json
 	npm install
 
-package:
-	tar -czf ${pack} app.js auth js models package.json package-lock.json public routes views
+package: clean
+	tar -czf ${pack} app.js auth js models package.json package-lock.json public routes tools views
 
 serve: node_modules
 	nodemon start
