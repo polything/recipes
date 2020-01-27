@@ -12,8 +12,7 @@ const recipeIngredientSchema = new mongoose.Schema({
 	prep: { type: String, max: 20, min: 3, trim: true },
 	unit: {
 		type: String,
-		required: true,
-		enum: ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz', 'pint',
+		enum: ['', 'cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz', 'pint',
 			'quart', 'tbsp', 'tsp'],
 	},
 })

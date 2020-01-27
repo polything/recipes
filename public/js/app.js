@@ -589,8 +589,9 @@
 		ingredients.forEach(ingredient => {
 			const prep = ingredient.prep ? ', ' + ingredient.prep : ''
 			const note = ingredient.note ? ' (' + ingredient.note + ')' : ''
-			const str = `${ingredient.amount} ${ingredient.unit} `
-				+ `${ingredient.name}${prep}${note}`
+			const unit = ingredient.unit ? ` ${ingredient.unit}` : ''
+			const str = `${ingredient.amount}${unit} ${ingredient.name}${prep}`
+				+ `${note}`
 
 			const $elem = $('<li></li>')
 			$elem.html(str)
