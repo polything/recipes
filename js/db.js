@@ -1,14 +1,12 @@
 const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
+// Create a new user and return an error if creating the user failed.
 exports.createUser = async (username, password) => {
-	const user = new User({
-		name: username,
-		password: password,
-	})
-
 	return new Promise((resolve, _) => {
-		user.save((err) => { resolve(err) })
+		User.create({name: username, password: password}, (err, _) => {
+			resolve(err)
+		})
 	})
 }
 

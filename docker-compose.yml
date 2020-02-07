@@ -1,0 +1,50 @@
+version: '3'
+services:
+    recipes:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: ["./wait-for.sh", "db:27017", "--", "node", "app.js"]
+        container_name: recipes
+        depends_on:
+            - "db"
+        env_file: .env
+        environment:
+            - ALLOW_ACCOUNT_CREATION=$ALLOW_ACCOUNT_CREATION
+            - MONGO_DB=$MONGO_DB
+            - MONGO_HOSTNAME=db
+            - MONGO_PASSWORD=$MONGO_PASSWORD
+            - MONGO_PORT=$MONGO_PORT
+            - MONGO_USERNAME=$MONGO_USERNAME
+            - PORT=$PORT
+            - ROOT_URL=$ROOT_URL
+            - SESSION_SECRET=$SESSION_SECRET
+        image: recipes
+        networks:
+            - app-network
+        ports:
+            - "3000:3000"
+        restart: unless-stopped
+        volumes:
+            - node_modules:/home/node/app/node_modules
+    db:
+        container_name: db
+        env_file: .env
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=$MONGO_USERNAME
+            - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
+        image: "mongo:4.0.14"
+        networks:
+            - app-network
+        ports:
+            - "27017:27017"
+        volumes:
+            - dbdata:/data/db
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    dbdata:
+    node_modules:
