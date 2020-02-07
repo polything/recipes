@@ -5,6 +5,7 @@ const router = express.Router()
 const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
+const db = require('../js/db')
 const profile = require('../js/profile')
 const util = require('../js/util')
 
@@ -38,27 +39,25 @@ router.post('/profile/create', async (req, res, next) => {
 		return res.status(400).json(data).end()
 	}
 
-	if (await User.findOne({ name: req.body.username })) {
+	const username = req.body.username
+	const password = req.body.password
+	if (await db.usernameExists(username)) {
 		return res.status(400).json({ msg: 'Name already exists' }).end()
 	}
 
-	const user = new User({
-		name: req.body.username,
-		password: req.body.password,
-	})
+	const err = await db.createUser(username, password)
+	if (err) { return next(err) }
 
-	user.save((err) => {
-		if (err) { return next(err) }
+	const user = await db.getUser(username)
 
-		req.logIn(user, async (err) => {
-			if (err) { return res.status(500).json({}).end() }
+	req.logIn(user, async (err) => {
+		if (err) { return res.status(500).json({}).end() }
 
-			// recipes doesn't need to be populated because it's an empty list
-			const data = await User
-				.findOne({name: user.name}, 'name recipes pantry').lean()
+		// recipes doesn't need to be populated because it's an empty list
+		const data = await User
+			.findOne({name: user.name}, 'name recipes pantry').lean()
 
-			return res.status(200).json(data).end()
-		})
+		return res.status(200).json(data).end()
 	})
 })
 

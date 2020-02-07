@@ -1,2 +1,14 @@
+.dockerignore
+.git
+.gitignore
+.env
+doc
+docker-compose.yml
+Dockerfile
+Makefile
+nightwatch.json
 node_modules
 npm-debug.log
+README.md
+tests
+tools
