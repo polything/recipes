@@ -638,9 +638,7 @@
 
 	// Handle when the recipe is saved to the server.
 	const onRecipeAddSuccess = () => {
-		$('#recipe-form-save').text('Saved!')
-		$('#recipe-form-save').addClass('btn-success')
-		$('#recipe-form-save').removeClass('btn-light')
+		setRecipeFormSaveBtnSaved()
 		initRecipes()
 		initProfile()
 	}
@@ -687,6 +685,7 @@
 	// Hide the recipe form page and show the recipe page.
 	const onRecipeEditBack = () => {
 		switchPage('recipe')
+		resetRecipeFormSave()
 	}
 
 	// Submit the recipe edit for saving.
@@ -826,6 +825,13 @@
 		return valid
 	}
 
+	// Remove recipe form button behavior.
+	const resetRecipeFormButtons = () => {
+		$('#recipe-form-back').off()
+		$('#recipe-form-save').off()
+		$('#recipe-form-reset').off()
+	}
+
 	// Reset all input formatting for invalid values.
 	const resetRecipeFormInvalid = () => {
 		hideFormInvalid('#recipe-form-name')
@@ -845,16 +851,14 @@
 		$('#recipe-form-ingredients').html('')
 		addRecipeFormIngredient()
 		$('#recipe-form-directions').val('')
+		resetRecipeFormSave()
+	}
+
+	// Reset recipe form save button to default graphics.
+	const resetRecipeFormSave = () => {
 		$('#recipe-form-save').text('Save')
 		$('#recipe-form-save').addClass('btn-secondary')
 		$('#recipe-form-save').removeClass('btn-success')
-	}
-
-	// Remove recipe form button behavior.
-	const resetRecipeFormButtons = () => {
-		$('#recipe-form-back').off()
-		$('#recipe-form-save').off()
-		$('#recipe-form-reset').off()
 	}
 
 	// Set the values in the recipe form with information from the given recipe.
@@ -871,6 +875,13 @@
 		})
 
 		$('#recipe-form-directions').val(recipe.directions.join('\n\n'))
+	}
+
+	// Set the recipe form save button to display successful save graphics.
+	const setRecipeFormSaveBtnSaved = () => {
+		$('#recipe-form-save').text('Saved!')
+		$('#recipe-form-save').addClass('btn-success')
+		$('#recipe-form-save').removeClass('btn-secondary')
 	}
 
 
