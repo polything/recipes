@@ -695,10 +695,9 @@
 		if (!recipeFormValid()) { return }
 
 		const recipe = getRecipeFormRecipe()
+		$('#recipe-form-save').text('Saving...')
 		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
 			onError)
-
-		$('#recipe-form-save').text('Saving...')
 	}
 
 	// Reset the edited recipe to the original.
@@ -713,6 +712,9 @@
 		$('#recipe-form-save').removeClass('btn-secondary')
 		user.recipes = await getRecipes()
 		updateMyRecipes(user.recipes)
+
+		// Update recipe form
+		getRecipe(currentRecipe._id)
 
 		// Reset the search results
 		defaultRecipes = []

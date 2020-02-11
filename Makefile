@@ -1,7 +1,7 @@
 pack ::= "recipe-image.tgz"
 src ::= "~/recipes/src"
 
-build: Dockerfile
+build: Dockerfile clean
 	docker build -t recipes .
 
 clean:
