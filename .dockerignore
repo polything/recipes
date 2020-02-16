@@ -8,7 +8,7 @@ Dockerfile
 Makefile
 nightwatch.json
 node_modules
-npm-debug.log
 README.md
+src
 tests
 tools

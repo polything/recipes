@@ -50,15 +50,7 @@ const main = () => {
 	app.use(passport.session())
 
 	// Define static resources
-	app.use('/deps', express.static(path.join(__dirname, 'public'),
-		{ maxAge: 31557600000 }))
-
-	app.use('/deps', express.static(
-		path.join(__dirname, 'node_modules/bootstrap/dist'),
-		{ maxAge: 31557600000 }))
-
-	app.use('/deps/js', express.static(
-		path.join(__dirname, 'node_modules/jquery/dist'),
+	app.use('/dist', express.static(path.join(__dirname, 'dist'),
 		{ maxAge: 31557600000 }))
 
 	// Set routes
