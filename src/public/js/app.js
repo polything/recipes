@@ -1,5 +1,9 @@
 /* eslint-env browser, jquery */
 /* global app, DATA_URL */
+import $ from 'jquery/dist/jquery.min.js'
+import * as appAlert from './alert.js'
+import * as navbar from './navbar.js'
+import * as util from './util.js'
 
 (() => {
 	let currentRecipe = {}
@@ -9,7 +13,7 @@
 
 	const backToRecipePage = () => {
 		switchPage('my-recipes')
-		showNavBar()
+		navbar.show()
 	}
 
 	const onRecipeDeleteClick = (id) => {
@@ -24,14 +28,6 @@
 		// Remove existing click events so they don't stack
 		$(`#${id}-delete`).off()
 		$(`#${id}-delete`).click(() => onRecipeDeleteClick(id))
-	}
-
-	const getID = () => {
-		return ('' + Math.random()).slice(2)
-	}
-
-	const removeElement = (id) => {
-		$('#' + id).remove()
 	}
 
 	const switchProfilePrompt = (name) => {
@@ -60,7 +56,7 @@
 		// Delete the recipe on confirm
 		$($confirmBtn).click(() => {
 			const url = `${DATA_URL}/recipe/${id}`
-			sendAjax('DELETE', {}, url, onDeleteRecipeSuccess, onError)
+			util.sendAjax('DELETE', {}, url, onDeleteRecipeSuccess, onError)
 		})
 
 		// Show the confirm button when clicked
@@ -89,7 +85,7 @@
 			'password': $('#create-form-pass').val()
 		}
 
-		sendAjax('POST', data, url, onCreateAccountSuccess)
+		util.sendAjax('POST', data, url, onCreateAccountSuccess)
 	}
 
 	const parseRecipe = (data, _, _2) => {
@@ -116,7 +112,7 @@
 
 		// Set back button behavior to return to specified page
 		$('#recipe-back-btn').click(() => {
-			showNavBar()
+			navbar.show()
 			switchPage(returnPage)
 			formatRecipeView({
 				directions: [],
@@ -125,7 +121,7 @@
 				servings: 1,
 			})
 		})
-		hideNavBar()
+		navbar.hide()
 		switchPage('recipe')
 	}
 
@@ -147,33 +143,6 @@
 	}
 
 
-	// ALERT ===================================================================
-
-
-	// Hide the alert element.
-	const hideAlert = () => {
-		$('#alert').slideUp('slow')
-	}
-
-	// Initialize the alert element by allowing it to be displayed and then
-	// immediately slide up so that it doesn't render and allows `slideDown()`
-	// to work.
-	const initAlert = () => {
-		$('#alert').removeClass('d-none')
-		$('#alert').slideUp(0)
-	}
-
-	// Show the alert element.
-	const showAlert = (text) => {
-		$('#alert').text(text)
-		$('#alert').slideDown('slow', () => {
-			setTimeout(() => {
-				hideAlert()
-			}, 2000)
-		})
-	}
-
-
 	// LOGIN ===================================================================
 
 
@@ -183,7 +152,7 @@
 			'password': $('#login-form-pass').val(),
 		}
 
-		sendAjax('POST', data, '/login', onLoginSuccess, onLoginError)
+		util.sendAjax('POST', data, '/login', onLoginSuccess, onLoginError)
 	}
 
 	const onLoginError = (_, _2, _3) => {
@@ -203,7 +172,7 @@
 
 
 	const logout = () => {
-		sendAjax('GET', null, `${DATA_URL}/profile/logout`, onLogoutSuccess,
+		util.sendAjax('GET', null, `${DATA_URL}/profile/logout`, onLogoutSuccess,
 			onError)
 	}
 
@@ -221,13 +190,13 @@
 
 	// Hide the pantry add page and show the pantry page.
 	const hidePantryAddPage = () => {
-		showNavBar()
+		navbar.show()
 		switchPage('pantry')
 	}
 
 	// Hide the pantry page and show the pantry add page.
 	const showPantryAddPage = () => {
-		hideNavBar()
+		navbar.hide()
 		switchPage('pantry-add')
 	}
 
@@ -248,7 +217,7 @@
 
 		const url = `${DATA_URL}/pantry`
 
-		sendAjax('POST', ingredient, url, onPantryAddSuccess)
+		util.sendAjax('POST', ingredient, url, onPantryAddSuccess)
 	}
 
 
@@ -334,7 +303,7 @@
 		data.amount = $(`#${id} .pantry-edit-amount`).val()
 		data.unit = $(`#${id} .pantry-edit-unit`).val()
 
-		sendAjax('POST', data, `${DATA_URL}/pantry`, onPantryItemEditSuccess)
+		util.sendAjax('POST', data, `${DATA_URL}/pantry`, onPantryItemEditSuccess)
 	}
 
 
@@ -346,9 +315,9 @@
 	// @param term The search term in the input element.
 	const onPantrySearch = (event, term) => {
 		// Ignore modifier key up events
-		if (isModifierKey(event.key)) { return }
+		if (util.isModifierKey(event.key)) { return }
 
-		term = sanitizeSearchString(term)
+		term = util.sanitizeSearchString(term)
 		filterPantryList(term)
 	}
 
@@ -408,7 +377,7 @@
 			$delConfirm.attr('id', `${id}-delete-confirm`)
 			$delConfirm.click(() => {
 				const url = `${DATA_URL}/pantry/${id}`
-				sendAjax('DELETE', {}, url, onDeletePantrySuccess, onError)
+				util.sendAjax('DELETE', {}, url, onDeletePantrySuccess, onError)
 			})
 
 			$('#pantry-item-list').append($item)
@@ -417,7 +386,7 @@
 
 	// Request the user's pantry
 	const getPantry = () => {
-		sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
+		util.sendAjax('GET', null, DATA_URL + '/pantry', onGetPantrySuccess)
 	}
 
 	// Update the pantry item list with the received pantry items.
@@ -432,10 +401,10 @@
 
 	// Initialize profile page
 	const initProfile = () => {
-		sendAjax('GET', null, DATA_URL + '/profile/createAllowed',
+		util.sendAjax('GET', null, DATA_URL + '/profile/createAllowed',
 			onGetCreateAllowedSuccess)
 
-		sendAjax('GET', null, DATA_URL + '/profile', onLoginSuccess)
+		util.sendAjax('GET', null, DATA_URL + '/profile', onLoginSuccess)
 	}
 
 	const onChangePassSuccess = () => {
@@ -469,7 +438,7 @@
 		}
 
 		const data = { newPass: second }
-		sendAjax('POST', data, DATA_URL + '/profile/change', onChangePassSuccess)
+		util.sendAjax('POST', data, DATA_URL + '/profile/change', onChangePassSuccess)
 	}
 
 	const showChangePass = () => {
@@ -506,7 +475,7 @@
 
 	// Submit request to delete currently logged in user.
 	const deleteAccount = () => {
-		sendAjax('DELETE', {}, DATA_URL + '/profile', onDeleteAccountSuccess)
+		util.sendAjax('DELETE', {}, DATA_URL + '/profile', onDeleteAccountSuccess)
 	}
 
 
@@ -606,7 +575,7 @@
 	// Switch back to the "My Recipes" page.
 	const onRecipeAddBack = () => {
 		switchPage('my-recipes')
-		showNavBar()
+		navbar.show()
 	}
 
 	// Error handling for errors from the server.
@@ -632,7 +601,7 @@
 
 		const recipe = getRecipeFormRecipe()
 
-		sendAjax('POST', recipe, `${DATA_URL}/recipe`, onRecipeAddSuccess,
+		util.sendAjax('POST', recipe, `${DATA_URL}/recipe`, onRecipeAddSuccess,
 			onRecipeAddError)
 	}
 
@@ -649,11 +618,11 @@
 		resetRecipeFormButtons()
 
 		switchPage('recipe-form')
-		hideNavBar()
+		navbar.hide()
 
-		setNewBtnClick('#recipe-form-back', onRecipeAddBack)
-		setNewBtnClick('#recipe-form-save', onRecipeAddSave)
-		setNewBtnClick('#recipe-form-reset', onRecipeAddReset)
+		util.setNewBtnClick('#recipe-form-back', onRecipeAddBack)
+		util.setNewBtnClick('#recipe-form-save', onRecipeAddSave)
+		util.setNewBtnClick('#recipe-form-reset', onRecipeAddReset)
 	}
 
 
@@ -675,11 +644,11 @@
 		setRecipeForm(currentRecipe)
 
 		switchPage('recipe-form')
-		hideNavBar()
+		navbar.hide()
 
-		setNewBtnClick('#recipe-form-back', onRecipeEditBack)
-		setNewBtnClick('#recipe-form-save', onRecipeEditSave)
-		setNewBtnClick('#recipe-form-reset', onRecipeEditReset)
+		util.setNewBtnClick('#recipe-form-back', onRecipeEditBack)
+		util.setNewBtnClick('#recipe-form-save', onRecipeEditSave)
+		util.setNewBtnClick('#recipe-form-reset', onRecipeEditReset)
 	}
 
 	// Hide the recipe form page and show the recipe page.
@@ -695,7 +664,7 @@
 
 		const recipe = getRecipeFormRecipe()
 		$('#recipe-form-save').text('Saving...')
-		sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
+		util.sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
 			onError)
 	}
 
@@ -726,12 +695,12 @@
 
 	// Add an ingredient form element to the recipe form.
 	const addRecipeFormIngredient = (ingredient) => {
-		const id = ingredient ? ingredient._id : getID()
+		const id = ingredient ? ingredient._id : util.generateID()
 		const $elem = $('#template-ingredient-form').clone()
 		$elem.removeClass('d-none')
 
 		$elem.attr('id', id)
-		$elem.find('button').click(() => removeElement(id))
+		$elem.find('button').click(() => util.removeElement(id))
 
 		if (ingredient) {
 			$elem.find('.name').val(ingredient.name)
@@ -899,9 +868,9 @@
 	// @param term The search term in the input element.
 	const onRecipeSearch = (event, term) => {
 		// Ignore modifier key up events
-		if (isModifierKey(event.key)) { return }
+		if (util.isModifierKey(event.key)) { return }
 
-		term = sanitizeSearchString(term)
+		term = util.sanitizeSearchString(term)
 		if (term === '') {
 			updateRecipeList(defaultRecipes)
 		} else {
@@ -920,7 +889,7 @@
 
 	const searchForRecipes = (term) => {
 		term = encodeURIComponent(term)
-		sendAjax('GET', null, `${DATA_URL}/recipe?t=${term}`,
+		util.sendAjax('GET', null, `${DATA_URL}/recipe?t=${term}`,
 			onRecipeSearchSuccess)
 	}
 
@@ -954,59 +923,11 @@
 		$(`${id}-help`).addClass('d-none')
 	}
 
-	// Hide the navbar from view.
-	const hideNavBar = () => {
-		$('#navbar').addClass('d-none')
-	}
-
-	// Determine if the key is a modifier key (Alt, Control, Shift) or not.
-	// @param key The key to check.
-	// @return true if key is modifier key; false otherwise.
-	const isModifierKey = (key) => {
-		return ['Alt', 'Control', 'Shift'].includes(key)
-	}
-
 	// Handler for displaying receiving AJAX errors.
 	// @data The received data.
 	const onError = (data, _, _2) => {
 		data = data.responseJSON
-		showAlert(data.msg)
-	}
-
-	// Sanitize the given search string.
-	// @param str The string to sanitize.
-	// @return The sanitized string.
-	const sanitizeSearchString = (str) => {
-		str = str.trim()
-		return str.replace(/\s+/gi, ' ')
-	}
-
-	// Send an AJAX request with the correct settings to enable the server to
-	// parser the body as JSON.
-	// @param method{String} The HTTP method to use.
-	// @param data{Anything} A JSON value (Object, Array, number, etc.).
-	// @param url{String} The URL to send to.
-	// @param onSuccess{function} The success callback.
-	// @param onErr{function} The error callback.
-	const sendAjax = (method, data, url, onSuccess, onErr) => {
-		$.ajax({
-			contentType: 'application/json',
-			data: data ? JSON.stringify(data) : undefined,
-			dataType: 'json',
-			error: onErr,
-			method: method,
-			success: onSuccess,
-			url: url,
-		})
-	}
-
-	// Set new button behavior by resetting click behavior and assigning a new
-	// one.
-	// @param id Element ID.
-	// @param func Function to call.
-	const setNewBtnClick = (id, func) => {
-		$(id).off()
-		$(id).click(func)
+		appAlert.show(data.msg)
 	}
 
 	// Show invalid formatting and help text of a form input.
@@ -1019,11 +940,6 @@
 		if (msg) {
 			$(`${id}-help`).text(msg)
 		}
-	}
-
-	// Display the navbar.
-	const showNavBar = () => {
-		$('#navbar').removeClass('d-none')
 	}
 
 	const switchPage = (page) => {
@@ -1049,7 +965,6 @@
 		widget.filterPantryList = filterPantryList
 		widget.hideChangePass = hideChangePass
 		widget.hidePantryAddPage = hidePantryAddPage
-		widget.initAlert = initAlert
 		widget.initProfile = initProfile
 		widget.initRecipes = initRecipes
 		widget.login = login
@@ -1076,5 +991,5 @@
 $(() => {
 	app.initRecipes()
 	app.initProfile()
-	app.initAlert()
+	appAlert.init()
 })

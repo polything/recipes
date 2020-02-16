@@ -9,7 +9,7 @@ COPY --chown=node:node package*.json ./
 
 USER node
 ENV NODE_ENV production
-RUN npm install
+RUN npm ci
 
 COPY --chown=node:node . .
 
