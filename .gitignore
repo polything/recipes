@@ -1,5 +1,7 @@
 node_modules/
 .env
+nightwatch_output
 tests_output
 *.log
 *.tgz
+dist/

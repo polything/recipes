@@ -31,10 +31,10 @@ form#change-pass-form.mt-3.d-none
 	button.btn.btn-danger(onclick='app.logout()') Logout
 
 //- Delete account
-#profile-delete-btn.row.justify-content-center.mt-5: .col-auto
-	button.btn.btn-danger(onclick='app.confirmDeleteAccount()') Delete account
+#profile-delete.row.justify-content-center.mt-5: .col-auto
+	button#profile-delete-btn.btn.btn-danger(onclick='app.confirmDeleteAccount()') Delete account
 #profile-delete-confirm-btns.mt-5.d-none
 	.row.justify-content-center: col-auto Are you sure?
 	.row.justify-content-center
-		.col-auto: button.btn.btn-success(onclick='app.deleteAccount()') Yes
-		.col-auto: button.btn.btn-light(onclick='app.resetDeleteAccount()') No
+		.col-auto: button#profile-delete-confirm.btn.btn-success(onclick='app.deleteAccount()') Yes
+		.col-auto: button#profile-delete-cancel.btn.btn-light(onclick='app.resetDeleteAccount()') No

@@ -1,18 +1,16 @@
 pack ::= "recipe-image.tgz"
 src ::= "~/recipes/src"
 
-build: Dockerfile clean build-dist
+build: Dockerfile build-dist
 	docker build -t recipes .
 
-build-dist:
-	npm i webpack
+build-dist: node_modules
 	npx webpack
 	cp -r src/public/css/* dist/
 	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/
-	rm -r node_modules
 
 clean:
-	-rm -r ${pack} *.log dist node_modules tests_output
+	-rm -r ${pack} *.log dist nightwatch_output node_modules tests_output
 
 deploy: clean build package upload server-restart
 
@@ -22,7 +20,7 @@ node_modules: package.json
 package:
 	docker save -o ${pack} recipes
 
-serve: clean
+serve:
 	docker-compose up -d
 
 serve-down:

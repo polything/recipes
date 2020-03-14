@@ -53,3 +53,15 @@ export const setNewBtnClick = (id, func) => {
 	$(id).off()
 	$(id).click(func)
 }
+
+// Show invalid formatting and help text of a form input.
+// @param id{String} HTML ID selector of the input field.
+// @param msg{String} Message to display.
+export const showFormInvalid = (id, msg) => {
+	$(id).addClass('is-invalid')
+	$(`${id}-help`).removeClass('d-none')
+
+	if (msg) {
+		$(`${id}-help`).text(msg)
+	}
+}
