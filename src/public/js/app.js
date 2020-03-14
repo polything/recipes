@@ -3,6 +3,7 @@
 import $ from 'jquery/dist/jquery.min.js'
 import * as appAlert from './alert.js'
 import * as navbar from './navbar.js'
+import * as recipeForm from './recipeForm.js'
 import * as util from './util.js'
 
 (() => {
@@ -433,7 +434,7 @@ import * as util from './util.js'
 		const first = $('#change-pass-1').val()
 		const second = $('#change-pass-2').val()
 		if (first !== second) {
-			showFormInvalid('#change-pass-2')
+			util.showFormInvalid('#change-pass-2')
 			return
 		}
 
@@ -584,7 +585,7 @@ import * as util from './util.js'
 		resetRecipeFormInvalid()
 		const errs = data.responseJSON
 		if (errs.includes('name-exists')) {
-			showFormInvalid('#recipe-form-name', 'That name is taken')
+			util.showFormInvalid('#recipe-form-name', 'That name is taken')
 		}
 	}
 
@@ -597,9 +598,9 @@ import * as util from './util.js'
 	// Submit the recipe to the server for saving.
 	const onRecipeAddSave = () => {
 		resetRecipeFormInvalid()
-		if (!recipeFormValid()) { return }
+		if (!recipeForm.isValid()) { return }
 
-		const recipe = getRecipeFormRecipe()
+		const recipe = recipeForm.getRecipe()
 
 		util.sendAjax('POST', recipe, `${DATA_URL}/recipe`, onRecipeAddSuccess,
 			onRecipeAddError)
@@ -642,6 +643,7 @@ import * as util from './util.js'
 	// Handler for when a recipe edit is started.
 	const showRecipeEditPage = () => {
 		setRecipeForm(currentRecipe)
+		recipeForm.addIngredient()
 
 		switchPage('recipe-form')
 		navbar.hide()
@@ -660,9 +662,9 @@ import * as util from './util.js'
 	// Submit the recipe edit for saving.
 	const onRecipeEditSave = () => {
 		resetRecipeFormInvalid()
-		if (!recipeFormValid()) { return }
+		if (!recipeForm.isValid()) { return }
 
-		const recipe = getRecipeFormRecipe()
+		const recipe = recipeForm.getRecipe()
 		$('#recipe-form-save').text('Saving...')
 		util.sendAjax('POST', recipe, `${DATA_URL}/recipe/edit`, onRecipeEditSuccess,
 			onError)
@@ -671,6 +673,7 @@ import * as util from './util.js'
 	// Reset the edited recipe to the original.
 	const onRecipeEditReset = () => {
 		setRecipeForm(currentRecipe)
+		recipeForm.addIngredient()
 	}
 
 	// Update user recipes and search results.
@@ -692,107 +695,6 @@ import * as util from './util.js'
 
 	// RECIPE FORM =============================================================
 
-
-	// Add an ingredient form element to the recipe form.
-	const addRecipeFormIngredient = (ingredient) => {
-		const id = ingredient ? ingredient._id : util.generateID()
-		const $elem = $('#template-ingredient-form').clone()
-		$elem.removeClass('d-none')
-
-		$elem.attr('id', id)
-		$elem.find('button').click(() => util.removeElement(id))
-
-		if (ingredient) {
-			$elem.find('.name').val(ingredient.name)
-			$elem.find('.amount').val(ingredient.amount)
-			$elem.find('.unit').val(ingredient.unit)
-			$elem.find('.prep').val(ingredient.prep)
-			$elem.find('.note').val(ingredient.note)
-		}
-
-		// Set IDs on fields with help messages
-		$elem.find('.name').attr('id', `${id}-name`)
-		$elem.find('.name-help').attr('id', `${id}-name-help`)
-		$elem.find('.amount').attr('id', `${id}-amount`)
-		$elem.find('.amount-help').attr('id', `${id}-amount-help`)
-
-		$('#recipe-form-ingredients').append($elem)
-	}
-
-	// Get the recipe from the recipe form.
-	// @return{Object} Recipe.
-	const getRecipeFormRecipe = () => {
-		const recipe = {}
-		recipe._id = $('#recipe-form-name').attr('recipe-id')
-		recipe.name = $('#recipe-form-name').val()
-		recipe.servings = $('#recipe-form-servings').val()
-		recipe.ingredients = []
-
-		$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
-			const ingredient = {}
-			ingredient.name = $(elem).find('.name').first().val()
-			ingredient.amount = Number($(elem).find('.amount').first().val())
-			ingredient.unit = $(elem).find('.unit').first().val()
-			ingredient.prep = $(elem).find('.prep').first().val()
-			ingredient.note = $(elem).find('.note').first().val()
-
-			recipe.ingredients.push(ingredient)
-		})
-
-		// Sanitize directions by removing extraneous lines/spaces
-		let directions = $('#recipe-form-directions').val()
-		directions = directions.replace(/  +/, ' ')
-		directions = directions.split('\n')
-		directions = directions.filter(line => line !== '')
-
-		recipe.directions = directions
-
-		return recipe
-	}
-
-	// Validate the recipe form and highlight elements that fail validation.
-	// @return true if valid; false otherwise.
-	const recipeFormValid = () => {
-		let valid = true
-		let id = '#recipe-form-name'
-
-		// Check recipe name
-		const name = $(id).val()
-		if (name === '') {
-			showFormInvalid(id, 'Cannot be empty')
-			valid = false
-		} else if (name.length < 3) {
-			showFormInvalid(id, 'Must be at least 3 characters')
-			valid = false
-		}
-
-		// No recipe servings check
-
-		// Check ingredient fields and showing help messages if invalid
-		const checkField = (elem, className) => {
-			const $elem = $(elem)
-			const $child = $elem.find(`.${className}`).first()
-			if ($child.val() === '') {
-				const id = `#${$elem.attr('id')}-${className}`
-				showFormInvalid(id)
-				valid = false
-			}
-		}
-
-		// Check fields for all ingredients
-		$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
-			checkField(elem, 'name')
-			checkField(elem, 'amount')
-		})
-
-		id = '#recipe-form-directions'
-		if ($(id).val() === '') {
-			showFormInvalid(id)
-			valid = false
-		}
-
-		return valid
-	}
 
 	// Remove recipe form button behavior.
 	const resetRecipeFormButtons = () => {
@@ -818,7 +720,7 @@ import * as util from './util.js'
 		$('#recipe-form-name').val('')
 		$('#recipe-form-servings').val('')
 		$('#recipe-form-ingredients').html('')
-		addRecipeFormIngredient()
+		recipeForm.addIngredient()
 		$('#recipe-form-directions').val('')
 		resetRecipeFormSave()
 	}
@@ -840,7 +742,7 @@ import * as util from './util.js'
 		// Insert ingredient form elements
 		$('#recipe-form-ingredients').html('')
 		recipe.ingredients.forEach(ingredient => {
-			addRecipeFormIngredient(ingredient)
+			recipeForm.addIngredient(ingredient)
 		})
 
 		$('#recipe-form-directions').val(recipe.directions.join('\n\n'))
@@ -930,25 +832,12 @@ import * as util from './util.js'
 		appAlert.show(data.msg)
 	}
 
-	// Show invalid formatting and help text of a form input.
-	// @param id{String} HTML ID selector of the input field.
-	// @param msg{String} Message to display.
-	const showFormInvalid = (id, msg) => {
-		$(id).addClass('is-invalid')
-		$(`${id}-help`).removeClass('d-none')
-
-		if (msg) {
-			$(`${id}-help`).text(msg)
-		}
-	}
-
 	const switchPage = (page) => {
 		$('.page').addClass('d-none')
 		$('#page-' + page).removeClass('d-none')
 		$('.main-nav').removeClass('active')
 		$('#navbar-' + page).toggleClass('active')
 	}
-
 
 	// EXPORT ==================================================================
 
@@ -957,7 +846,7 @@ import * as util from './util.js'
 		// The recipe module to return
 		const widget = {}
 
-		widget.addRecipeFormIngredient = addRecipeFormIngredient
+		widget.addRecipeFormIngredient = recipeForm.addIngredient
 		widget.backToRecipePage = backToRecipePage
 		widget.confirmDeleteAccount = confirmDeleteAccount
 		widget.createAccount = createAccount

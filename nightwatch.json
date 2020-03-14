@@ -16,7 +16,9 @@
 						"args": ["-headless"]
 					}
 				}
-			}
+			},
+			"disable_colors": true,
+			"output_folder": "nightwatch_output"
 		}
 	}
 }

@@ -19,11 +19,9 @@ form
 	.form-row: .col
 		div Ingredients
 
-		//- Populated via JS
-		#recipe-form-ingredients
-
-	.form-row: .col-auto
-		button.btn.btn-secondary(onclick='app.addRecipeFormIngredient()') + Ingredient
+	#recipe-form-ingredients
+		#recipe-form-ingredients-help.invalid-feedback.d-none
+		//- Ingredients populated by JS
 
 	.form-row: .col
 		.input-group: label.w-100 Directions
@@ -39,33 +37,12 @@ form
 	.col-auto: button#recipe-form-reset.btn.btn-secondary Reset
 
 
-#template-ingredient-form.ingredient.mb-2.d-none
-	.form-row
-		.col
-			input.name.form-control(type='text'
-				autocomplete='off' placeholder='Ingredient name')
+#template-ingredient-form.mb-2.d-none.form-row.ingredient
+	.col
+		input.form-control(type='text' autocomplete='off'
+			placeholder='1 cup onion, diced (some note)')
 
-			.name-help.invalid-feedback.d-none Cannot be empty
+		.ingredient-help.invalid-feedback.d-none Invalid ingredient format
 
-		.col-auto: button.btn.btn-danger(type='button') -
-
-	.form-row
-		.col
-			input.amount.form-control(type='number'
-				autocomplete='off' min='0' step='0.01' placeholder='Amount')
-
-			.amount-help.invalid-feedback.d-none Cannot be empty
-
-		.col: select.unit.form-control
-			-
-				let _units3 = ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz', 'pint', 'quart', 'tbsp', 'tsp']
-
-			option(value='') No unit
-			each unit in _units3
-				option(value=unit) #{unit}
-
-	.form-row: .col: input.prep.form-control(type='text' autocomplete='off'
-		placeholder='Preparation')
-
-	.form-row: .col: input.note.form-control(type='text' autocomplete='off'
-		placeholder='Note')
+	.col-auto
+		button.btn.btn-danger(type='button') -

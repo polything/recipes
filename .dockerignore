@@ -7,8 +7,10 @@ docker-compose.yml
 Dockerfile
 Makefile
 nightwatch.json
+nightwatch_output
 node_modules
 README.md
 src
 tests
+tests_output
 tools

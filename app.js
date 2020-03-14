@@ -1,6 +1,5 @@
 const path = require('path')
 
-const dotenv = require('dotenv')
 const errorHandler = require('errorhandler')
 const express = require('express')
 const mongoose = require('mongoose')
@@ -9,8 +8,6 @@ const session = require('express-session')
 
 const app = express()
 const mongostore = require('connect-mongo')(session)
-
-dotenv.config({ path: '.env' })
 
 const {
 	LISTEN_PORT,
