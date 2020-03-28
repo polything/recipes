@@ -2,8 +2,10 @@ const account = require('../ui-util/account')
 const recipeForm = require('../ui-util/recipeForm')
 
 module.exports = {
-	'create account' : account.create,
-	'navigate to new recipe form': recipeForm.toNew,
+	before: browser => {
+		account.create(browser)
+		recipeForm.toNew(browser)
+	},
 	'initial form correctly displayed': async function(browser) {
 		browser
 			// Check page layout
@@ -40,7 +42,9 @@ module.exports = {
 			}
 		)
 	},
-	'leave recipe form': recipeForm.leave,
-	'delete account': account.deleteLoggedIn,
-	after: browser => browser.end()
+	after: browser => {
+		recipeForm.leave(browser)
+		account.deleteLoggedIn(browser)
+		browser.end()
+	}
 }

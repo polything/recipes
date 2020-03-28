@@ -3,6 +3,7 @@
 import $ from 'jquery/dist/jquery.min.js'
 import * as appAlert from './alert.js'
 import * as navbar from './navbar.js'
+import * as pantryForm from './pantryForm.js'
 import * as recipeForm from './recipeForm.js'
 import * as util from './util.js'
 
@@ -207,18 +208,16 @@ import * as util from './util.js'
 
 	const onPantryAddSuccess = (_, _2, _3) => {
 		getPantry()
+		pantryForm.hideError()
 	}
 
 	// Request saving the pantry item.
 	const submitIngredient = () => {
-		const ingredient = {}
-		ingredient.name = $('#ingredient-name').val().trim()
-		ingredient.amount = $('#ingredient-amount').val()
-		ingredient.unit = $('#ingredient-unit').val()
+		const item = pantryForm.get()
+		if (item === null) { return }
 
 		const url = `${DATA_URL}/pantry`
-
-		util.sendAjax('POST', ingredient, url, onPantryAddSuccess)
+		util.sendAjax('POST', item, url, onPantryAddSuccess)
 	}
 
 
@@ -862,6 +861,7 @@ import * as util from './util.js'
 		widget.onRecipeSearch = onRecipeSearch
 		widget.onRecipeAddSave = onRecipeAddSave
 		widget.resetDeleteAccount = resetDeleteAccount
+		widget.resetPantryForm = pantryForm.reset
 		widget.showChangePass = showChangePass
 		widget.showPantryAddPage = showPantryAddPage
 		widget.showRecipeAddPage = showRecipeAddPage
