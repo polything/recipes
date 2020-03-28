@@ -14,6 +14,9 @@ clean:
 
 deploy: clean build package upload server-restart
 
+lint: node_modules
+	npx eslint . && echo "No issues"
+
 node_modules: package.json
 	npm install
 
@@ -32,7 +35,7 @@ serve-log:
 server-restart:
 	ssh recipes "cd ${src} && docker-compose up -d"
 
-test: build serve
+test: lint build serve
 	npm test
 
 upload: package
