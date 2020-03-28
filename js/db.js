@@ -1,4 +1,3 @@
-const Recipe = require('../models/Recipe')
 const User = require('../models/User')
 
 // Create a new user and return an error if creating the user failed.

@@ -1,23 +1,13 @@
+//- Back button
 .row.my-3: .col-auto.mr-auto
-	button.btn.btn-light(onclick='app.hidePantryAddPage()') <
+	button#pantry-back-btn.btn.btn-secondary(onclick='app.hidePantryAddPage()') <
 
-.row: .col
-	div: label(for='name') Name
-		input#ingredient-name(type='text' name='name' autocomplete='off'
-			required)
+form: .form-row.mb-2: .col
+	input#pantry-form.form-control(autocomplete='off' placeholder='1 cup onion'
+		type='text')
 
-	div: label(for='amount') Amount
-		input#ingredient-amount(type='number' name='amount' autocomplete='off'
-			required)
+	#pantry-form-help.invalid-feedback.d-none
 
-	div: label(for='unit') Unit
-		select(name='unit' id='ingredient-unit')
-
-			-
-				const units = ['cup', 'floz', 'g', 'gal', 'kg', 'lb',
-					'liter', 'oz', 'pint', 'quart', 'tbsp', 'tsp']
-
-			each unit in units
-				option(value=unit) #{unit}
-
-	button(onclick='app.submitIngredient()') Submit
+.row.justify-content-center.align-items-center
+	.col-auto: button#pantry-submit-btn.btn-lg.btn-secondary(onclick='app.submitIngredient()') Submit
+	.col-auto: button#pantry-reset-btn.btn.btn-secondary(onclick='app.resetPantryForm()') Reset

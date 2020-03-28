@@ -108,7 +108,7 @@ export const isValid = () => {
 // empty.
 const emptyIngredients = () => {
 	const elems = $('#recipe-form-ingredients .ingredient')
-	let ret = []
+	const ret = []
 
 	// Have to use for-loop because elems is a map
 	for (let i = 0; i < elems.length; ++i) {

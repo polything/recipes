@@ -10,7 +10,7 @@ build-dist: node_modules
 	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/
 
 clean:
-	-rm -r ${pack} *.log dist nightwatch_output node_modules tests_output
+	-rm -r ${pack} *.log dist nightwatch_output node_modules
 
 deploy: clean build package upload server-restart
 
