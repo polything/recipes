@@ -44,7 +44,6 @@ export const getRecipe = () => {
 		if (val === '') { return }
 
 		const ingredient = parseIngredient(val)
-		ingredient._id = $elem.attr('id')
 
 		recipe.ingredients.push(ingredient)
 	})
