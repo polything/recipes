@@ -3,10 +3,8 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"lint": "node ./node_modules/eslint/bin/eslint.js . && echo \"No linting issues\"",
 		"start": "node app.js",
-		"test": "ava && nightwatch --headless tests/ui",
-		"test-unit": "ava"
+		"test": "ava && nightwatch --headless tests/ui"
 	},
 	"author": "",
 	"ava": {

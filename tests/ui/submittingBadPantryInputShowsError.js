@@ -1,5 +1,4 @@
 const account = require('../ui-util/account')
-const pantry = require('../ui-util/pantry')
 const pantryForm = require('../ui-util/pantryForm')
 
 module.exports = {

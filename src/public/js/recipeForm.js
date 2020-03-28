@@ -89,7 +89,7 @@ export const isValid = () => {
 	recipe.ingredients.forEach(ingredient => {
 		id = ingredient._id
 		// Check name given (basic check for successful parseIngredient())
-		if (!ingredient.hasOwnProperty('name')) {
+		if (!Object.prototype.hasOwnProperty.call(ingredient, 'name')) {
 			util.showFormInvalid(id)
 			valid = false
 		}
