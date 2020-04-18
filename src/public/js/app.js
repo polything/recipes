@@ -582,10 +582,7 @@ import * as util from './util.js'
 	// @param data{Object} The error data.
 	const onRecipeAddError = (data, _, _2) => {
 		resetRecipeFormInvalid()
-		const errs = data.responseJSON
-		if (errs.includes('name-exists')) {
-			util.showFormInvalid('#recipe-form-name', 'That name is taken')
-		}
+		console.trace(data)
 	}
 
 	// Handle when the recipe form is reset when adding a new recipe.

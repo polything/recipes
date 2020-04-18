@@ -2,6 +2,13 @@
 import $ from 'jquery/dist/jquery.min.js'
 import * as util from './util.js'
 
+// Provide a function for getting the servings to "default" the returned value
+// to 1 instead of 0.
+function getServings() {
+	const val = Number($('#recipe-form-servings').val())
+	return val === 0 ? 1 : val
+}
+
 // Add an ingredient form element to the recipe form.
 export const addIngredient = (ingredient) => {
 	const id = ingredient ? ingredient._id : util.generateID()
@@ -33,7 +40,7 @@ export const getRecipe = () => {
 	const recipe = {}
 	recipe._id = $('#recipe-form-name').attr('recipe-id')
 	recipe.name = $('#recipe-form-name').val()
-	recipe.servings = Number($('#recipe-form-servings').val())
+	recipe.servings = getServings()
 	recipe.ingredients = []
 
 	$('#recipe-form-ingredients').find('.ingredient').each((_, elem) => {
@@ -76,7 +83,7 @@ export const isValid = () => {
 		valid = false
 	}
 
-	// No recipe servings check
+	// No servings check
 
 	// Check > 0 ingredient
 	id = '#recipe-form-ingredients'
