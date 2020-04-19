@@ -1,5 +1,6 @@
 const account = require('../ui-util/account')
 const pantryForm = require('../ui-util/pantryForm')
+const util = require('../ui-util/util')
 
 module.exports = {
 	before: browser => {
@@ -12,6 +13,10 @@ module.exports = {
 			.setValue('#pantry-form', '1 cup test item')
 			.assert.visible('#pantry-submit-btn')
 			.click('#pantry-submit-btn')
+			.waitForElementVisible('#pantry-save-status', 1000, function() {
+				util.elementTextEquals(browser, '#pantry-save-status', 'Saved')
+			})
+			.waitForElementNotVisible('#pantry-save-status', 2000)
 
 		pantryForm.leave(browser)
 

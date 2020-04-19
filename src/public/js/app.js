@@ -209,6 +209,7 @@ import * as util from './util.js'
 	const onPantryAddSuccess = (_, _2, _3) => {
 		getPantry()
 		pantryForm.hideError()
+		pantryForm.showSaveSuccess()
 	}
 
 	// Request saving the pantry item.
@@ -218,6 +219,7 @@ import * as util from './util.js'
 
 		const url = `${DATA_URL}/pantry`
 		util.sendAjax('POST', item, url, onPantryAddSuccess)
+		pantryForm.showSaveInProgress()
 	}
 
 
