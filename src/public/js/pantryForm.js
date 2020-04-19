@@ -54,3 +54,20 @@ export const showNoItemError = () => {
 export const showParseError = () => {
 	showError('Cannot parse item. Be sure it is like "1 cup tomato paste"')
 }
+
+// Show save in progress
+export const showSaveInProgress = () => {
+	const $saveStatus = $('#pantry-save-status')
+	$saveStatus.fadeIn(0, () => { $saveStatus.text('Saving...') } )
+}
+
+// Show save success
+export const showSaveSuccess = () => {
+	const $saveStatus = $('#pantry-save-status')
+	$saveStatus.text('Saved')
+	setTimeout(() => {
+		$saveStatus.fadeOut(500, () => {
+			$saveStatus.text('')
+		})
+	}, 1000)
+}
