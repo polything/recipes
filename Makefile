@@ -1,5 +1,6 @@
 pack ::= "recipe-image.tgz"
 src ::= "~/recipes"
+pwd ::= $(shell pwd)
 
 build: Dockerfile build-dist
 	docker build -t recipes .
@@ -14,8 +15,8 @@ clean:
 
 deploy: clean build package upload server-restart
 
-lint: node_modules
-	npx eslint . && echo "No issues"
+lint:
+	docker run --rm -v ${pwd}:/data:ro cytopia/eslint .
 
 node_modules: package.json
 	npm install
@@ -35,7 +36,7 @@ serve-log:
 server-restart:
 	ssh recipes "cd ${src} && docker-compose up -d"
 
-test: lint build serve
+test: lint node_modules build serve
 	npm test
 
 upload: package
