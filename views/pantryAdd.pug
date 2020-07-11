@@ -9,6 +9,7 @@ form: .form-row.mb-2: .col
 	#pantry-form-help.invalid-feedback.d-none
 
 .row.justify-content-center.align-items-center
-	.col-1: #pantry-save-status
 	.col-auto: button#pantry-submit-btn.btn-lg.btn-secondary(onclick='app.submitIngredient()') Submit
 	.col-auto: button#pantry-reset-btn.btn.btn-secondary(onclick='app.resetPantryForm()') Reset
+
+.row.justify-content-center.mt-3: .col-auto: #pantry-save-status
