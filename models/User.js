@@ -9,6 +9,7 @@ const pantryItemSchema = new mongoose.Schema({
 		set: v => v.toFixed(2),
 	},
 	dateAdded: { type: Date, default: Date.now },
+	expire: { type: Date, default: null },
 	name: { type: String, required: true, minlength: 2, trim: true },
 	unit: {
 		type: String,

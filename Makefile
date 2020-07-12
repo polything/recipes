@@ -11,7 +11,7 @@ build-dist: node_modules
 	cp node_modules/bootstrap/dist/css/bootstrap.min.css dist/
 
 clean:
-	-rm -r ${pack} *.log dist nightwatch_output node_modules
+	-rm -rf ${pack} *.log dist nightwatch_output node_modules
 
 deploy: clean build package upload server-restart
 
@@ -24,7 +24,7 @@ node_modules: package.json
 package:
 	docker save -o ${pack} recipes
 
-serve:
+serve: build
 	docker-compose up -d
 
 serve-down:

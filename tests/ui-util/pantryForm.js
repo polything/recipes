@@ -9,10 +9,12 @@ exports.leave = browser => {
 }
 
 // Submit pantry item
-exports.submit = (browser, text) => {
+exports.submit = (browser, itemStr, expire = '') => {
 	browser
 		.assert.visible('#pantry-form')
-		.setValue('#pantry-form', text)
+		.setValue('#pantry-form', itemStr)
+		.assert.visible('#pantry-expire')
+		.setValue('#pantry-expire', expire)
 		.assert.visible('#pantry-submit-btn')
 		.click('#pantry-submit-btn')
 }

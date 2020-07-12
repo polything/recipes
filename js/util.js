@@ -26,10 +26,12 @@ exports.send500 = (res, msg) => {
 	res.status(500).json({msg: msg}).end()
 }
 
+// Return a pantry item Object.
 exports.getPantryItem = (req) => {
 	return {
 		_id: req.body._id,
 		amount: Number(req.body.amount),
+		expire: req.body.expire,
 		name: req.body.name,
 		unit: req.body.unit,
 	}
