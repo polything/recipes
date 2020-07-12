@@ -12,6 +12,7 @@ export const get = () => {
 		return null
 	}
 
+	// Parse item
 	const match = re.exec(val)
 
 	if (match === null) {
@@ -19,11 +20,19 @@ export const get = () => {
 		return null
 	}
 
-	return {
+	const data = {
 		amount: Number(match[1]),
+		name: match[3].trim(),
 		unit: match[2].trim(),
-		name: match[3].trim()
 	}
+
+	// Set expiry date if given
+	const expireDate = $('#pantry-expire').val()
+	if (expireDate) {
+		data.expire = new Date(expireDate)
+	}
+
+	return data
 }
 
 // Hide the pantry item error text
@@ -35,6 +44,7 @@ export const hideError = () => {
 // Reset the pantry item add form to have no contents.
 export const reset = () => {
 	$('#pantry-form').val('')
+	$('#pantry-expire').val('')
 	hideError()
 }
 

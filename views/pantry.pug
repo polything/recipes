@@ -12,26 +12,30 @@
 
 
 #template-pantry-item.row.py-1.align-items-center.hover-row.d-none.pantry-item
-	//- Add py-2 to the name/units so that there's a bigger click area
-	.col.py-2.pantry-name.pantry-editable
-	.col.px-1.py-2.pantry-editable
-		span.pantry-amount
-		span.pantry-unit
-	.col.px-1.pantry-edit.input-group.d-none
-		input.pantry-edit-name.form-control(type='text' autocomplete='off')
-		input.pantry-edit-amount.form-control(type='number'
-			autocomplete='off')
+	.col
+		//- pt-2 so there's a bigger click area
+		.row.pt-2
+			.col.pantry-name.pantry-editable
+			.col.px-1.pantry-editable
+				span.pantry-amount
+				span.pantry-unit
+			.col.px-1.pantry-edit.input-group.d-none
+				input.pantry-edit-name.form-control(type='text' autocomplete='off')
+				input.pantry-edit-amount.form-control(type='number'
+					autocomplete='off')
 
-		select.pantry-edit-unit.form-control
-			-
-				let _units2 = ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz', 'pint', 'quart', 'tbsp', 'tsp']
+				select.pantry-edit-unit.form-control
+					-
+						let _units2 = ['cup', 'floz', 'g', 'gal', 'kg', 'lb', 'liter', 'oz', 'pint', 'quart', 'tbsp', 'tsp']
 
-			each unit in _units2
-				option(value=unit) #{unit}
+					each unit in _units2
+						option(value=unit) #{unit}
 
-		.input-group-append
-			button.btn.btn-success.pantry-edit-confirm &#x2714;
-			button.btn.btn-danger.pantry-edit-cancel x
+				.input-group-append
+					button.btn.btn-success.pantry-edit-confirm &#x2714;
+					button.btn.btn-danger.pantry-edit-cancel x
 
-	.col-auto: button.btn.btn-danger.pantry-delete x
-	.col-auto.pl-0.d-none: button.btn.btn-success.pantry-delete-confirm &#x2714;
+		.row.py-0: small.col.pantry-expire.pantry-editable.d-none
+	.col-auto: .row.py-0
+		.col-auto: button.btn.btn-danger.pantry-delete x
+		.col-auto.pl-0.d-none: button.btn.btn-success.pantry-delete-confirm &#x2714;

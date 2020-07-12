@@ -144,6 +144,7 @@ router.post('/pantry', passportConfig.isAuthenticated, async (req, res) => {
 		await User.updateOne({'pantry._id': data._id}, {
 			$set: {
 				'pantry.$.amount': data.amount,
+				'pantry.$.expire': data.expire,
 				'pantry.$.name': data.name,
 				'pantry.$.unit': data.unit,
 			}

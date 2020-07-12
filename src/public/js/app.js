@@ -361,6 +361,21 @@ import * as util from './util.js'
 			// Unit text
 			$item.find('.pantry-unit').text(` ${ingredient.unit}`)
 
+			// Expire date if given
+			if (ingredient.expire) {
+				const opts = {
+					day: 'numeric',
+					month: 'numeric',
+					year: 'numeric',
+				}
+
+				const date = new Date(ingredient.expire).toLocaleDateString(opts)
+
+				const $expire = $item.find('.pantry-expire')
+				$expire.removeClass('d-none')
+				$expire.text(`Expires ${date}`)
+			}
+
 			// Edit elements
 			$item.find('.pantry-edit-name').val(ingredient.name)
 			$item.find('.pantry-edit-amount').val(ingredient.amount)
