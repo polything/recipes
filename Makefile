@@ -25,6 +25,7 @@ package:
 	docker save -o ${pack} recipes
 
 serve: build
+	cp -n .env.example .env
 	docker-compose up -d
 
 serve-down:
